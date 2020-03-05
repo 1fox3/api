@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.model.stock.mapper.StockUpDownMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.model.stock.entity.StockUpDownEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="stock_id" property="stockId" jdbcType="INTEGER" />
+        <result column="d10_up" property="d10Up" jdbcType="FLOAT" />
+        <result column="d10_down" property="d10Down" jdbcType="FLOAT" />
+        <result column="d30_up" property="d30Up" jdbcType="FLOAT" />
+        <result column="d30_down" property="d30Down" jdbcType="FLOAT" />
+        <result column="d50_up" property="d50Up" jdbcType="FLOAT" />
+        <result column="d50_down" property="d50Down" jdbcType="FLOAT" />
+        <result column="d100_up" property="d100Up" jdbcType="FLOAT" />
+        <result column="d100_down" property="d100Down" jdbcType="FLOAT" />
+        <result column="d200_up" property="d200Up" jdbcType="FLOAT" />
+        <result column="d200_down" property="d200Down" jdbcType="FLOAT" />
+        <result column="d300_up" property="d300Up" jdbcType="FLOAT" />
+        <result column="d300_down" property="d300Down" jdbcType="FLOAT" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockUpDownEntity">
+        INSERT INTO t_stock_up_down (
+            stock_id,
+            d10_up,
+            d10_down,
+            d30_up,
+            d30_down,
+            d50_up,
+            d50_down,
+            d100_up,
+            d100_down,
+            d200_up,
+            d200_down,
+            d300_up,
+            d300_down
+        )
+        VALUES
+            (
+                #{stockId},
+                #{d10Up},
+                #{d10Down},
+                #{d30Up},
+                #{d30Down},
+                #{d50Up},
+                #{d50Down},
+                #{d100Up},
+                #{d100Down},
+                #{d200Up},
+                #{d200Down},
+                #{d300Up},
+                #{d300Down}
+            );
+    </insert>
+
+    <insert id="updateById" parameterType="com.fox.api.model.stock.entity.StockUpDownEntity">
+        UPDATE t_stock_up_down
+        SET
+            d10_up = #{d10Up},
+            d10_down = #{d10Down},
+            d30_up = #{d30Up},
+            d30_down = #{d30Down},
+            d50_up = #{d50Up},
+            d50_down = #{d50Down},
+            d100_up = #{d100Up},
+            d100_down = #{d100Down},
+            d200_up = #{d200Up},
+            d200_down = #{d200Down},
+            d300_up = #{d300Up},
+            d300_down = #{d300Down}
+        WHERE
+            id = #{id};
+    </insert>
+
+    <select id="getList" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_up_down
+        ORDER BY
+            ${orderBy}
+        LIMIT ${limit};
+    </select>
+
+    <select id="getByStockId" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_up_down
+        WHERE
+            stock_id = ${stockId}
+        LIMIT 1;
+    </select>
+
+    <delete id="deleteById">
+        DELETE
+        FROM
+            t_stock_up_down
+        WHERE
+            id = #{id};
+    </delete>
+</mapper>

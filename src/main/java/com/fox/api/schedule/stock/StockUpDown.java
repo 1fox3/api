@@ -1,0 +1,184 @@
+package com.fox.api.schedule.stock;
+
+import com.fox.api.common.util.DateUtil;
+import com.fox.api.model.stock.entity.StockEntity;
+import com.fox.api.model.stock.entity.StockLimitUpDownEntity;
+import com.fox.api.model.stock.entity.StockUpDownEntity;
+import com.fox.api.model.stock.mapper.StockLimitUpDownMapper;
+import com.fox.api.model.stock.mapper.StockMapper;
+import com.fox.api.model.stock.mapper.StockUpDownMapper;
+import com.fox.api.service.stock.StockOfflineService;
+import com.fox.api.service.third.stock.entity.StockDayLineEntity;
+import com.fox.api.service.third.stock.entity.StockDealEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
+
+@Component
+public class StockUpDown {
+
+    @Autowired
+    private StockMapper stockMapper;
+
+    @Autowired
+    private StockUpDownMapper stockUpDownMapper;
+
+    @Autowired
+    private StockLimitUpDownMapper stockLimitUpDownMapper;
+
+    @Autowired
+    private StockOfflineService stockOfflineService;
+
+    /**
+     * 执行时间请设置在股市结束之后，因为接口会反回当天数据，影响涨跌停的判断
+     */
+    @Scheduled(cron="0 30 15 * * 1-5")
+    public void stockUpDown() {
+        int bigId = stockMapper.getLastId();
+        List<Integer> scopeList = Arrays.asList(10, 30, 50, 100, 200, 300);
+        int limitLen = scopeList.get(scopeList.size() - 1);
+
+        for (int i = 1; i <= bigId; i++) {
+            Double currentPrice , highestPrice, lowestPrice, todayPrice, yesterdayPrice;
+            currentPrice = highestPrice = lowestPrice = todayPrice = yesterdayPrice = 0.0;
+            String today, yesterday;
+            today = yesterday = "";
+            StockEntity stockEntity = stockMapper.getById(i);
+            if (null == stockEntity || stockEntity.getNetsStockCode().equals("")) {
+                continue;
+            }
+
+            StockUpDownEntity stockUpDownEntity = stockUpDownMapper.getByStockId(stockEntity.getId());
+            StockLimitUpDownEntity stockLimitUpDownEntity =
+                    stockLimitUpDownMapper.getByStockId(stockEntity.getId());
+
+            if (2 == stockEntity.getStockMarket() //过滤掉港股
+                    || 1 == stockEntity.getStockStatus() //过滤掉已退市的
+            ) {
+                if (null != stockUpDownEntity) {
+                    stockUpDownMapper.deleteById(stockUpDownEntity.getId());
+                }
+                if (null != stockLimitUpDownEntity) {
+                    stockLimitUpDownMapper.deleteById(stockLimitUpDownEntity.getId());
+                }
+                continue;
+            }
+            System.out.println(stockEntity.getStockCode());
+
+            if (null == stockUpDownEntity) {
+                stockUpDownEntity = new StockUpDownEntity();
+            }
+            stockUpDownEntity.setStockId(stockEntity.getId());
+            if (stockEntity.getId() > 0) {
+                StockDayLineEntity stockDayLineEntity = stockOfflineService.line(stockEntity.getId(), DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1));
+                List<StockDealEntity> list = stockDayLineEntity.getLineNode();
+                if (null == list) {
+                    continue;
+                }
+                int len = list.size();
+                if (0 == len) {
+                    continue;
+                }
+                for (int j = 0; j<= limitLen; j++) {
+                    int pos = len - j - 1;
+                    if (pos >= 0) {
+                        StockDealEntity stockDealEntity = list.get(pos);
+                        currentPrice = 0.0 == currentPrice ? stockDealEntity.getClosePrice() : currentPrice;
+                        if (0 == j) {
+                            today = stockDealEntity.getDateTime();
+                            todayPrice = stockDealEntity.getClosePrice();
+                        }
+                        if (1 == j) {
+                            yesterday = stockDealEntity.getDateTime();
+                            yesterdayPrice = stockDealEntity.getClosePrice();
+                        }
+
+                        highestPrice = stockDealEntity.getHighestPrice() > highestPrice ?
+                                stockDealEntity.getHighestPrice() : highestPrice;
+                        lowestPrice = 0.0 == lowestPrice || stockDealEntity.getLowestPrice() < lowestPrice ?
+                                stockDealEntity.getLowestPrice() : lowestPrice;
+                    }
+
+                    if (scopeList.contains(j) && currentPrice > 0 && lowestPrice > 0 && lowestPrice > 0) {
+                        float up = (float)((currentPrice - lowestPrice) / lowestPrice);
+                        float down = (float)((highestPrice - currentPrice) / highestPrice);
+                        //保留4位小数
+                        up = (float)Math.round(up * 10000) / 10000;
+                        down = (float)Math.round(down * 10000) / 10000;
+                        if (10 == j) {
+                            stockUpDownEntity.setD10Up(up);
+                            stockUpDownEntity.setD10Down(down);
+                        }
+                        if (30 == j) {
+                            stockUpDownEntity.setD30Up(up);
+                            stockUpDownEntity.setD30Down(down);
+                        }
+                        if (50 == j) {
+                            stockUpDownEntity.setD50Up(up);
+                            stockUpDownEntity.setD50Down(down);
+                        }
+                        if (100 == j) {
+                            stockUpDownEntity.setD100Up(up);
+                            stockUpDownEntity.setD100Down(down);
+                        }
+                        if (200 == j) {
+                            stockUpDownEntity.setD200Up(up);
+                            stockUpDownEntity.setD200Down(down);
+                        }
+                        if (300 == j) {
+                            stockUpDownEntity.setD300Up(up);
+                            stockUpDownEntity.setD300Down(down);
+                        }
+                    }
+                }
+                if (todayPrice > 0 && yesterdayPrice > 0) {
+                    //type值说明 0-正常，1-涨停，2-跌停
+                    Integer type = 0;
+                    if ((float)Math.abs((todayPrice - yesterdayPrice) * 100) / 100 == (float)Math.round(yesterdayPrice * 0.1 * 100) / 100) {
+                        type = todayPrice > yesterdayPrice ? 1 : 2;
+                    }
+
+                    if (null != stockLimitUpDownEntity) {
+                        stockLimitUpDownEntity.setType(type);
+                        if (0 != type) {
+                            stockLimitUpDownEntity.setType(type);
+                            stockLimitUpDownEntity.setCurrentPrice(Float.valueOf(String.valueOf(todayPrice)));
+                            stockLimitUpDownEntity.setCurrentDate(today);
+                            if (stockLimitUpDownEntity.getType() != type) {
+                                stockLimitUpDownEntity.setStartPrice(Float.valueOf(String.valueOf(yesterdayPrice)));
+                                stockLimitUpDownEntity.setStartDate(yesterday);
+                                stockLimitUpDownEntity.setNum(1);
+                            } else {
+                                stockLimitUpDownEntity.setNum(stockLimitUpDownEntity.getNum() + 1);
+                            }
+                        }
+                        stockLimitUpDownMapper.updateById(stockLimitUpDownEntity);
+                    } else {
+                        if (0 != type) {
+                            stockLimitUpDownEntity = new StockLimitUpDownEntity();
+                            stockLimitUpDownEntity.setStockId(stockEntity.getId());
+                            stockLimitUpDownEntity.setType(type);
+                            stockLimitUpDownEntity.setNum(1);
+                            stockLimitUpDownEntity.setCurrentPrice(Float.valueOf(String.valueOf(todayPrice)));
+                            stockLimitUpDownEntity.setCurrentDate(today);
+                            stockLimitUpDownEntity.setStartPrice(Float.valueOf(String.valueOf(yesterdayPrice)));
+                            stockLimitUpDownEntity.setStartDate(yesterday);
+                            stockLimitUpDownMapper.insert(stockLimitUpDownEntity);
+                        }
+                    }
+                }
+            }
+            if (null == stockUpDownEntity.getId()) {
+                stockUpDownMapper.insert(stockUpDownEntity);
+            } else {
+                stockUpDownMapper.updateById(stockUpDownEntity);
+            };
+            try{
+                Thread.sleep(200);
+            } catch (InterruptedException e){}
+        }
+    }
+}

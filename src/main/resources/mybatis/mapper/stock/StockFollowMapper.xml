@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.model.stock.mapper.StockFollowMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.model.stock.entity.StockFollowEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="user_id" property="userId" jdbcType="INTEGER" />
+        <result column="stock_id" property="stockId" jdbcType="INTEGER" />
+        <result column="follow_status" property="followStatus" jdbcType="INTEGER" />
+        <result column="follow_time" property="followTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <select id="getByUser" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_follow
+        WHERE
+            user_id = #{userId}
+            AND
+            follow_status = '1'
+        ORDER BY follow_time DESC;
+    </select>
+</mapper>

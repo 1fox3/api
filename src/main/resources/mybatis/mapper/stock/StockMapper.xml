@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.model.stock.mapper.StockMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.model.stock.entity.StockEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="stock_code" property="stockCode" jdbcType="VARCHAR" />
+        <result column="stock_name" property="stockName" jdbcType="VARCHAR" />
+        <result column="stock_name_en" property="stockNameEn" jdbcType="VARCHAR" />
+        <result column="sina_stock_code" property="sinaStockCode" jdbcType="VARCHAR" />
+        <result column="nets_stock_code" property="netsStockCode" jdbcType="VARCHAR" />
+        <result column="stock_market" property="stockMarket" jdbcType="INTEGER" />
+        <result column="stock_type" property="stockType" jdbcType="INTEGER" />
+        <result column="stock_kind" property="stockKind" jdbcType="INTEGER" />
+        <result column="stock_status" property="stockStatus" jdbcType="INTEGER" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockEntity">
+        INSERT INTO t_stock (
+            stock_code,
+            stock_name,
+            stock_name_en,
+            sina_stock_code,
+            nets_stock_code,
+            stock_market,
+            stock_type,
+            stock_kind,
+            stock_status
+        )
+        VALUES
+            (
+                #{stockCode},
+                #{stockName},
+                #{stockNameEn},
+                #{sinaStockCode},
+                #{netsStockCode},
+                #{stockMarket},
+                #{stockType},
+                #{stockKind},
+                #{stockStatus}
+            );
+    </insert>
+
+    <update id="update" parameterType="com.fox.api.model.stock.entity.StockEntity">
+        UPDATE t_stock
+        SET
+            stock_code = #{stockCode},
+            stock_name = #{stockName},
+            stock_name_en = #{stockNameEn},
+            sina_stock_code = #{sinaStockCode},
+            nets_stock_code = #{netsStockCode},
+            stock_market = #{stockMarket},
+            stock_type = #{stockType},
+            stock_kind = #{stockKind},
+            stock_status = #{stockStatus}
+        WHERE
+            id = #{id};
+    </update>
+
+    <select id="getById" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock
+        WHERE
+            id = #{id};
+    </select>
+
+    <select id="getByStockCode" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock
+        WHERE
+            stock_code = #{stockCode}
+            AND
+            stock_market = #{stockMarket}
+        LIMIT 1;
+    </select>
+
+    <select id="getLastId" resultType="INTEGER">
+        SELECT
+            id
+        FROM
+            t_stock
+        ORDER BY
+            id DESC
+        LIMIT 1
+    </select>
+</mapper>

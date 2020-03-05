@@ -1,0 +1,50 @@
+server:
+  port: 8081 #启动端口
+
+spring:
+  datasource: #数据库配置
+#    url: jdbc:mysql://47.104.29.59:3306/api?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+#    username: root
+#    password: "`Lss19890228"
+    url: jdbc:mysql://127.0.0.1:3306/mba?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&characterEncoding=utf-8
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 不同的数据源配置
+    stock:
+      url: jdbc:mysql://127.0.0.1:3306/stock?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&characterEncoding=utf-8
+      username: root
+      password:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    api:
+      url: jdbc:mysql://127.0.0.1:3306/api?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&characterEncoding=utf-8
+      username: root
+      password:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+  redis: # redis配置
+    host: 47.104.29.59
+    port: 6379
+    password:
+    timeout: 1000
+
+
+# 阿里接口账号信息
+ali:
+  api:
+    account:
+      app-key: 203769816
+      app-secret: 5ecdmkzsqysdjvg58ktwmcwt8t5vjvq1
+      app-code: ae29555a60b343fd9a9e80629b4f21e2
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  # 针对数据源的mapper路径
+  stock:
+    mapper-location: classpath:mybatis/mapper/stock/*.xml
+  api:
+    mapper-location: classpath:mybatis/mapper/api/*.xml
+
+
+

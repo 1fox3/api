@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.model.stock.mapper.StockLimitUpDownMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.model.stock.entity.StockLimitUpDownEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="stock_id" property="stockId" jdbcType="INTEGER" />
+        <result column="type" property="type" jdbcType="INTEGER" />
+        <result column="num" property="num" jdbcType="INTEGER" />
+        <result column="start_price" property="startPrice" jdbcType="FLOAT" />
+        <result column="current_price" property="currentPrice" jdbcType="FLOAT" />
+        <result column="start_date" property="startDate" jdbcType="DATE" />
+        <result column="current_date" property="currentDate" jdbcType="DATE" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockLimitUpDownEntity">
+        INSERT INTO t_stock_limit_up_down (
+            stock_id,
+            `type`,
+            num,
+            start_price,
+            current_price,
+            start_date,
+            `current_date`
+        )
+        VALUES
+            (
+                #{stockId},
+                #{type},
+                #{num},
+                #{startPrice},
+                #{currentPrice},
+                #{startDate},
+                #{currentDate}
+            );
+    </insert>
+
+    <insert id="updateById" parameterType="com.fox.api.model.stock.entity.StockLimitUpDownEntity">
+        UPDATE t_stock_limit_up_down
+        SET
+            `type` = #{type},
+            num = #{num},
+            start_price = #{startPrice},
+            current_price = #{currentPrice},
+            start_date = #{startDate},
+            `current_date` = #{currentDate}
+        WHERE
+            id = #{id};
+    </insert>
+
+    <select id="getList" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_limit_up_down
+        WHERE
+            `type` = #{type}
+        ORDER BY
+            num DESC,
+            current_price DESC
+        LIMIT ${limit};
+    </select>
+
+    <select id="getByStockId" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_limit_up_down
+        WHERE
+            stock_id = #{stockId}
+        LIMIT 1;
+    </select>
+
+    <select id="countByType" resultType="INTEGER">
+        SELECT
+            count(*) as c
+        FROM
+            t_stock_limit_up_down
+        WHERE
+            `type` = #{type};
+    </select>
+
+    <delete id="deleteById">
+        DELETE
+        FROM
+            t_stock_limit_up_down
+        WHERE
+            id = #{id};
+    </delete>
+</mapper>
