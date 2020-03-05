@@ -8,15 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class ApiApplicationTests {
 
-    @Autowired
-    private StockMapper stockStockMapper;
-
     @Test
     void contextLoads() {
-    }
-
-    @Test
-    void testMapper() {
-        System.out.println(stockStockMapper.getById(500));
     }
 }
