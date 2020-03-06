@@ -57,7 +57,7 @@ public class StockScan {
      * 扫描股票代码
      * 对应新浪和网易的股票代码
      */
-    @Scheduled(cron="0 30 20 * * ?")
+    @Scheduled(cron="0 0 18 * * 1-5")
     public void stockCodeScan() {
         List<String> stockCodeList = new LinkedList<>();
         Map<String, String> sinaStockMarketPYMap = SinaStockBaseApi.stockMarketPYMap;

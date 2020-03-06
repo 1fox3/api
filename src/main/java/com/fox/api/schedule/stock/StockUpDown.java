@@ -35,7 +35,7 @@ public class StockUpDown {
     /**
      * 执行时间请设置在股市结束之后，因为接口会反回当天数据，影响涨跌停的判断
      */
-    @Scheduled(cron="0 30 15 * * 1-5")
+    @Scheduled(cron="0 5 15 * * 1-5")
     public void stockUpDown() {
         int bigId = stockMapper.getLastId();
         List<Integer> scopeList = Arrays.asList(10, 30, 50, 100, 200, 300);
