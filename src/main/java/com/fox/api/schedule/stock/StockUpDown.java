@@ -55,8 +55,9 @@ public class StockUpDown {
             StockLimitUpDownEntity stockLimitUpDownEntity =
                     stockLimitUpDownMapper.getByStockId(stockEntity.getId());
 
-            if (2 == stockEntity.getStockMarket() //过滤掉港股
+            if (3 == stockEntity.getStockMarket() //过滤掉港股
                     || 1 == stockEntity.getStockStatus() //过滤掉已退市的
+                    || 2 != stockEntity.getStockType() //过滤掉不是股票类型的
             ) {
                 if (null != stockUpDownEntity) {
                     stockUpDownMapper.deleteById(stockUpDownEntity.getId());

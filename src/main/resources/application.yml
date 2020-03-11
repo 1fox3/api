@@ -1,3 +1,4 @@
 spring:
   profiles:
+    include: stock
     active: online # 当前运行环境

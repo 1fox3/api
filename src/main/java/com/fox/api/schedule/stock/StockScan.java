@@ -1,7 +1,11 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.config.stock.StockConfig;
+import com.fox.api.config.stock.entity.StockKindInfoEntity;
+import com.fox.api.config.stock.entity.StockMarketInfoEntity;
 import com.fox.api.model.stock.entity.StockEntity;
 import com.fox.api.model.stock.mapper.StockMapper;
+import com.fox.api.service.stock.StockUtilService;
 import com.fox.api.service.third.stock.entity.StockRealtimeEntity;
 import com.fox.api.service.third.stock.entity.StockRealtimeLineEntity;
 import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
@@ -20,18 +24,21 @@ public class StockScan {
     @Autowired
     private StockMapper stockMapper;
 
+    @Autowired
+    private StockUtilService stockUtilService;
+
+    @Autowired
+    private StockConfig stockConfig;
+
     private static Map<String, Map<String, String>> stockScanConfig = new LinkedHashMap<String, Map<String, String>>(){{
         put("sh", new HashMap<String, String>(){{
             put("maxLimit", "1000000");
-            put("stockMarketId", "0");
         }});
         put("sz", new HashMap<String, String>(){{
             put("maxLimit", "1000000");
-            put("stockMarketId", "1");
         }});
         put("hk", new HashMap<String, String>(){{
             put("maxLimit", "100000");
-            put("stockMarketId", "2");
         }});
     }};
 
@@ -65,10 +72,13 @@ public class StockScan {
         List<String> netsStockCodePrefixList = NetsStockBaseApi.stockCodePrefix;
         SinaRealtime sinaRealtime = new SinaRealtime();
         NetsMinuteRealtime netsMinuteRealtime = new NetsMinuteRealtime();
+        Map<String,StockMarketInfoEntity> stockMarketConfigMap = stockConfig.getMarket();
         for (String stockMarket : StockScan.stockScanConfig.keySet()) {
             if (!sinaStockMarketPYMap.containsKey(stockMarket) || !netsStockMarketPYMap.containsKey(stockMarket)) {
                 continue;
             }
+            StockMarketInfoEntity stockMarketInfoEntity = stockMarketConfigMap.containsKey(stockMarket) ?
+                    stockMarketConfigMap.get(stockMarket) : new StockMarketInfoEntity();
             String lastDealDate = this.getLastDealDate(stockMarket);
             String sinaStockMarketPY = sinaStockMarketPYMap.get(stockMarket);
             String netsStockMarketPY = netsStockMarketPYMap.get(stockMarket);
@@ -76,8 +86,8 @@ public class StockScan {
             Map<String, String> scanConfig = StockScan.stockScanConfig.get(stockMarket);
             int maxLimit = scanConfig.containsKey("maxLimit") && !scanConfig.get("maxLimit").equals("") ?
                     Integer.valueOf(scanConfig.get("maxLimit")) : 1000000;
-            int stockMarketId = scanConfig.containsKey("stockMarketId") && !scanConfig.get("stockMarketId").equals("") ?
-                    Integer.valueOf(scanConfig.get("stockMarketId")) : 0;
+            int stockMarketId = null == stockMarketInfoEntity.getStockMarket() ?
+                    0 : stockMarketInfoEntity.getStockMarket();
 
             int stockCodeLen = String.valueOf(maxLimit).length() - 1;
             for (int i = 0; i < maxLimit; i++) {
@@ -115,7 +125,7 @@ public class StockScan {
                                         break;
                                     }
                                 }
-                                System.out.println(stockCode + "\t" + stockCodeName);
+                                System.out.println(stockCode + "\t" + stockCodeName + "\t" + stockMarketId);
                                 StockEntity stockEntity = stockMapper.getByStockCode(stockCode, stockMarketId);
                                 if (null == stockEntity) {
                                     stockEntity = new StockEntity();
@@ -129,6 +139,12 @@ public class StockScan {
                                 stockEntity.setNetsStockCode(netsStockCode);
                                 stockEntity.setStockMarket(stockMarketId);
                                 stockEntity.setStockStatus(lastDealDate.equals(stockRealtimeEntity.getCurrentDate()) ? 0 : 1);
+                                //判定类别
+                                StockKindInfoEntity stockKindInfoEntity = stockUtilService.getStockKindInfo(stockCode, stockMarketId);
+                                stockEntity.setStockType(null == stockKindInfoEntity.getStockType() ?
+                                        0 : stockKindInfoEntity.getStockType());
+                                stockEntity.setStockKind(null == stockKindInfoEntity.getStockKind() ?
+                                        0 : stockKindInfoEntity.getStockKind());
                                 if (null != stockEntity.getId()) {
                                     stockMapper.update(stockEntity);
                                 } else {
