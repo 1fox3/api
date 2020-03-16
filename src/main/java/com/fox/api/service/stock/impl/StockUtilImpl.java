@@ -16,7 +16,7 @@ public class StockUtilImpl extends StockBaseImpl implements StockUtilService {
 
     @Override
     public StockKindInfoEntity getStockKindInfo(String stockCode, Integer stockMarket) {
-        StockKindInfoEntity stockKindInfo = null;
+        StockKindInfoEntity stockKindInfo = new StockKindInfoEntity();
         Map<String, StockKindInfoEntity> map = stockConfig.getKind();
         for (StockKindInfoEntity stockKindInfoEntity : map.values()) {
             if (null != stockMarket && stockKindInfoEntity.getStockMarket() == stockMarket) {
@@ -28,7 +28,7 @@ public class StockUtilImpl extends StockBaseImpl implements StockUtilService {
                     }
                 }
             }
-            if (null != stockKindInfo) {
+            if (null != stockKindInfo.getStockKind()) {
                 break;
             }
         }

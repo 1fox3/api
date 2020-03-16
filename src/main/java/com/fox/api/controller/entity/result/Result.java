@@ -9,7 +9,7 @@ import lombok.Data;
 public class Result<T> {
     private int code;
     private String msg;
-    private T body;
+    private T data;
 
     public static <T> Result<T> success(T body) {
         return new Result(ReturnCode.SUCCESS.getCode(), ReturnCode.SUCCESS.getMsg(), body);
