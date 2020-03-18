@@ -142,20 +142,22 @@ public class StockUpDown {
                         type = todayPrice > yesterdayPrice ? 1 : 2;
                     }
 
-                    if (0 != type) {
-                        if (null != stockLimitUpDownEntity) {
+                    if (null != stockLimitUpDownEntity) {
+                        if (0 != type) {
                             if (stockLimitUpDownEntity.getType() != type) {
                                 stockLimitUpDownEntity.setStartPrice(Float.valueOf(String.valueOf(yesterdayPrice)));
-                                stockLimitUpDownEntity.setStartDate(yesterday);
+                                stockLimitUpDownEntity.setStartDate(today);
                                 stockLimitUpDownEntity.setNum(1);
                             } else {
                                 stockLimitUpDownEntity.setNum(stockLimitUpDownEntity.getNum() + 1);
                             }
-                            stockLimitUpDownEntity.setType(type);
                             stockLimitUpDownEntity.setCurrentPrice(Float.valueOf(String.valueOf(todayPrice)));
                             stockLimitUpDownEntity.setCurrentDate(today);
-                            stockLimitUpDownMapper.updateById(stockLimitUpDownEntity);
-                        } else {
+                        }
+                        stockLimitUpDownEntity.setType(type);
+                        stockLimitUpDownMapper.updateById(stockLimitUpDownEntity);
+                    } else {
+                        if (0 != type) {
                             stockLimitUpDownEntity = new StockLimitUpDownEntity();
                             stockLimitUpDownEntity.setStockId(stockEntity.getId());
                             stockLimitUpDownEntity.setType(type);
