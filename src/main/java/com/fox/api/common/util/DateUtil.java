@@ -1,6 +1,5 @@
 package com.fox.api.common.util;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -17,6 +16,9 @@ public class DateUtil {
     //日期格式
     public static final String DATE_FORMAT_1 = "yyyy-MM-dd";
     public static final String DATE_FORMAT_2 = "yyyyMMdd";
+
+    //时间格式
+    public static final String TIME_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
 
     //格式类
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat();

@@ -2,3 +2,11 @@ spring:
   profiles:
     include: stock
     active: online # 当前运行环境
+login:
+  aes:
+    key: cdb2b4b4bd6a4a710757ceaf5461d9bc
+
+open:
+  wechat-mini:
+    url:
+      login: http://open.1fox3.com/open/wechatMini/Login/index

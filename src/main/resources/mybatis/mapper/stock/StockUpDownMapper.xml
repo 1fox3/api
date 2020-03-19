@@ -20,7 +20,8 @@
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
-    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockUpDownEntity">
+    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockUpDownEntity" keyColumn="id"
+            useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_stock_up_down (
             stock_id,
             d10_up,

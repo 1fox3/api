@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.model.user.mapper.UserMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.model.user.entity.UserEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="plat_type" property="platType" jdbcType="INTEGER" />
+        <result column="plat_id" property="platId" jdbcType="VARCHAR" />
+        <result column="plat_user_id" property="platUserId" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.model.user.entity.UserEntity" keyColumn="id"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_user (
+            plat_type,
+            plat_id,
+            plat_user_id
+        )
+        VALUES
+            (
+                #{platType},
+                #{platId},
+                #{platUserId}
+            );
+    </insert>
+
+    <update id="update" parameterType="com.fox.api.model.user.entity.UserEntity">
+        UPDATE t_user
+        SET
+            plat_type = #{platType},
+            plat_id = #{platId},
+            plat_user_id = #{platUserId}
+        WHERE
+            id = #{id};
+    </update>
+
+    <select id="getByPlatUserId" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_user
+        WHERE
+            plat_type = #{platType}
+            AND
+            plat_id = #{platId}
+            AND
+            plat_user_id = #{platUserId};
+    </select>
+
+    <select id="getById" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_user
+        WHERE
+            id = #{id};
+    </select>
+</mapper>

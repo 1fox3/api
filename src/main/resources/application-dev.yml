@@ -13,6 +13,11 @@ spring:
       username: root
       password:
       driver-class-name: com.mysql.cj.jdbc.Driver
+    user:
+      url: jdbc:mysql://127.0.0.1:3306/user?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&characterEncoding=utf-8
+      username: root
+      password:
+      driver-class-name: com.mysql.cj.jdbc.Driver
     api:
       url: jdbc:mysql://127.0.0.1:3306/api?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&characterEncoding=utf-8
       username: root
@@ -40,6 +45,8 @@ mybatis:
   # 针对数据源的mapper路径
   stock:
     mapper-location: classpath:mybatis/mapper/stock/*.xml
+  user:
+    mapper-location: classpath:mybatis/mapper/user/*.xml
   api:
     mapper-location: classpath:mybatis/mapper/api/*.xml
 

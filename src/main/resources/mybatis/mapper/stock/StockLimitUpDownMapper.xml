@@ -14,7 +14,8 @@
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
-    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockLimitUpDownEntity">
+    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockLimitUpDownEntity" keyColumn="id"
+            useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_stock_limit_up_down (
             stock_id,
             `type`,

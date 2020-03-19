@@ -26,14 +26,15 @@ public class StockEntity {
     //股票状态
     private Integer stockStatus = 0;
     //更新时间
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private String updateTime;
     //创建时间
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private String createTime;
 
     /**
      * 获取股票集市字符串
+     *
      * @return
      */
     public String getStockMarketStr() {
