@@ -24,12 +24,6 @@ spring:
       password: "`Lss19890228"
       driver-class-name: com.mysql.cj.jdbc.Driver
 
-  redis: # redis配置
-    host: 47.104.29.59
-    port: 6379
-    timeout: 1000
-
-
 # 阿里接口账号信息
 ali:
   api:
