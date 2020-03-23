@@ -1,6 +1,6 @@
 package com.fox.api.controller.api.stock;
 
-import com.fox.api.controller.entity.result.Result;
+import com.fox.api.controller.dto.result.ResultDTO;
 import com.fox.api.controller.enums.code.ReturnCode;
 import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.service.third.stock.entity.StockRealtimeEntity;
@@ -21,32 +21,32 @@ public class RealtimeController {
     private StockRealtimeService stockRealtimeService;
 
     @RequestMapping("/stock/realtime/info")
-    public Result realtime(int stockId) {
+    public ResultDTO realtime(int stockId) {
         StockRealtimeEntity stockRealtimeEntity = stockRealtimeService.info(stockId);
         if (null == stockRealtimeEntity) {
-            return Result.fail(ReturnCode.FAIL);
+            return ResultDTO.fail(ReturnCode.FAIL);
         }
-        return Result.success(stockRealtimeEntity);
+        return ResultDTO.success(stockRealtimeEntity);
     }
 
     @RequestMapping("/stock/realtime/priceList")
-    public Result priceList(int stockId) {
+    public ResultDTO priceList(int stockId) {
         StockRealtimeEntity stockRealtimeEntity = stockRealtimeService.info(stockId);
         if (null == stockRealtimeEntity) {
-            return Result.fail(ReturnCode.FAIL);
+            return ResultDTO.fail(ReturnCode.FAIL);
         }
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("sell", stockRealtimeEntity.getSellPriceList());
         map.put("buy", stockRealtimeEntity.getBuyPriceList());
-        return Result.success(map);
+        return ResultDTO.success(map);
     }
 
     @RequestMapping("/stock/realtime/line")
-    public Result lint(int stockId) {
+    public ResultDTO lint(int stockId) {
         StockRealtimeLineEntity stockRealtimeLineEntity = stockRealtimeService.line(stockId);
         if (null == stockRealtimeLineEntity) {
-            return Result.fail(ReturnCode.FAIL);
+            return ResultDTO.fail(ReturnCode.FAIL);
         }
-        return Result.success(stockRealtimeLineEntity);
+        return ResultDTO.success(stockRealtimeLineEntity);
     }
 }

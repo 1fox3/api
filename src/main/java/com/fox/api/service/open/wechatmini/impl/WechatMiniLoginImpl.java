@@ -3,12 +3,12 @@ package com.fox.api.service.open.wechatmini.impl;
 import com.fox.api.common.entity.HttpResponse;
 import com.fox.api.common.util.DateUtil;
 import com.fox.api.common.util.HttpUtil;
+import com.fox.api.controller.vo.open.wechatmini.login.WechatMiniLoginVO;
 import com.fox.api.model.user.entity.UserEntity;
 import com.fox.api.model.user.entity.UserLoginEntity;
 import com.fox.api.model.user.mapper.UserLoginMapper;
 import com.fox.api.model.user.mapper.UserMapper;
-import com.fox.api.service.open.entity.login.LoginEntity;
-import com.fox.api.service.open.wechat.impl.WechatLoginImpl;
+import com.fox.api.service.open.dto.login.LoginDTO;
 import com.fox.api.service.open.wechatmini.WechatMiniLogin;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,21 +37,21 @@ public class WechatMiniLoginImpl implements WechatMiniLogin {
     private static Integer loginExpireDate = 30;
 
     @Override
-    public LoginEntity login(String code, String iv, String encryptedData, String platId) {
-        LoginEntity loginEntity = new LoginEntity();
+    public LoginDTO login(WechatMiniLoginVO wechatMiniLoginVO) {
+        LoginDTO loginEntity = new LoginDTO();
         try {
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(this.wechatMiniLoginUrl);
-            httpUtil.setParam("code", code);
-            httpUtil.setParam("iv", iv);
-            httpUtil.setParam("encryptedData", encryptedData);
-            httpUtil.setParam("wechatMini", platId);
+            httpUtil.setParam("code", wechatMiniLoginVO.getCode());
+            httpUtil.setParam("iv", wechatMiniLoginVO.getIv());
+            httpUtil.setParam("encryptedData", wechatMiniLoginVO.getEncryptedData());
+            httpUtil.setParam("wechatMini", wechatMiniLoginVO.getPlatId());
             HttpResponse httpResponse = httpUtil.request();
             String response = httpResponse.getContent();
             JSONObject jsonObject = JSONObject.fromObject(response);
             JSONObject data = jsonObject.getJSONObject("data");
             String platUserId = data.getString("openid");
-            UserEntity userEntity = this.userMapper.getByPlatUserId(platUserId, platId, 2);
+            UserEntity userEntity = this.userMapper.getByPlatUserId(platUserId, wechatMiniLoginVO.getPlatId(), 2);
             if (null == userEntity.getId()) {
                 return loginEntity;
             }

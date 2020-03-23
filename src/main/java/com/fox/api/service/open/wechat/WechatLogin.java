@@ -1,8 +1,8 @@
 package com.fox.api.service.open.wechat;
 
-import com.fox.api.service.open.entity.login.LoginEntity;
+import com.fox.api.service.open.dto.login.LoginDTO;
 
 public interface WechatLogin {
-    public LoginEntity login(Integer userId);
-    public LoginEntity login(String userId, String platId);
+    public LoginDTO login(Integer userId);
+    public LoginDTO login(String userId, String platId);
 }

@@ -1,6 +1,6 @@
 package com.fox.api.controller.api.stock;
 
-import com.fox.api.controller.entity.result.Result;
+import com.fox.api.controller.dto.result.ResultDTO;
 import com.fox.api.controller.enums.code.ReturnCode;
 import com.fox.api.service.stock.StockLimitUpDownService;
 import com.fox.api.service.stock.StockUpDownService;
@@ -24,32 +24,32 @@ public class UpDownController {
     StockLimitUpDownService stockLimitUpDownService;
 
     @RequestMapping("/stock/upDown/list")
-    public Result list(String orderBy, PageInfo pageInfo) {
+    public ResultDTO list(String orderBy, PageInfo pageInfo) {
         orderBy = null == orderBy ? "d10_up DESC" : orderBy;
         List<StockUpDown> list = stockUpDownService.getList(orderBy, pageInfo);
         if (null == list) {
-            return Result.fail(ReturnCode.FAIL);
+            return ResultDTO.fail(ReturnCode.FAIL);
         }
-        return Result.success(list);
+        return ResultDTO.success(list);
     }
 
     @RequestMapping("/stock/limitUpDown/list")
-    public Result list(Integer type, PageInfo pageInfo) {
+    public ResultDTO list(Integer type, PageInfo pageInfo) {
         type = null == type ? 1 : type;
         List<StockLimitUpDown> list = stockLimitUpDownService.getList(type, pageInfo);
         if (null == list) {
-            return Result.fail(ReturnCode.FAIL);
+            return ResultDTO.fail(ReturnCode.FAIL);
         }
-        return Result.success(list);
+        return ResultDTO.success(list);
     }
 
     @RequestMapping("/stock/limitUpDown/count")
-    public Result list(Integer type) {
+    public ResultDTO list(Integer type) {
         type = null == type ? 1 : type;
         Integer totalCount = stockLimitUpDownService.countByType(type);
         if (null == totalCount) {
-            return Result.fail(ReturnCode.FAIL);
+            return ResultDTO.fail(ReturnCode.FAIL);
         }
-        return Result.success(totalCount);
+        return ResultDTO.success(totalCount);
     }
 }

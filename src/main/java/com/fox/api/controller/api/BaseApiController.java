@@ -1,10 +1,8 @@
 package com.fox.api.controller.api;
 
 import com.fox.api.common.util.AESUtil;
-import com.fox.api.model.user.entity.UserEntity;
 import com.fox.api.model.user.entity.UserLoginEntity;
-import com.fox.api.model.user.mapper.UserLoginMapper;
-import com.fox.api.service.open.entity.login.LoginEntity;
+import com.fox.api.service.open.dto.login.LoginDTO;
 import com.fox.api.service.user.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,7 +77,7 @@ public class BaseApiController {
      * 设置登录的cookie
      * @param loginEntity
      */
-    public void setSessionCookie(LoginEntity loginEntity) {
+    public void setSessionCookie(LoginDTO loginEntity) {
         ServletRequestAttributes servletRequestAttributes =
                 (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (null != servletRequestAttributes) {

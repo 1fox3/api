@@ -5,7 +5,7 @@ import com.fox.api.model.user.entity.UserEntity;
 import com.fox.api.model.user.entity.UserLoginEntity;
 import com.fox.api.model.user.mapper.UserLoginMapper;
 import com.fox.api.model.user.mapper.UserMapper;
-import com.fox.api.service.open.entity.login.LoginEntity;
+import com.fox.api.service.open.dto.login.LoginDTO;
 import com.fox.api.service.open.wechat.WechatLogin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,8 +30,8 @@ public class WechatLoginImpl implements WechatLogin {
     private static Integer loginExpireDate = 30;
 
     @Override
-    public LoginEntity login(Integer userId) {
-        LoginEntity loginEntity = new LoginEntity();
+    public LoginDTO login(Integer userId) {
+        LoginDTO loginEntity = new LoginDTO();
         UserEntity userEntity = this.userMapper.getById(userId);
         if (null == userEntity.getId()) {
             return loginEntity;
@@ -53,11 +53,11 @@ public class WechatLoginImpl implements WechatLogin {
     }
 
     @Override
-    public LoginEntity login(String userId, String platId) {
+    public LoginDTO login(String userId, String platId) {
         UserEntity userEntity = this.userMapper.getByPlatUserId(userId, platId, 1);
         if (null != userEntity && null != userEntity.getId()) {
             return this.login(userEntity.getId());
         }
-        return new LoginEntity();
+        return new LoginDTO();
     }
 }

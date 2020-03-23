@@ -1,11 +1,11 @@
-package com.fox.api.service.open.entity.login;
+package com.fox.api.service.open.dto.login;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fox.api.common.util.AESUtil;
 import lombok.Data;
 
 @Data
-public class LoginEntity {
+public class LoginDTO {
     //登录的sessionid
     private String sessionid;
 
