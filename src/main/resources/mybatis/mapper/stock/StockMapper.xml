@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.fox.api.model.stock.mapper.StockMapper">
-    <resultMap id="BasicResultMap" type="com.fox.api.model.stock.entity.StockEntity">
+<mapper namespace="com.fox.api.dao.stock.mapper.StockMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockEntity">
         <id column="id" property="id" jdbcType="INTEGER" />
         <result column="stock_code" property="stockCode" jdbcType="VARCHAR" />
         <result column="stock_name" property="stockName" jdbcType="VARCHAR" />
@@ -16,7 +16,7 @@
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
-    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockEntity" keyColumn="id"
+    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockEntity" keyColumn="id"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_stock (
             stock_code,
@@ -43,7 +43,7 @@
             );
     </insert>
 
-    <update id="update" parameterType="com.fox.api.model.stock.entity.StockEntity">
+    <update id="update" parameterType="com.fox.api.dao.stock.entity.StockEntity">
         UPDATE t_stock
         SET
             stock_code = #{stockCode},

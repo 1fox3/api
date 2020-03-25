@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.fox.api.model.user.mapper.UserMapper">
-    <resultMap id="BasicResultMap" type="com.fox.api.model.user.entity.UserEntity">
+<mapper namespace="com.fox.api.dao.user.mapper.UserMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.user.entity.UserEntity">
         <id column="id" property="id" jdbcType="INTEGER" />
         <result column="plat_type" property="platType" jdbcType="INTEGER" />
         <result column="plat_id" property="platId" jdbcType="VARCHAR" />
@@ -10,7 +10,7 @@
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
-    <insert id="insert" parameterType="com.fox.api.model.user.entity.UserEntity" keyColumn="id"
+    <insert id="insert" parameterType="com.fox.api.dao.user.entity.UserEntity" keyColumn="id"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_user (
             plat_type,
@@ -25,7 +25,7 @@
             );
     </insert>
 
-    <update id="update" parameterType="com.fox.api.model.user.entity.UserEntity">
+    <update id="update" parameterType="com.fox.api.dao.user.entity.UserEntity">
         UPDATE t_user
         SET
             plat_type = #{platType},

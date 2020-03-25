@@ -1,10 +1,9 @@
 package com.fox.api.controller.api.open.wechatmini;
 
 import com.fox.api.controller.api.BaseApiController;
-import com.fox.api.controller.dto.result.ResultDTO;
-import com.fox.api.controller.enums.code.LoginCode;
-import com.fox.api.controller.enums.code.ReturnCode;
-import com.fox.api.controller.vo.open.wechatmini.login.WechatMiniLoginVO;
+import com.fox.api.entity.dto.result.ResultDto;
+import com.fox.api.enums.code.LoginCode;
+import com.fox.api.entity.vo.open.wechatmini.login.WechatMiniLoginVo;
 import com.fox.api.service.open.dto.login.LoginDTO;
 import com.fox.api.service.open.wechatmini.WechatMiniLogin;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +23,11 @@ public class WechatMiniLoginController extends BaseApiController {
     private WechatMiniLogin wechatMiniLogin;
 
     @RequestMapping("/login")
-    public ResultDTO login(@Valid @RequestBody WechatMiniLoginVO wechatMiniLoginVO) {
+    public ResultDto login(@Valid @RequestBody WechatMiniLoginVo wechatMiniLoginVO) {
         LoginDTO loginDTO = wechatMiniLogin.login(wechatMiniLoginVO);
         if (null == loginDTO.getSessionid()) {
-            return ResultDTO.fail(LoginCode.LOGIN_FAIL);
+            return ResultDto.fail(LoginCode.LOGIN_FAIL);
         }
-        return ResultDTO.success(loginDTO);
+        return ResultDto.success(loginDTO);
     }
 }

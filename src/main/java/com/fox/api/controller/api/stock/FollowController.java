@@ -1,6 +1,6 @@
 package com.fox.api.controller.api.stock;
 
-import com.fox.api.controller.dto.result.ResultDTO;
+import com.fox.api.entity.dto.result.ResultDto;
 import com.fox.api.service.stock.StockFollowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -15,7 +15,7 @@ public class FollowController {
     StockFollowService stockFollowService;
 
     @RequestMapping("/stock/follow/list")
-    public ResultDTO realtime() {
-        return ResultDTO.success(stockFollowService.getByUser(0));
+    public ResultDto realtime() {
+        return ResultDto.success(stockFollowService.getByUser(0));
     }
 }

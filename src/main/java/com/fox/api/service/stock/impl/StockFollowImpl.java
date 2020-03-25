@@ -1,8 +1,8 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.model.stock.entity.StockEntity;
-import com.fox.api.model.stock.entity.StockFollowEntity;
-import com.fox.api.model.stock.mapper.StockFollowMapper;
+import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.entity.StockFollowEntity;
+import com.fox.api.dao.stock.mapper.StockFollowMapper;
 import com.fox.api.service.stock.StockFollowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

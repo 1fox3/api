@@ -1,13 +1,13 @@
 package com.fox.api.service.open.wechatmini.impl;
 
-import com.fox.api.common.entity.HttpResponse;
-import com.fox.api.common.util.DateUtil;
-import com.fox.api.common.util.HttpUtil;
-import com.fox.api.controller.vo.open.wechatmini.login.WechatMiniLoginVO;
-import com.fox.api.model.user.entity.UserEntity;
-import com.fox.api.model.user.entity.UserLoginEntity;
-import com.fox.api.model.user.mapper.UserLoginMapper;
-import com.fox.api.model.user.mapper.UserMapper;
+import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.util.DateUtil;
+import com.fox.api.util.HttpUtil;
+import com.fox.api.entity.vo.open.wechatmini.login.WechatMiniLoginVo;
+import com.fox.api.dao.user.entity.UserEntity;
+import com.fox.api.dao.user.entity.UserLoginEntity;
+import com.fox.api.dao.user.mapper.UserLoginMapper;
+import com.fox.api.dao.user.mapper.UserMapper;
 import com.fox.api.service.open.dto.login.LoginDTO;
 import com.fox.api.service.open.wechatmini.WechatMiniLogin;
 import net.sf.json.JSONObject;
@@ -37,7 +37,7 @@ public class WechatMiniLoginImpl implements WechatMiniLogin {
     private static Integer loginExpireDate = 30;
 
     @Override
-    public LoginDTO login(WechatMiniLoginVO wechatMiniLoginVO) {
+    public LoginDTO login(WechatMiniLoginVo wechatMiniLoginVO) {
         LoginDTO loginEntity = new LoginDTO();
         try {
             HttpUtil httpUtil = new HttpUtil();
@@ -46,7 +46,7 @@ public class WechatMiniLoginImpl implements WechatMiniLogin {
             httpUtil.setParam("iv", wechatMiniLoginVO.getIv());
             httpUtil.setParam("encryptedData", wechatMiniLoginVO.getEncryptedData());
             httpUtil.setParam("wechatMini", wechatMiniLoginVO.getPlatId());
-            HttpResponse httpResponse = httpUtil.request();
+            HttpResponseDto httpResponse = httpUtil.request();
             String response = httpResponse.getContent();
             JSONObject jsonObject = JSONObject.fromObject(response);
             JSONObject data = jsonObject.getJSONObject("data");

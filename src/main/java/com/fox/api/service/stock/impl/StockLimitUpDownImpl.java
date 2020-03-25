@@ -1,14 +1,11 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.model.stock.entity.StockEntity;
-import com.fox.api.model.stock.entity.StockLimitUpDownEntity;
-import com.fox.api.model.stock.entity.StockUpDownEntity;
-import com.fox.api.model.stock.mapper.StockLimitUpDownMapper;
-import com.fox.api.model.stock.mapper.StockUpDownMapper;
+import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.entity.StockLimitUpDownEntity;
+import com.fox.api.dao.stock.mapper.StockLimitUpDownMapper;
 import com.fox.api.service.stock.StockLimitUpDownService;
 import com.fox.api.service.stock.entity.PageInfo;
 import com.fox.api.service.stock.entity.updown.StockLimitUpDown;
-import com.fox.api.service.stock.entity.updown.StockUpDown;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

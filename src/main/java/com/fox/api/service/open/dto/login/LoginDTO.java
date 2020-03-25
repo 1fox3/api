@@ -1,7 +1,6 @@
 package com.fox.api.service.open.dto.login;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fox.api.common.util.AESUtil;
+import com.fox.api.util.AESUtil;
 import lombok.Data;
 
 @Data

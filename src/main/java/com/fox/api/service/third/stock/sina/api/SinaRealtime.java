@@ -1,8 +1,8 @@
 package com.fox.api.service.third.stock.sina.api;
 
-import com.fox.api.common.entity.HttpResponse;
-import com.fox.api.common.util.HttpUtil;
-import com.fox.api.common.util.StringUtil;
+import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.util.HttpUtil;
+import com.fox.api.util.StringUtil;
 import com.fox.api.service.third.stock.entity.StockRealtimeEntity;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class SinaRealtime extends SinaStockBaseApi {
         try {
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(apiUrl + StringUtil.listToString(stockCodes, ",")).setOriCharset("GBK");
-            HttpResponse httpResponse = httpUtil.request();
+            HttpResponseDto httpResponse = httpUtil.request();
             return this.handleResponse(httpResponse.getContent());
         } catch (IOException e) {
             e.printStackTrace();

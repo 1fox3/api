@@ -1,8 +1,8 @@
 package com.fox.api.controller.api.open.wechat;
 
 import com.fox.api.controller.api.BaseApiController;
-import com.fox.api.controller.dto.result.ResultDTO;
-import com.fox.api.controller.vo.UserVo;
+import com.fox.api.entity.dto.result.ResultDto;
+import com.fox.api.enums.code.LoginCode;
 import com.fox.api.service.open.dto.login.LoginDTO;
 import com.fox.api.service.open.wechat.WechatLogin;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +15,12 @@ public class WechatLoginController extends BaseApiController {
     private WechatLogin wechatLogin;
 
     @RequestMapping("/open/wechat/login")
-    public ResultDTO login(@RequestBody UserVo userVo) {
-        System.out.println(this.getUserId());
-        LoginDTO loginEntity = wechatLogin.login(userVo.getUserId());
-        this.setSessionCookie(loginEntity);
-        return ResultDTO.success(loginEntity);
+    public ResultDto login(Integer userId) {
+        LoginDTO loginDTO = wechatLogin.login(userId);
+        this.setSessionCookie(loginDTO);
+        if (null == loginDTO.getSessionid()) {
+            return ResultDto.fail(LoginCode.LOGIN_FAIL);
+        }
+        return ResultDto.success(loginDTO);
     }
 }

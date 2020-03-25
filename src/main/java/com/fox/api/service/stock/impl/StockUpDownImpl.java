@@ -1,8 +1,8 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.model.stock.entity.StockEntity;
-import com.fox.api.model.stock.entity.StockUpDownEntity;
-import com.fox.api.model.stock.mapper.StockUpDownMapper;
+import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.entity.StockUpDownEntity;
+import com.fox.api.dao.stock.mapper.StockUpDownMapper;
 import com.fox.api.service.stock.StockUpDownService;
 import com.fox.api.service.stock.entity.PageInfo;
 import com.fox.api.service.stock.entity.updown.StockUpDown;

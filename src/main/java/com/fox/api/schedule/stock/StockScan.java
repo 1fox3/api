@@ -1,10 +1,10 @@
 package com.fox.api.schedule.stock;
 
-import com.fox.api.config.stock.StockConfig;
-import com.fox.api.config.stock.entity.StockKindInfoEntity;
-import com.fox.api.config.stock.entity.StockMarketInfoEntity;
-import com.fox.api.model.stock.entity.StockEntity;
-import com.fox.api.model.stock.mapper.StockMapper;
+import com.fox.api.property.stock.StockProperty;
+import com.fox.api.entity.property.stock.StockKindInfoProperty;
+import com.fox.api.entity.property.stock.StockMarketInfoProperty;
+import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.service.stock.StockUtilService;
 import com.fox.api.service.third.stock.entity.StockRealtimeEntity;
 import com.fox.api.service.third.stock.entity.StockRealtimeLineEntity;
@@ -28,7 +28,7 @@ public class StockScan {
     private StockUtilService stockUtilService;
 
     @Autowired
-    private StockConfig stockConfig;
+    private StockProperty stockConfig;
 
     private static Map<String, Map<String, String>> stockScanConfig = new LinkedHashMap<String, Map<String, String>>(){{
         put("sh", new HashMap<String, String>(){{
@@ -72,13 +72,13 @@ public class StockScan {
         List<String> netsStockCodePrefixList = NetsStockBaseApi.stockCodePrefix;
         SinaRealtime sinaRealtime = new SinaRealtime();
         NetsMinuteRealtime netsMinuteRealtime = new NetsMinuteRealtime();
-        Map<String,StockMarketInfoEntity> stockMarketConfigMap = stockConfig.getMarket();
+        Map<String, StockMarketInfoProperty> stockMarketConfigMap = stockConfig.getMarket();
         for (String stockMarket : StockScan.stockScanConfig.keySet()) {
             if (!sinaStockMarketPYMap.containsKey(stockMarket) || !netsStockMarketPYMap.containsKey(stockMarket)) {
                 continue;
             }
-            StockMarketInfoEntity stockMarketInfoEntity = stockMarketConfigMap.containsKey(stockMarket) ?
-                    stockMarketConfigMap.get(stockMarket) : new StockMarketInfoEntity();
+            StockMarketInfoProperty stockMarketInfoEntity = stockMarketConfigMap.containsKey(stockMarket) ?
+                    stockMarketConfigMap.get(stockMarket) : new StockMarketInfoProperty();
             String lastDealDate = this.getLastDealDate(stockMarket);
             String sinaStockMarketPY = sinaStockMarketPYMap.get(stockMarket);
             String netsStockMarketPY = netsStockMarketPYMap.get(stockMarket);
@@ -140,7 +140,7 @@ public class StockScan {
                                 stockEntity.setStockMarket(stockMarketId);
                                 stockEntity.setStockStatus(lastDealDate.equals(stockRealtimeEntity.getCurrentDate()) ? 0 : 1);
                                 //判定类别
-                                StockKindInfoEntity stockKindInfoEntity = stockUtilService.getStockKindInfo(stockCode, stockMarketId);
+                                StockKindInfoProperty stockKindInfoEntity = stockUtilService.getStockKindInfo(stockCode, stockMarketId);
                                 stockEntity.setStockType(null == stockKindInfoEntity.getStockType() ?
                                         0 : stockKindInfoEntity.getStockType());
                                 stockEntity.setStockKind(null == stockKindInfoEntity.getStockKind() ?

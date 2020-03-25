@@ -1,8 +1,8 @@
 package com.fox.api.service.third.stock.nets.api;
 
-import com.fox.api.common.entity.HttpResponse;
-import com.fox.api.common.util.DateUtil;
-import com.fox.api.common.util.HttpUtil;
+import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.util.DateUtil;
+import com.fox.api.util.HttpUtil;
 import com.fox.api.service.third.stock.entity.StockDayLineEntity;
 import com.fox.api.service.third.stock.entity.StockDealEntity;
 import net.sf.json.JSONArray;
@@ -71,7 +71,7 @@ public class NetsDayLine extends NetsStockBaseApi {
                         .replace("{stockCode}", stockCode);
                 HttpUtil httpUtil = new HttpUtil();
                 httpUtil.setUrl(url).setOriCharset("GBK");
-                HttpResponse httpResponse = httpUtil.request();
+                HttpResponseDto httpResponse = httpUtil.request();
                 StockDayLineEntity currentStockDayLineEntity = this.handleResponse(httpResponse.getContent());
                 List<StockDealEntity> list = currentStockDayLineEntity.getLineNode();
                 List<StockDealEntity> filterList = new LinkedList<>();

@@ -1,12 +1,12 @@
 package com.fox.api.schedule.stock;
 
-import com.fox.api.common.util.DateUtil;
-import com.fox.api.model.stock.entity.StockEntity;
-import com.fox.api.model.stock.entity.StockLimitUpDownEntity;
-import com.fox.api.model.stock.entity.StockUpDownEntity;
-import com.fox.api.model.stock.mapper.StockLimitUpDownMapper;
-import com.fox.api.model.stock.mapper.StockMapper;
-import com.fox.api.model.stock.mapper.StockUpDownMapper;
+import com.fox.api.util.DateUtil;
+import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.entity.StockLimitUpDownEntity;
+import com.fox.api.dao.stock.entity.StockUpDownEntity;
+import com.fox.api.dao.stock.mapper.StockLimitUpDownMapper;
+import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.dao.stock.mapper.StockUpDownMapper;
 import com.fox.api.service.stock.StockOfflineService;
 import com.fox.api.service.third.stock.entity.StockDayLineEntity;
 import com.fox.api.service.third.stock.entity.StockDealEntity;

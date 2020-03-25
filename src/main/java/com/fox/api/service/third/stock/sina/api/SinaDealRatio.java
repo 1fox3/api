@@ -1,7 +1,7 @@
 package com.fox.api.service.third.stock.sina.api;
 
-import com.fox.api.common.entity.HttpResponse;
-import com.fox.api.common.util.HttpUtil;
+import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.util.HttpUtil;
 import com.fox.api.service.third.stock.entity.StockDealNumEntity;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class SinaDealRatio extends SinaStockBaseApi {
             httpUtil.setParam("symbol", stockCode);
             httpUtil.setParam("startdate", startDate);
             httpUtil.setParam("enddate", endDate);
-            HttpResponse httpResponse = httpUtil.request();
+            HttpResponseDto httpResponse = httpUtil.request();
             return this.handleResponse(httpResponse.getContent());
         } catch (IOException e) {
             e.printStackTrace();

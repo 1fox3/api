@@ -1,10 +1,10 @@
 package com.fox.api.service.open.wechat.impl;
 
-import com.fox.api.common.util.DateUtil;
-import com.fox.api.model.user.entity.UserEntity;
-import com.fox.api.model.user.entity.UserLoginEntity;
-import com.fox.api.model.user.mapper.UserLoginMapper;
-import com.fox.api.model.user.mapper.UserMapper;
+import com.fox.api.util.DateUtil;
+import com.fox.api.dao.user.entity.UserEntity;
+import com.fox.api.dao.user.entity.UserLoginEntity;
+import com.fox.api.dao.user.mapper.UserLoginMapper;
+import com.fox.api.dao.user.mapper.UserMapper;
 import com.fox.api.service.open.dto.login.LoginDTO;
 import com.fox.api.service.open.wechat.WechatLogin;
 import org.springframework.beans.factory.annotation.Autowired;

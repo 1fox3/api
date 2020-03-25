@@ -1,7 +1,7 @@
 package com.fox.api.controller.api.stock;
 
-import com.fox.api.controller.dto.result.ResultDTO;
-import com.fox.api.controller.enums.code.ReturnCode;
+import com.fox.api.entity.dto.result.ResultDto;
+import com.fox.api.enums.code.ReturnCode;
 import com.fox.api.service.stock.StockOfflineService;
 import com.fox.api.service.third.stock.entity.StockDayLineEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +16,11 @@ public class OfflineController {
     private StockOfflineService stockOfflineService;
 
     @RequestMapping("/stock/offline/line")
-    public ResultDTO realtime(int stockId) {
+    public ResultDto realtime(int stockId) {
         StockDayLineEntity stockDayLineEntity = stockOfflineService.line(stockId);
         if (null == stockDayLineEntity) {
-            return ResultDTO.fail(ReturnCode.FAIL);
+            return ResultDto.fail(ReturnCode.FAIL);
         }
-        return ResultDTO.success(stockDayLineEntity);
+        return ResultDto.success(stockDayLineEntity);
     }
 }

@@ -1,7 +1,7 @@
 package com.fox.api.service.user.impl;
 
-import com.fox.api.model.user.entity.UserLoginEntity;
-import com.fox.api.model.user.mapper.UserLoginMapper;
+import com.fox.api.dao.user.entity.UserLoginEntity;
+import com.fox.api.dao.user.mapper.UserLoginMapper;
 import com.fox.api.service.user.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;

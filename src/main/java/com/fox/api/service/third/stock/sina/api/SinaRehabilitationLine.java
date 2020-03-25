@@ -1,7 +1,7 @@
 package com.fox.api.service.third.stock.sina.api;
 
-import com.fox.api.common.entity.HttpResponse;
-import com.fox.api.common.util.HttpUtil;
+import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.util.HttpUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -35,7 +35,7 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
                     .replace("{date}", date);
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(url).setOriCharset("GBK");
-            HttpResponse httpResponse = httpUtil.request();
+            HttpResponseDto httpResponse = httpUtil.request();
             return this.handleResponse(httpResponse.getContent());
         } catch (IOException e) {
             e.printStackTrace();

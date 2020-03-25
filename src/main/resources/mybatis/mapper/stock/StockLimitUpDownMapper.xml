@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.fox.api.model.stock.mapper.StockLimitUpDownMapper">
-    <resultMap id="BasicResultMap" type="com.fox.api.model.stock.entity.StockLimitUpDownEntity">
+<mapper namespace="com.fox.api.dao.stock.mapper.StockLimitUpDownMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockLimitUpDownEntity">
         <id column="id" property="id" jdbcType="INTEGER" />
         <result column="stock_id" property="stockId" jdbcType="INTEGER" />
         <result column="type" property="type" jdbcType="INTEGER" />
@@ -14,7 +14,7 @@
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
-    <insert id="insert" parameterType="com.fox.api.model.stock.entity.StockLimitUpDownEntity" keyColumn="id"
+    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockLimitUpDownEntity" keyColumn="id"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_stock_limit_up_down (
             stock_id,
@@ -37,7 +37,7 @@
             );
     </insert>
 
-    <insert id="updateById" parameterType="com.fox.api.model.stock.entity.StockLimitUpDownEntity">
+    <insert id="updateById" parameterType="com.fox.api.dao.stock.entity.StockLimitUpDownEntity">
         UPDATE t_stock_limit_up_down
         SET
             `type` = #{type},

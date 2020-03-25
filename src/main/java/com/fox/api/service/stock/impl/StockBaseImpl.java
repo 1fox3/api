@@ -1,7 +1,7 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.model.stock.entity.StockEntity;
-import com.fox.api.model.stock.mapper.StockMapper;
+import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import org.springframework.beans.factory.annotation.Autowired;
 

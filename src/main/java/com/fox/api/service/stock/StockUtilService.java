@@ -1,7 +1,7 @@
 package com.fox.api.service.stock;
 
-import com.fox.api.config.stock.entity.StockKindInfoEntity;
+import com.fox.api.entity.property.stock.StockKindInfoProperty;
 
 public interface StockUtilService {
-    StockKindInfoEntity getStockKindInfo(String stockCode, Integer stockMarket);
+    StockKindInfoProperty getStockKindInfo(String stockCode, Integer stockMarket);
 }

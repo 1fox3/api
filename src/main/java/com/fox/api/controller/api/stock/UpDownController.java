@@ -1,7 +1,7 @@
 package com.fox.api.controller.api.stock;
 
-import com.fox.api.controller.dto.result.ResultDTO;
-import com.fox.api.controller.enums.code.ReturnCode;
+import com.fox.api.entity.dto.result.ResultDto;
+import com.fox.api.enums.code.ReturnCode;
 import com.fox.api.service.stock.StockLimitUpDownService;
 import com.fox.api.service.stock.StockUpDownService;
 import com.fox.api.service.stock.entity.PageInfo;
@@ -24,32 +24,32 @@ public class UpDownController {
     StockLimitUpDownService stockLimitUpDownService;
 
     @RequestMapping("/stock/upDown/list")
-    public ResultDTO list(String orderBy, PageInfo pageInfo) {
+    public ResultDto list(String orderBy, PageInfo pageInfo) {
         orderBy = null == orderBy ? "d10_up DESC" : orderBy;
         List<StockUpDown> list = stockUpDownService.getList(orderBy, pageInfo);
         if (null == list) {
-            return ResultDTO.fail(ReturnCode.FAIL);
+            return ResultDto.fail(ReturnCode.FAIL);
         }
-        return ResultDTO.success(list);
+        return ResultDto.success(list);
     }
 
     @RequestMapping("/stock/limitUpDown/list")
-    public ResultDTO list(Integer type, PageInfo pageInfo) {
+    public ResultDto list(Integer type, PageInfo pageInfo) {
         type = null == type ? 1 : type;
         List<StockLimitUpDown> list = stockLimitUpDownService.getList(type, pageInfo);
         if (null == list) {
-            return ResultDTO.fail(ReturnCode.FAIL);
+            return ResultDto.fail(ReturnCode.FAIL);
         }
-        return ResultDTO.success(list);
+        return ResultDto.success(list);
     }
 
     @RequestMapping("/stock/limitUpDown/count")
-    public ResultDTO list(Integer type) {
+    public ResultDto list(Integer type) {
         type = null == type ? 1 : type;
         Integer totalCount = stockLimitUpDownService.countByType(type);
         if (null == totalCount) {
-            return ResultDTO.fail(ReturnCode.FAIL);
+            return ResultDto.fail(ReturnCode.FAIL);
         }
-        return ResultDTO.success(totalCount);
+        return ResultDto.success(totalCount);
     }
 }

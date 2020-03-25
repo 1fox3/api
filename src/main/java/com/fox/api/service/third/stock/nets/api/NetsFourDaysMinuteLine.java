@@ -1,7 +1,7 @@
 package com.fox.api.service.third.stock.nets.api;
 
-import com.fox.api.common.entity.HttpResponse;
-import com.fox.api.common.util.HttpUtil;
+import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.util.HttpUtil;
 import com.fox.api.service.third.stock.entity.StockRealtimeLineEntity;
 import com.fox.api.service.third.stock.entity.StockRealtimeNodeEntity;
 import net.sf.json.JSONArray;
@@ -39,7 +39,7 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
                     .replace("{stockCode}", stockCode);
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(url).setOriCharset("GBK");
-            HttpResponse httpResponse = httpUtil.request();
+            HttpResponseDto httpResponse = httpUtil.request();
             return this.handleResponse(httpResponse.getContent());
         } catch (IOException e) {
             e.printStackTrace();
