@@ -4,17 +4,42 @@ spring:
     active: online # 当前运行环境
 
   redis: # redis配置
-    database: 0
-    host: 47.104.29.59
-    port: 6380
-    password: lss19890228
-    lettuce:
-      pool:
-        max-active: 8
-        min-idle: 0
-        max-idle: 8
-        max-wait: 1000ms
-      shutdown-timeout: 100ms
+    main:
+      database: 1
+      host: 47.104.29.59
+      port: 6380
+      password: lss19890228
+      timeout: 2s
+      lettuce:
+        pool:
+          max-active: 8
+          min-idle: 0
+          max-idle: 8
+          max-wait: 1000ms
+    stock:
+      database: 2
+      host: 47.104.29.59
+      port: 6380
+      password: lss19890228
+      timeout: 2s
+      lettuce:
+        pool:
+          max-active: 8
+          min-idle: 0
+          max-idle: 8
+          max-wait: 1000ms
+    user:
+      database: 3
+      host: 47.104.29.59
+      port: 6380
+      password: lss19890228
+      timeout: 2s
+      lettuce:
+        pool:
+          max-active: 8
+          min-idle: 0
+          max-idle: 8
+          max-wait: 1000ms
 
 login:
   aes:
