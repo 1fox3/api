@@ -1,6 +1,8 @@
 spring:
   profiles:
-    include: stock
+    include:
+      - stock
+      - redis
     active: online # 当前运行环境
 
   redis: # redis配置

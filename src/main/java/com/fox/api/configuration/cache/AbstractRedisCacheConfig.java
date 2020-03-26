@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fox.api.entity.property.redis.RedisLettuceProperty;
+import com.fox.api.property.redis.ClassCacheTimeProperty;
 import lombok.Data;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -23,9 +25,14 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 public abstract class AbstractRedisCacheConfig {
+    @Autowired
+    ClassCacheTimeProperty classCacheTimeProperty;
+
     protected Integer database;
     protected String host;
     protected Integer port;
@@ -126,7 +133,33 @@ public abstract class AbstractRedisCacheConfig {
         RedisCacheManager redisCacheManager = RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .transactionAware()
+                .withInitialCacheConfigurations(this.getRedisCacheConfigurationMap())
                 .build();
         return redisCacheManager;
+    }
+
+    private Map<String, RedisCacheConfiguration> getRedisCacheConfigurationMap() {
+        Map<String, RedisCacheConfiguration> redisCacheConfigurationMap = new HashMap<>();
+        for(Map.Entry<String, Integer> entry : this.classCacheTimeProperty.getTime().entrySet()){
+            String mapKey = entry.getKey();
+            Integer mapValue = entry.getValue();
+            System.out.println(mapKey);
+            System.out.println(mapValue);
+            redisCacheConfigurationMap.put(mapKey, this.getRedisCacheConfigurationWithTtl(mapValue));
+        }
+        return redisCacheConfigurationMap;
+    }
+
+    private RedisCacheConfiguration getRedisCacheConfigurationWithTtl(Integer seconds) {
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = this.getValueSerializer();
+
+        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig();
+        redisCacheConfiguration = redisCacheConfiguration.serializeValuesWith(
+                RedisSerializationContext
+                        .SerializationPair
+                        .fromSerializer(jackson2JsonRedisSerializer)
+        ).entryTtl(Duration.ofSeconds(seconds));
+
+        return redisCacheConfiguration;
     }
 }

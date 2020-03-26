@@ -1,0 +1,5 @@
+redis:
+  class:
+    time: #根据类名设置默认缓存时间
+      UserLogin: 7200
+
