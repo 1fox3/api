@@ -5,6 +5,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,5 +33,10 @@ public class StockRedisCacheConfig extends AbstractRedisCacheConfig {
     @Bean("stockKeyGenerator")
     public KeyGenerator keyGenerator() {
         return super.keyGenerator();
+    }
+
+    @Bean("stockCacheManager")
+    public RedisCacheManager cacheManager() {
+        return super.cacheManager();
     }
 }

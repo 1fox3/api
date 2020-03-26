@@ -15,7 +15,7 @@ public class UserLoginImpl implements UserLoginService {
     protected UserLoginMapper userLoginMapper;
 
     @Override
-    @Cacheable(key = "#sessionid")
+    @Cacheable(key = "#sessionid", cacheManager = "userCacheManager")
     public UserLoginEntity getUserLoginBySessionid(Integer sessionid) {
         return userLoginMapper.getById(sessionid);
     }

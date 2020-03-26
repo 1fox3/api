@@ -8,6 +8,8 @@ import lombok.Data;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
@@ -16,8 +18,11 @@ import org.springframework.data.redis.connection.lettuce.LettucePoolingClientCon
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
 
 @Data
 public abstract class AbstractRedisCacheConfig {
@@ -61,11 +66,7 @@ public abstract class AbstractRedisCacheConfig {
     protected RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         RedisSerializer stringSerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-        ObjectMapper om = new ObjectMapper();
-        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(om);
+        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = this.getValueSerializer();
         // key采用String的序列化方式
         template.setKeySerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);
@@ -75,6 +76,19 @@ public abstract class AbstractRedisCacheConfig {
         template.setConnectionFactory(factory);
         template.afterPropertiesSet();
         return template;
+    }
+
+    /**
+     * 获取缓存值的序列化方法
+     * @return
+     */
+    private Jackson2JsonRedisSerializer getValueSerializer() {
+        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+        ObjectMapper om = new ObjectMapper();
+        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        jackson2JsonRedisSerializer.setObjectMapper(om);
+        return jackson2JsonRedisSerializer;
     }
 
     protected StringRedisTemplate getStringRedisTemplate(RedisConnectionFactory factory) {
@@ -94,5 +108,25 @@ public abstract class AbstractRedisCacheConfig {
             }
             return sb.toString();
         };
+    }
+
+    public RedisCacheManager cacheManager() {
+        RedisConnectionFactory connectionFactory = this.factory();
+        RedisSerializer stringSerializer = new StringRedisSerializer();
+        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = this.getValueSerializer();
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(3600)) // 1小时缓存失效
+                // 设置key的序列化方式
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
+                // 设置value的序列化方式
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))
+                // 不缓存null值
+                .disableCachingNullValues();
+
+        RedisCacheManager redisCacheManager = RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(config)
+                .transactionAware()
+                .build();
+        return redisCacheManager;
     }
 }
