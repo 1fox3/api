@@ -1,9 +1,9 @@
-package com.fox.api.service.stock.entity;
+package com.fox.api.entity.po;
 
 import lombok.Data;
 
 @Data
-public class PageInfo {
+public class PageInfoPo {
     private Integer pageNum;
     private Integer pageSize;
 

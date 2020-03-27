@@ -3,8 +3,8 @@ package com.fox.api.service.third.stock.nets.api;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.HttpUtil;
-import com.fox.api.service.third.stock.entity.StockDayLineEntity;
-import com.fox.api.service.third.stock.entity.StockDealEntity;
+import com.fox.api.entity.po.third.stock.StockDayLinePo;
+import com.fox.api.entity.po.third.stock.StockDealPo;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -28,14 +28,14 @@ public class NetsDayLine extends NetsStockBaseApi {
      * @param netsCodeInfoMap
      * @return
      */
-    public StockDayLineEntity getDayLine(Map<String, String> netsCodeInfoMap, String startDateStr, String endDateStr) {
+    public StockDayLinePo getDayLine(Map<String, String> netsCodeInfoMap, String startDateStr, String endDateStr) {
         String stockCode = netsCodeInfoMap.containsKey("netsStockCode") ?
                 (String)netsCodeInfoMap.get("netsStockCode") : "";
         String rehabilitationType = netsCodeInfoMap.containsKey("rehabilitationType") ?
                 (String)netsCodeInfoMap.get("rehabilitationType") : "";
         rehabilitationType = this.rehabilitationTypeList.contains(rehabilitationType) ?
                 rehabilitationType : this.rehabilitationType;
-        StockDayLineEntity stockDayLineEntity = new StockDayLineEntity();
+        StockDayLinePo stockDayLineEntity = new StockDayLinePo();
         if (stockCode.equals("")) {
             return stockDayLineEntity;
         }
@@ -72,11 +72,11 @@ public class NetsDayLine extends NetsStockBaseApi {
                 HttpUtil httpUtil = new HttpUtil();
                 httpUtil.setUrl(url).setOriCharset("GBK");
                 HttpResponseDto httpResponse = httpUtil.request();
-                StockDayLineEntity currentStockDayLineEntity = this.handleResponse(httpResponse.getContent());
-                List<StockDealEntity> list = currentStockDayLineEntity.getLineNode();
-                List<StockDealEntity> filterList = new LinkedList<>();
+                StockDayLinePo currentStockDayLineEntity = this.handleResponse(httpResponse.getContent());
+                List<StockDealPo> list = currentStockDayLineEntity.getLineNode();
+                List<StockDealPo> filterList = new LinkedList<>();
                 if (null != list && list.size() > 0) {
-                    for (StockDealEntity stockDayNodeEntity : list) {
+                    for (StockDealPo stockDayNodeEntity : list) {
                         Date currentDate = DateUtil.getDateFromStr(stockDayNodeEntity.getDateTime());
                         if (startDate.compareTo(currentDate) <=0 && currentDate.compareTo(endDate) <= 0) {
                             filterList.add(stockDayNodeEntity);
@@ -87,7 +87,7 @@ public class NetsDayLine extends NetsStockBaseApi {
                 if (stockDayLineEntity.getStockCode() == null) {
                     stockDayLineEntity = currentStockDayLineEntity;
                 } else {
-                    List<StockDealEntity> allList = stockDayLineEntity.getLineNode();
+                    List<StockDealPo> allList = stockDayLineEntity.getLineNode();
                     if (null != currentStockDayLineEntity.getLineNode()) {
                         allList.addAll(currentStockDayLineEntity.getLineNode());
                     }
@@ -105,8 +105,8 @@ public class NetsDayLine extends NetsStockBaseApi {
      * @param response
      * @return
      */
-    private StockDayLineEntity handleResponse(String response) {
-        StockDayLineEntity stockDayLineEntity = new StockDayLineEntity();
+    private StockDayLinePo handleResponse(String response) {
+        StockDayLinePo stockDayLineEntity = new StockDayLinePo();
         try {
             JSONObject responseObj = (JSONObject)JSONObject.fromObject(response);
             if (responseObj.containsKey("symbol")) {
@@ -118,11 +118,11 @@ public class NetsDayLine extends NetsStockBaseApi {
             if (responseObj.containsKey("data")) {
                 JSONArray dataArr = (JSONArray)responseObj.get("data");
                 int dataLen = dataArr.size();
-                List<StockDealEntity> nodeList = new LinkedList();
+                List<StockDealPo> nodeList = new LinkedList();
                 for (int i = 0; i < dataLen; i++) {
                     JSONArray singleArr = (JSONArray)dataArr.get(i);
                     if (7 == singleArr.size()) {
-                        StockDealEntity stockDayNodeEntity = new StockDealEntity();
+                        StockDealPo stockDayNodeEntity = new StockDealPo();
                         stockDayNodeEntity.setDateTime(
                                 DateUtil.dateStrFormatChange(
                                         singleArr.getString(0), DateUtil.DATE_FORMAT_2, DateUtil.DATE_FORMAT_1

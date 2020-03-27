@@ -22,11 +22,8 @@ public class AliThirdBaseApi {
         try {
             HttpResponse response = HttpUtils.doGet(host, path, method, headers, params);
             String responseJsonStr = EntityUtils.toString(response.getEntity());
-            System.out.println(response.toString());
-            System.out.println(responseJsonStr);
             result = JSONObject.fromObject(responseJsonStr);
             result = result.getJSONObject("data");
-            System.out.println(result.keySet().toString());
         } catch (Exception e) {
             e.printStackTrace();
         }

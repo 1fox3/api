@@ -1,4 +1,4 @@
-package com.fox.api.service.third.stock.entity;
+package com.fox.api.entity.po.third.stock;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import java.util.List;
  * 当天成交信息线图
  */
 @Data
-public class StockRealtimeLineEntity {
+public class StockRealtimeLinePo {
     //股票编号
     private String stockCode;
     //股票名称
@@ -22,5 +22,5 @@ public class StockRealtimeLineEntity {
     //成交股数
     private Long dealNum;
     //分钟粒度的成交信息
-    private List<StockRealtimeNodeEntity> lineNode;
+    private List<StockRealtimeNodePo> lineNode;
 }

@@ -1,4 +1,4 @@
-package com.fox.api.service.third.stock.entity;
+package com.fox.api.entity.po.third.stock;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
  * 股票成交信息
  */
 @Data
-public class StockDealNumEntity {
+public class StockDealNumPo {
     //价格
     private Float price;
     //成交量

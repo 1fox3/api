@@ -3,7 +3,7 @@ package com.fox.api.service.third.stock.sina.api;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StringUtil;
-import com.fox.api.service.third.stock.entity.StockRealtimeEntity;
+import com.fox.api.entity.po.third.stock.StockRealtimePo;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,14 +25,14 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param stockCode
      * @return
      */
-    public StockRealtimeEntity getRealtimeData(String stockCode) {
+    public StockRealtimePo getRealtimeData(String stockCode) {
         List<String> stockCodes = new LinkedList<>();
         stockCodes.add(stockCode);
-        Map<String, StockRealtimeEntity> stockRealtimeEntityMap = this.getRealtimeData(stockCodes);
+        Map<String, StockRealtimePo> stockRealtimeEntityMap = this.getRealtimeData(stockCodes);
         if (stockRealtimeEntityMap.containsKey(stockCode)) {
             return stockRealtimeEntityMap.get(stockCode);
         }
-        return new StockRealtimeEntity();
+        return new StockRealtimePo();
     }
 
     /**
@@ -40,7 +40,7 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param stockCodes
      * @return
      */
-    public Map<String, StockRealtimeEntity> getRealtimeData(List<String> stockCodes) {
+    public Map<String, StockRealtimePo> getRealtimeData(List<String> stockCodes) {
         try {
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(apiUrl + StringUtil.listToString(stockCodes, ",")).setOriCharset("GBK");
@@ -50,7 +50,7 @@ public class SinaRealtime extends SinaStockBaseApi {
             e.printStackTrace();
         } finally {
         }
-        HashMap<String, StockRealtimeEntity> hashMap = new HashMap<>();
+        HashMap<String, StockRealtimePo> hashMap = new HashMap<>();
         return hashMap;
     }
 
@@ -59,14 +59,14 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param response
      * @return
      */
-    private Map<String, StockRealtimeEntity> handleResponse(String response) {
-        HashMap<String, StockRealtimeEntity> hashMap = new HashMap<>();
+    private Map<String, StockRealtimePo> handleResponse(String response) {
+        HashMap<String, StockRealtimePo> hashMap = new HashMap<>();
         if (response.contains(";")) {
             String[] responseArr = response.trim().split(";");
             for (int i = 0; i< responseArr.length; i++) {
                 if (!responseArr[i].equals("")) {
                     String key = this.getStockCode(responseArr[i]);
-                    StockRealtimeEntity stockRealtimeEntity = this.getStockRealtimeEntity(responseArr[i]);
+                    StockRealtimePo stockRealtimeEntity = this.getStockRealtimeEntity(responseArr[i]);
                     if (!key.equals("")) {
                         hashMap.put(key, stockRealtimeEntity);
                     }
@@ -94,8 +94,8 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param response
      * @return
      */
-    private static StockRealtimeEntity getStockRealtimeEntity(String response) {
-        StockRealtimeEntity stockRealtimeEntity = new StockRealtimeEntity();
+    private static StockRealtimePo getStockRealtimeEntity(String response) {
+        StockRealtimePo stockRealtimeEntity = new StockRealtimePo();
         String stockCode = getStockCode(response);
         int startIndex = response.indexOf("\"");
         int endIndex = response.lastIndexOf("\"");
@@ -119,8 +119,8 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param responseArr
      * @return
      */
-    private static StockRealtimeEntity buildCnStockRealtimeEntity(String[] responseArr) {
-        StockRealtimeEntity stockRealtimeEntity = new StockRealtimeEntity();
+    private static StockRealtimePo buildCnStockRealtimeEntity(String[] responseArr) {
+        StockRealtimePo stockRealtimeEntity = new StockRealtimePo();
         if (null == responseArr || responseArr.length == 0) {
             return stockRealtimeEntity;
         }
@@ -216,8 +216,8 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param responseArr
      * @return
      */
-    private static StockRealtimeEntity buildHkStockRealtimeEntity(String[] responseArr) {
-        StockRealtimeEntity stockRealtimeEntity = new StockRealtimeEntity();
+    private static StockRealtimePo buildHkStockRealtimeEntity(String[] responseArr) {
+        StockRealtimePo stockRealtimeEntity = new StockRealtimePo();
         if (null == responseArr || responseArr.length == 0) {
             return stockRealtimeEntity;
         }

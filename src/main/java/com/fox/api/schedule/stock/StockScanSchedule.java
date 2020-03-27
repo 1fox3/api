@@ -6,8 +6,8 @@ import com.fox.api.entity.property.stock.StockMarketInfoProperty;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.service.stock.StockUtilService;
-import com.fox.api.service.third.stock.entity.StockRealtimeEntity;
-import com.fox.api.service.third.stock.entity.StockRealtimeLineEntity;
+import com.fox.api.entity.po.third.stock.StockRealtimePo;
+import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
 import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class StockScan {
+public class StockScanSchedule {
 
     @Autowired
     private StockMapper stockMapper;
@@ -53,7 +53,7 @@ public class StockScan {
         if ("hk".equals(market)) {
             sinaStockCode = "hk00700";//腾讯
         }
-        StockRealtimeEntity stockRealtimeEntity = sinaRealtime.getRealtimeData(sinaStockCode);
+        StockRealtimePo stockRealtimeEntity = sinaRealtime.getRealtimeData(sinaStockCode);
         if (null != stockRealtimeEntity) {
             return stockRealtimeEntity.getCurrentDate();
         }
@@ -73,7 +73,7 @@ public class StockScan {
         SinaRealtime sinaRealtime = new SinaRealtime();
         NetsMinuteRealtime netsMinuteRealtime = new NetsMinuteRealtime();
         Map<String, StockMarketInfoProperty> stockMarketConfigMap = stockConfig.getMarket();
-        for (String stockMarket : StockScan.stockScanConfig.keySet()) {
+        for (String stockMarket : StockScanSchedule.stockScanConfig.keySet()) {
             if (!sinaStockMarketPYMap.containsKey(stockMarket) || !netsStockMarketPYMap.containsKey(stockMarket)) {
                 continue;
             }
@@ -83,7 +83,7 @@ public class StockScan {
             String sinaStockMarketPY = sinaStockMarketPYMap.get(stockMarket);
             String netsStockMarketPY = netsStockMarketPYMap.get(stockMarket);
 
-            Map<String, String> scanConfig = StockScan.stockScanConfig.get(stockMarket);
+            Map<String, String> scanConfig = StockScanSchedule.stockScanConfig.get(stockMarket);
             int maxLimit = scanConfig.containsKey("maxLimit") && !scanConfig.get("maxLimit").equals("") ?
                     Integer.valueOf(scanConfig.get("maxLimit")) : 1000000;
             int stockMarketId = null == stockMarketInfoEntity.getStockMarket() ?
@@ -100,10 +100,10 @@ public class StockScan {
                 stockCodeList.add(sinaStockCode);
 
                 if (stockCodeList.size() >= 500 || maxLimit == i) {
-                    Map<String, StockRealtimeEntity> sinaStockRealtimeEntityMap = sinaRealtime.getRealtimeData(stockCodeList);
+                    Map<String, StockRealtimePo> sinaStockRealtimeEntityMap = sinaRealtime.getRealtimeData(stockCodeList);
                     for (String currentStockCode : stockCodeList) {
                         if (sinaStockRealtimeEntityMap.containsKey(currentStockCode)) {
-                            StockRealtimeEntity stockRealtimeEntity = sinaStockRealtimeEntityMap.get(currentStockCode);
+                            StockRealtimePo stockRealtimeEntity = sinaStockRealtimeEntityMap.get(currentStockCode);
                             if (null != stockRealtimeEntity
                                     && null != stockRealtimeEntity.getStockName()
                                     && !stockRealtimeEntity.getStockName().equals("")) {
@@ -115,7 +115,7 @@ public class StockScan {
                                     Map<String, String> netsStockInfoMap = new HashMap<>();
                                     netsStockInfoMap.put("netsStockCode", currentNetsStockCode);
                                     netsStockInfoMap.put("netsStockMarketPY", netsStockMarketPY);
-                                    StockRealtimeLineEntity stockRealtimeLineEntity =
+                                    StockRealtimeLinePo stockRealtimeLineEntity =
                                             netsMinuteRealtime.getRealtimeData(netsStockInfoMap);
                                     if (null != stockRealtimeLineEntity.getStockName()
                                             && !stockRealtimeLineEntity.getStockName().equals("")
@@ -125,7 +125,6 @@ public class StockScan {
                                         break;
                                     }
                                 }
-                                System.out.println(stockCode + "\t" + stockCodeName + "\t" + stockMarketId);
                                 StockEntity stockEntity = stockMapper.getByStockCode(stockCode, stockMarketId);
                                 if (null == stockEntity) {
                                     stockEntity = new StockEntity();

@@ -2,7 +2,7 @@ package com.fox.api.service.third.stock.sina.api;
 
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
-import com.fox.api.service.third.stock.entity.StockDealEntity;
+import com.fox.api.entity.po.third.stock.StockDealPo;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -28,8 +28,8 @@ public class SinaDeal extends SinaStockBaseApi {
      * @param dataLen
      * @return
      */
-    public List<StockDealEntity> getDealList(String stockCode, Integer scale, Integer dataLen) {
-        List<StockDealEntity> list = new LinkedList<>();
+    public List<StockDealPo> getDealList(String stockCode, Integer scale, Integer dataLen) {
+        List<StockDealPo> list = new LinkedList<>();
         try {
             if (!this.scaleList.contains(scale)) {
                 return list;
@@ -54,16 +54,16 @@ public class SinaDeal extends SinaStockBaseApi {
      * @param response
      * @return
      */
-    public List<StockDealEntity> handleResponse(String response) {
+    public List<StockDealPo> handleResponse(String response) {
         //给json字符串的key加双引号
         response = this.handleJsonStr(response);
-        List<StockDealEntity> list = new LinkedList<>();
+        List<StockDealPo> list = new LinkedList<>();
         try {
             JSONArray jsonArray = JSONArray.fromObject (response); //其中的这个data是接口传来的json数据
             int arrayLen = jsonArray.size();
             for (int i = 0; i < arrayLen; i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                StockDealEntity stockDealEntity = new StockDealEntity();
+                StockDealPo stockDealEntity = new StockDealPo();
                 stockDealEntity.setDateTime(jsonObject.get("day").toString());
                 stockDealEntity.setOpenPrice(jsonObject.getDouble("open"));
                 stockDealEntity.setHighestPrice(jsonObject.getDouble("high"));

@@ -3,3 +3,6 @@ redis:
     time: #根据类名设置默认缓存时间
       UserLogin: 7200
 
+  stock:
+    stock-list: stockRedisList #股票在缓存中使用的队列
+

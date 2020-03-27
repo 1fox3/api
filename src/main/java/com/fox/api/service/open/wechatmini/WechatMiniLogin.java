@@ -1,8 +1,8 @@
 package com.fox.api.service.open.wechatmini;
 
 import com.fox.api.entity.vo.open.wechatmini.login.WechatMiniLoginVo;
-import com.fox.api.service.open.dto.login.LoginDTO;
+import com.fox.api.entity.dto.login.LoginDto;
 
 public interface WechatMiniLogin {
-    public LoginDTO login(WechatMiniLoginVo wechatMiniLoginVO);
+    public LoginDto login(WechatMiniLoginVo wechatMiniLoginVO);
 }

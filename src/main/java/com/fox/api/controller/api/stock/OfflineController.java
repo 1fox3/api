@@ -3,7 +3,7 @@ package com.fox.api.controller.api.stock;
 import com.fox.api.entity.dto.result.ResultDto;
 import com.fox.api.enums.code.ReturnCode;
 import com.fox.api.service.stock.StockOfflineService;
-import com.fox.api.service.third.stock.entity.StockDayLineEntity;
+import com.fox.api.entity.po.third.stock.StockDayLinePo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +17,7 @@ public class OfflineController {
 
     @RequestMapping("/stock/offline/line")
     public ResultDto realtime(int stockId) {
-        StockDayLineEntity stockDayLineEntity = stockOfflineService.line(stockId);
+        StockDayLinePo stockDayLineEntity = stockOfflineService.line(stockId);
         if (null == stockDayLineEntity) {
             return ResultDto.fail(ReturnCode.FAIL);
         }

@@ -3,8 +3,8 @@ package com.fox.api.service.third.stock.nets.api;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.HttpUtil;
-import com.fox.api.service.third.stock.entity.StockRealtimeLineEntity;
-import com.fox.api.service.third.stock.entity.StockRealtimeNodeEntity;
+import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
+import com.fox.api.entity.po.third.stock.StockRealtimeNodePo;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -24,7 +24,7 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
      * @param netsCodeInfoMap
      * @return
      */
-    public StockRealtimeLineEntity getRealtimeData(Map<String, String> netsCodeInfoMap) {
+    public StockRealtimeLinePo getRealtimeData(Map<String, String> netsCodeInfoMap) {
         try {
             String url = this.demoUrl.replace("{stockMarketPY}", netsCodeInfoMap.get("netsStockMarketPY"))
                     .replace("{stockCode}", netsCodeInfoMap.get("netsStockCode"));
@@ -36,7 +36,7 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
             e.printStackTrace();
         } finally {
         }
-        return new StockRealtimeLineEntity();
+        return new StockRealtimeLinePo();
     }
 
     /**
@@ -44,8 +44,8 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
      * @param response
      * @return
      */
-    private StockRealtimeLineEntity handleResponse(String response) {
-        StockRealtimeLineEntity stockRealtimeLineEntity = new StockRealtimeLineEntity();
+    private StockRealtimeLinePo handleResponse(String response) {
+        StockRealtimeLinePo stockRealtimeLineEntity = new StockRealtimeLinePo();
         if (response.equals("")) {
             return stockRealtimeLineEntity;
         }
@@ -76,12 +76,12 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
         }
         if (responseObject.containsKey("data")) {
             JSONArray dataArr = (JSONArray)responseObject.get("data");
-            List<StockRealtimeNodeEntity> nodeList = new LinkedList();
+            List<StockRealtimeNodePo> nodeList = new LinkedList();
             int dataLen = dataArr.size();
             for (int i = 0; i < dataLen; i++) {
                 JSONArray noteArr = (JSONArray)dataArr.get(i);
                 if (4 == noteArr.size()) {
-                    StockRealtimeNodeEntity stockRealtimeNodeEntity = new StockRealtimeNodeEntity();
+                    StockRealtimeNodePo stockRealtimeNodeEntity = new StockRealtimeNodePo();
                     String timeStr = noteArr.getString(0);
                     stockRealtimeNodeEntity.setTime(timeStr.substring(0, 2) + ":" + timeStr.substring(2, 4));
                     stockRealtimeNodeEntity.setPrice(noteArr.getDouble(1));

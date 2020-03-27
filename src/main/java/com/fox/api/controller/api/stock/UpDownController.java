@@ -4,9 +4,9 @@ import com.fox.api.entity.dto.result.ResultDto;
 import com.fox.api.enums.code.ReturnCode;
 import com.fox.api.service.stock.StockLimitUpDownService;
 import com.fox.api.service.stock.StockUpDownService;
-import com.fox.api.service.stock.entity.PageInfo;
-import com.fox.api.service.stock.entity.updown.StockLimitUpDown;
-import com.fox.api.service.stock.entity.updown.StockUpDown;
+import com.fox.api.entity.po.PageInfoPo;
+import com.fox.api.entity.dto.stock.updown.StockLimitUpDownDto;
+import com.fox.api.entity.dto.stock.updown.StockUpDownDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,9 +24,9 @@ public class UpDownController {
     StockLimitUpDownService stockLimitUpDownService;
 
     @RequestMapping("/stock/upDown/list")
-    public ResultDto list(String orderBy, PageInfo pageInfo) {
+    public ResultDto list(String orderBy, PageInfoPo pageInfo) {
         orderBy = null == orderBy ? "d10_up DESC" : orderBy;
-        List<StockUpDown> list = stockUpDownService.getList(orderBy, pageInfo);
+        List<StockUpDownDto> list = stockUpDownService.getList(orderBy, pageInfo);
         if (null == list) {
             return ResultDto.fail(ReturnCode.FAIL);
         }
@@ -34,9 +34,9 @@ public class UpDownController {
     }
 
     @RequestMapping("/stock/limitUpDown/list")
-    public ResultDto list(Integer type, PageInfo pageInfo) {
+    public ResultDto list(Integer type, PageInfoPo pageInfo) {
         type = null == type ? 1 : type;
-        List<StockLimitUpDown> list = stockLimitUpDownService.getList(type, pageInfo);
+        List<StockLimitUpDownDto> list = stockLimitUpDownService.getList(type, pageInfo);
         if (null == list) {
             return ResultDto.fail(ReturnCode.FAIL);
         }

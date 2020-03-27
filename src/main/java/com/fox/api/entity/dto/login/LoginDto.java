@@ -1,10 +1,10 @@
-package com.fox.api.service.open.dto.login;
+package com.fox.api.entity.dto.login;
 
 import com.fox.api.util.AESUtil;
 import lombok.Data;
 
 @Data
-public class LoginDTO {
+public class LoginDto {
     //登录的sessionid
     private String sessionid;
 

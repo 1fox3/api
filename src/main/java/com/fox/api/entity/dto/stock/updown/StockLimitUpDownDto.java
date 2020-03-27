@@ -1,10 +1,10 @@
-package com.fox.api.service.stock.entity.updown;
+package com.fox.api.entity.dto.stock.updown;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 @Data
-public class StockLimitUpDown {
+public class StockLimitUpDownDto {
     //股票id
     private Integer stockId;
     //股票代码

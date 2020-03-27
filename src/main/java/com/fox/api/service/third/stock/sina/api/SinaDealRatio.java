@@ -2,7 +2,7 @@ package com.fox.api.service.third.stock.sina.api;
 
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
-import com.fox.api.service.third.stock.entity.StockDealNumEntity;
+import com.fox.api.entity.po.third.stock.StockDealNumPo;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -24,8 +24,8 @@ public class SinaDealRatio extends SinaStockBaseApi {
      * @param endDate
      * @return
      */
-    public List<StockDealNumEntity> getDealRatio(String stockCode, String startDate, String endDate) {
-        List<StockDealNumEntity> list = new LinkedList<>();
+    public List<StockDealNumPo> getDealRatio(String stockCode, String startDate, String endDate) {
+        List<StockDealNumPo> list = new LinkedList<>();
         try {
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(apiUrl).setOriCharset("GBK");
@@ -46,8 +46,8 @@ public class SinaDealRatio extends SinaStockBaseApi {
      * @param response
      * @return
      */
-    private List<StockDealNumEntity> handleResponse(String response) {
-        List<StockDealNumEntity> list = new LinkedList<>();
+    private List<StockDealNumPo> handleResponse(String response) {
+        List<StockDealNumPo> list = new LinkedList<>();
         //截取表格内容
         int bodyStartIndex = response.indexOf("<tbody");
         int bodyEndIndex = response.lastIndexOf("</tbody");
@@ -56,13 +56,13 @@ public class SinaDealRatio extends SinaStockBaseApi {
         String patternStr = "<td>(.*)<\\/td>*?";
         Pattern pattern = Pattern.compile(patternStr);
         Matcher matcher = pattern.matcher(response);
-        StockDealNumEntity stockDealNumEntity = new StockDealNumEntity();
+        StockDealNumPo stockDealNumEntity = new StockDealNumPo();
         int i = 0;
         while (matcher.find()) {
             i++;
             String e = matcher.group(1);
             if (1 == i) {//匹配价格
-                stockDealNumEntity = new StockDealNumEntity();
+                stockDealNumEntity = new StockDealNumPo();
                 stockDealNumEntity.setPrice(Float.valueOf(e));
             }
             if (2 == i) {//匹配成交量

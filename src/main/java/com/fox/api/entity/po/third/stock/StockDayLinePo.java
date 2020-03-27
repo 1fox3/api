@@ -1,4 +1,4 @@
-package com.fox.api.service.third.stock.entity;
+package com.fox.api.entity.po.third.stock;
 
 import lombok.Data;
 
@@ -8,8 +8,8 @@ import java.util.List;
  * 股票日线信息
  */
 @Data
-public class StockDayLineEntity {
+public class StockDayLinePo {
     private String stockCode;
     private String stockName;
-    private List<StockDealEntity> lineNode;
+    private List<StockDealPo> lineNode;
 }

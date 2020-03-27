@@ -1,4 +1,4 @@
-package com.fox.api.service.third.stock.entity;
+package com.fox.api.entity.po.third.stock;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
  * 分钟粒度的成交信息
  */
 @Data
-public class StockRealtimeNodeEntity {
+public class StockRealtimeNodePo {
     //分钟小时时间
     private String time;
     //价格

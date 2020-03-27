@@ -1,18 +1,21 @@
-package com.fox.api;
+package com.fox.api.schedule.stock;
 
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.util.redis.StockRedisUtil;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
 
-@SpringBootTest
-class ApiApplicationTests {
+/**
+ * 将需要频繁处理的股票信息放入缓存列表中，方便以后使用，不用在查询数据库
+ */
+@Component
+public class StockIntoListSchedule {
 
     @Autowired
     private StockMapper stockMapper;
@@ -32,12 +35,20 @@ class ApiApplicationTests {
     @Autowired
     private StockRedisUtil stockRedisUtil;
 
-    @Test
-    void contextLoads() {
+    /**
+     * 每天凌晨1点中清除一次，并重新填充
+     */
+    @Scheduled(cron="0 0 1 * * ?")
+    public void clearStockIntoList() {
+        this.stockRedisUtil.delete(this.stockRedisList);
+        this.stockIntoList();
     }
 
-    @Test
-    void redisTest() {
+    /**
+     * 每5分钟检查一次,防止缓存失效或者重启导致的缓存数据丢失
+     */
+    @Scheduled(cron="0 */5 * * * ?")
+    public void stockIntoList() {
         int startId = 0;
         if (this.stockRedisUtil.hasKey(this.stockRedisList)) {
             Long listSize = this.stockRedisUtil.lSize(this.stockRedisList);

@@ -8,7 +8,7 @@ import com.fox.api.dao.user.entity.UserEntity;
 import com.fox.api.dao.user.entity.UserLoginEntity;
 import com.fox.api.dao.user.mapper.UserLoginMapper;
 import com.fox.api.dao.user.mapper.UserMapper;
-import com.fox.api.service.open.dto.login.LoginDTO;
+import com.fox.api.entity.dto.login.LoginDto;
 import com.fox.api.service.open.wechatmini.WechatMiniLogin;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +37,8 @@ public class WechatMiniLoginImpl implements WechatMiniLogin {
     private static Integer loginExpireDate = 30;
 
     @Override
-    public LoginDTO login(WechatMiniLoginVo wechatMiniLoginVO) {
-        LoginDTO loginEntity = new LoginDTO();
+    public LoginDto login(WechatMiniLoginVo wechatMiniLoginVO) {
+        LoginDto loginEntity = new LoginDto();
         try {
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(this.wechatMiniLoginUrl);

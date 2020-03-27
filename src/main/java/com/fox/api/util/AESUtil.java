@@ -38,7 +38,6 @@ public class AESUtil {
                 return null;
             }
         } catch (Exception ex) {
-            System.out.println(ex.toString());
             return null;
         }
     }

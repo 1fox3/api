@@ -1,4 +1,4 @@
-package com.fox.api.service.third.stock.entity;
+package com.fox.api.entity.po.third.stock;
 
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.util.Map;
 @Data
 //json编码时驼峰转蛇形
 //@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class StockRealtimeEntity {
+public class StockRealtimePo {
     //股票名称
     private String stockName;
     //股票英文名

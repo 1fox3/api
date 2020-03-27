@@ -1,10 +1,10 @@
 package com.fox.api.service.stock;
 
-import com.fox.api.service.stock.entity.PageInfo;
-import com.fox.api.service.stock.entity.updown.StockUpDown;
+import com.fox.api.entity.po.PageInfoPo;
+import com.fox.api.entity.dto.stock.updown.StockUpDownDto;
 
 import java.util.List;
 
 public interface StockUpDownService {
-    List<StockUpDown> getList(String orderBy, PageInfo pageInfo);
+    List<StockUpDownDto> getList(String orderBy, PageInfoPo pageInfo);
 }

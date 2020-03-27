@@ -144,8 +144,6 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
         for(Map.Entry<String, Integer> entry : this.classCacheTimeProperty.getTime().entrySet()){
             String mapKey = entry.getKey();
             Integer mapValue = entry.getValue();
-            System.out.println(mapKey);
-            System.out.println(mapValue);
             redisCacheConfigurationMap.put(mapKey, this.getRedisCacheConfigurationWithTtl(mapValue));
         }
         return redisCacheConfigurationMap;

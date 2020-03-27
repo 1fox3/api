@@ -1,11 +1,11 @@
 package com.fox.api.service.stock;
 
-import com.fox.api.service.third.stock.entity.StockRealtimeEntity;
-import com.fox.api.service.third.stock.entity.StockRealtimeLineEntity;
+import com.fox.api.entity.po.third.stock.StockRealtimePo;
+import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 
 public interface StockRealtimeService {
 
-    StockRealtimeEntity info(int stockId);
+    StockRealtimePo info(int stockId);
 
-    StockRealtimeLineEntity line(int stockId);
+    StockRealtimeLinePo line(int stockId);
 }

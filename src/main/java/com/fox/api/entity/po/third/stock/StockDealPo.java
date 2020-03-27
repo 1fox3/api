@@ -1,4 +1,4 @@
-package com.fox.api.service.third.stock.entity;
+package com.fox.api.entity.po.third.stock;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
  * 股票日线点信息
  */
 @Data
-public class StockDealEntity {
+public class StockDealPo {
     //日期时间(2019-12-12，2019-12-12 13:00:00)
     private String dateTime;
     //开盘价

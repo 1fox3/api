@@ -2,8 +2,8 @@ package com.fox.api.service.third.stock.nets.api;
 
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
-import com.fox.api.service.third.stock.entity.StockRealtimeLineEntity;
-import com.fox.api.service.third.stock.entity.StockRealtimeNodeEntity;
+import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
+import com.fox.api.entity.po.third.stock.StockRealtimeNodePo;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -22,7 +22,7 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
      * @param stockMarket
      * @return
      */
-    public List<StockRealtimeLineEntity> getFourDaysMinuteLine(String stockCode, String stockMarket) {
+    public List<StockRealtimeLinePo> getFourDaysMinuteLine(String stockCode, String stockMarket) {
         this.stockMarketPY = stockMarket;
         return this.getFourDaysMinuteLine(stockCode);
     }
@@ -32,8 +32,8 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
      * @param stockCode
      * @return
      */
-    public List<StockRealtimeLineEntity> getFourDaysMinuteLine(String stockCode) {
-        List<StockRealtimeLineEntity> list = new LinkedList<>();
+    public List<StockRealtimeLinePo> getFourDaysMinuteLine(String stockCode) {
+        List<StockRealtimeLinePo> list = new LinkedList<>();
         try {
             String url = this.demoUrl.replace("{stockMarketPY}", this.stockMarketPY)
                     .replace("{stockCode}", stockCode);
@@ -52,8 +52,8 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
      * @param response
      * @return
      */
-    private List<StockRealtimeLineEntity> handleResponse(String response) {
-        List<StockRealtimeLineEntity> list = new LinkedList<>();
+    private List<StockRealtimeLinePo> handleResponse(String response) {
+        List<StockRealtimeLinePo> list = new LinkedList<>();
 
         JSONObject responseObject = JSONObject.fromObject(response);
         String stockCode = responseObject.containsKey("symbol") ? responseObject.getString("symbol") : "";
@@ -64,7 +64,7 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
             int totalDataLen = totalDataArr.size();
             for (int i = 0; i < totalDataLen; i++) {
                 JSONObject dataObject = (JSONObject) totalDataArr.get(i);
-                StockRealtimeLineEntity stockRealtimeLineEntity = new StockRealtimeLineEntity();
+                StockRealtimeLinePo stockRealtimeLineEntity = new StockRealtimeLinePo();
                 stockRealtimeLineEntity.setStockCode(stockCode);
                 stockRealtimeLineEntity.setStockName(stockName);
                 if (dataObject.containsKey("count")) {
@@ -81,12 +81,12 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
                 }
                 if (dataObject.containsKey("data")) {
                     JSONArray dataArr = (JSONArray)dataObject.get("data");
-                    List<StockRealtimeNodeEntity> nodeList = new LinkedList();
+                    List<StockRealtimeNodePo> nodeList = new LinkedList();
                     int dataLen = dataArr.size();
                     for (int j = 0; j < dataLen; j++) {
                         JSONArray noteArr = (JSONArray)dataArr.get(j);
                         if (4 == noteArr.size()) {
-                            StockRealtimeNodeEntity stockRealtimeNodeEntity = new StockRealtimeNodeEntity();
+                            StockRealtimeNodePo stockRealtimeNodeEntity = new StockRealtimeNodePo();
                             stockRealtimeNodeEntity.setTime(noteArr.getString(0));
                             stockRealtimeNodeEntity.setPrice(noteArr.getDouble(1));
                             stockRealtimeNodeEntity.setAvgPrice(noteArr.getDouble(2));

@@ -8,8 +8,8 @@ import com.fox.api.dao.stock.mapper.StockLimitUpDownMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.dao.stock.mapper.StockUpDownMapper;
 import com.fox.api.service.stock.StockOfflineService;
-import com.fox.api.service.third.stock.entity.StockDayLineEntity;
-import com.fox.api.service.third.stock.entity.StockDealEntity;
+import com.fox.api.entity.po.third.stock.StockDayLinePo;
+import com.fox.api.entity.po.third.stock.StockDealPo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class StockUpDown {
+public class StockUpDownSchedule {
 
     @Autowired
     private StockMapper stockMapper;
@@ -67,15 +67,13 @@ public class StockUpDown {
                 }
                 continue;
             }
-            System.out.println(stockEntity.getStockCode());
-
             if (null == stockUpDownEntity) {
                 stockUpDownEntity = new StockUpDownEntity();
             }
             stockUpDownEntity.setStockId(stockEntity.getId());
             if (stockEntity.getId() > 0) {
-                StockDayLineEntity stockDayLineEntity = stockOfflineService.line(stockEntity.getId(), DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1));
-                List<StockDealEntity> list = stockDayLineEntity.getLineNode();
+                StockDayLinePo stockDayLineEntity = stockOfflineService.line(stockEntity.getId(), DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1));
+                List<StockDealPo> list = stockDayLineEntity.getLineNode();
                 if (null == list) {
                     continue;
                 }
@@ -86,7 +84,7 @@ public class StockUpDown {
                 for (int j = 0; j<= limitLen; j++) {
                     int pos = len - j - 1;
                     if (pos >= 0) {
-                        StockDealEntity stockDealEntity = list.get(pos);
+                        StockDealPo stockDealEntity = list.get(pos);
                         currentPrice = 0.0 == currentPrice ? stockDealEntity.getClosePrice() : currentPrice;
                         if (0 == j) {
                             today = stockDealEntity.getDateTime();

@@ -1,10 +1,10 @@
 package com.fox.api.service.stock;
 
-import com.fox.api.service.third.stock.entity.StockDayLineEntity;
+import com.fox.api.entity.po.third.stock.StockDayLinePo;
 
 public interface StockOfflineService {
-    StockDayLineEntity line(int stockId);
-    StockDayLineEntity line(int stockId, String startDate);
-    StockDayLineEntity line(int stockId, int dayLen);
-    StockDayLineEntity line(int stockId, String startDate, String endDate);
+    StockDayLinePo line(int stockId);
+    StockDayLinePo line(int stockId, String startDate);
+    StockDayLinePo line(int stockId, int dayLen);
+    StockDayLinePo line(int stockId, String startDate, String endDate);
 }

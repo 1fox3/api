@@ -89,4 +89,24 @@
             id DESC
         LIMIT 1
     </select>
+
+    <select id="getListByType" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock
+        WHERE
+            id > #{id}
+            AND
+            stock_type = #{stockType}
+        <if test="stockMarket.size > 0" >
+            AND stock_market IN
+            <foreach collection="stockMarket" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        ORDER BY
+            id ASC
+        LIMIT ${limit}
+    </select>
 </mapper>
