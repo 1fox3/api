@@ -31,19 +31,4 @@ public class StockEntity {
     //创建时间
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private String createTime;
-
-    /**
-     * 获取股票集市字符串
-     *
-     * @return
-     */
-    public String getStockMarketStr() {
-        if (1 == this.stockMarket) {
-            return "sz";
-        }
-        if (2 == this.stockMarket) {
-            return "hk";
-        }
-        return "sh";
-    }
 }

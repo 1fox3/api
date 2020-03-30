@@ -12,7 +12,7 @@ import java.util.*;
  * 获取复权线图
  */
 public class SinaRehabilitationLine extends SinaStockBaseApi {
-    //样例链接
+    //样例链接 http://finance.sina.com.cn/realstock/company/sh603383/qianfuquan.js?d=20200330
     private static String demoUrl = "http://finance.sina.com.cn/realstock/company/{stockCode}/{rehabilitationType}.js?d={date}";
     //复权类型
     private static List<String> rehabilitationTypeList = Arrays.asList("qianfuquan", "houfuquan");

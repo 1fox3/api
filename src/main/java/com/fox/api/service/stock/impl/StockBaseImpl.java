@@ -2,13 +2,26 @@ package com.fox.api.service.stock.impl;
 
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockMapper;
-import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
+import com.fox.api.util.StockUtil;
+import com.fox.api.util.redis.StockRedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class StockBaseImpl {
+    @Autowired
+    protected StockRedisUtil stockRedisUtil;
+
+    @Value("${redis.stock.realtime.stock.info.hash}")
+    protected String redisRealtimeStockInfoHash;
+
+    @Value("${redis.stock.stock.heat-list}")
+    protected String redisStockHeatList;
+
+    @Value("${redis.stock.realtime.stock.line.single}")
+    protected String redisRealtimeStockLineSingle;
+
     @Autowired
     protected StockMapper stockMapper;
 
@@ -38,12 +51,6 @@ public class StockBaseImpl {
      */
     protected Map<String, String> getNetsStockInfoMap(int stockId) {
         StockEntity stockEntity = this.getStockEntity(stockId);
-        Map<String, String> netsStockInfoMap = new HashMap<>();
-        String netsStockCode = null == stockEntity ? "" : stockEntity.getNetsStockCode();
-        String netsStockMarket = null == stockEntity ? "sh" : stockEntity.getStockMarketStr();
-        String netsStockMarketPY = NetsStockBaseApi.getNetsStockMarketPY(netsStockMarket);
-        netsStockInfoMap.put("netsStockMarketPY", netsStockMarketPY);
-        netsStockInfoMap.put("netsStockCode", netsStockCode);
-        return netsStockInfoMap;
+        return StockUtil.getNetsStockInfoMap(stockEntity);
     }
 }

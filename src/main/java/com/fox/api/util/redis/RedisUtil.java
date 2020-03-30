@@ -1,5 +1,6 @@
 package com.fox.api.util.redis;
 
+import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -184,7 +185,7 @@ public abstract class RedisUtil {
     }
 
     /**
-     * 获取hash对用的所有键值
+     * 获取hash对应的所有键值
      * @param hash
      * @return
      */
@@ -193,12 +194,22 @@ public abstract class RedisUtil {
     }
 
     /**
+     * 批量获取值
+     * @param hash
+     * @param hashKeys
+     * @return
+     */
+    public List<Object> hMultiGet(Object hash, Collection<? extends Object> hashKeys) {
+        return this.getRedisTemplate().opsForHash().multiGet(hash, hashKeys);
+    }
+
+    /**
      * hash添加过个键值
      * @param hash
      * @param map
      * @return
      */
-    public boolean hPutAll(Object hash, Map<Object, Object> map) {
+    public boolean hPutAll(Object hash, Map<? extends Object, ? extends  Object> map) {
         try {
             this.getRedisTemplate().opsForHash().putAll(hash, map);
             return true;
@@ -328,6 +339,14 @@ public abstract class RedisUtil {
         return this.hIncrement(hash, key, -delta);
     }
 
+    /**
+     * 获取hash的元素个数
+     * @param hash
+     * @return
+     */
+    public Long hSize(Object hash) {
+        return this.getRedisTemplate().opsForHash().size(hash);
+    }
     /**
      * 获取set集合中的所有值
      * @param set

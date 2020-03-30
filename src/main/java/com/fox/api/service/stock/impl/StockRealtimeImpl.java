@@ -10,15 +10,41 @@ import org.springframework.stereotype.Service;
 @Service
 public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeService {
 
+    /**
+     * 获取实时信息
+     * @param stockId
+     * @return
+     */
     @Override
     public StockRealtimePo info(int stockId) {
+        if (this.stockRedisUtil.hHasKey(this.redisRealtimeStockInfoHash, stockId)) {
+            return (StockRealtimePo)this.stockRedisUtil.hGet(this.redisRealtimeStockInfoHash, stockId);
+        }
         SinaRealtime sinaRealtime = new SinaRealtime();
-        return sinaRealtime.getRealtimeData(this.getSinaStockCode(stockId));
+        StockRealtimePo stockRealtimePo = sinaRealtime.getRealtimeData(this.getSinaStockCode(stockId));
+        if (null != stockRealtimePo && null != stockRealtimePo.getStockName()) {
+            this.stockRedisUtil.hPut(this.redisRealtimeStockInfoHash, stockId, stockRealtimePo);
+        }
+        return  stockRealtimePo;
     }
 
+    /**
+     * 获取实时线图
+     * @param stockId
+     * @return
+     */
     @Override
     public StockRealtimeLinePo line(int stockId) {
+        String redisKey = this.redisRealtimeStockLineSingle + stockId;
+        StockRealtimeLinePo stockRealtimeLinePo = (StockRealtimeLinePo)this.stockRedisUtil.get(redisKey);
+        if (null != stockRealtimeLinePo) {
+            return stockRealtimeLinePo;
+        }
         NetsMinuteRealtime netsMinuteRealtime = new NetsMinuteRealtime();
-        return netsMinuteRealtime.getRealtimeData(this.getNetsStockInfoMap(stockId));
+        stockRealtimeLinePo = netsMinuteRealtime.getRealtimeData(this.getNetsStockInfoMap(stockId));
+        if (null != stockRealtimeLinePo) {
+            this.stockRedisUtil.set(redisKey, stockId, Long.valueOf(5));
+        }
+        return  stockRealtimeLinePo;
     }
 }
