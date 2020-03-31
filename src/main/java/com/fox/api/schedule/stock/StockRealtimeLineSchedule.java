@@ -24,8 +24,10 @@ public class StockRealtimeLineSchedule extends StockBaseSchedule {
      */
 //    @Scheduled(cron="0/5 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeLine() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println("stockRealtimeLine:start:" + df.format(System.currentTimeMillis()));
         //需要开启的线程数量
-        Integer threadNum = 20;
+        Integer threadNum = 50;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
         Integer threadOnceLimit = (int) (stockListSize / threadNum) + 1;
         List<StockRealtimeLineThread> threadList = new LinkedList<>();
@@ -62,5 +64,6 @@ public class StockRealtimeLineSchedule extends StockBaseSchedule {
             } catch (Exception e) {
             }
         }
+        System.out.println("stockRealtimeLine:end:" + df.format(System.currentTimeMillis()));
     }
 }

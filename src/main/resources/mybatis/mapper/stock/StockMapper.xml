@@ -99,6 +99,8 @@
             id > #{id}
             AND
             stock_type = #{stockType}
+            AND
+            stock_status = 0
         <if test="stockMarket.size > 0" >
             AND stock_market IN
             <foreach collection="stockMarket" item="item" separator="," open="(" close=")">

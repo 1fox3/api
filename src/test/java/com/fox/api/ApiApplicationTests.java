@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @SpringBootTest
 class ApiApplicationTests {
@@ -26,8 +26,17 @@ class ApiApplicationTests {
     @Value("${stock.market.sz.stock-market}")
     private int szStockMarket;
 
-    @Value("${redis.stock.stock-list}")
-    private String stockRedisList;
+    @Value("${redis.stock.realtime.stock.rank.uptick}")
+    protected String redisRealtimeRankUptickRateZSet;
+
+    @Value("${redis.stock.realtime.stock.info.hash}")
+    protected String redisRealtimeStockInfoHash;
+
+    @Value("${redis.stock.stock.hash}")
+    protected String redisStockHash;
+
+    @Value("${redis.stock.stock.list}")
+    protected String redisStockList;
 
     @Autowired
     private StockRedisUtil stockRedisUtil;
@@ -38,25 +47,34 @@ class ApiApplicationTests {
 
     @Test
     void redisTest() {
-        int startId = 0;
-        if (this.stockRedisUtil.hasKey(this.stockRedisList)) {
-            Long listSize = this.stockRedisUtil.lSize(this.stockRedisList);
-            StockEntity stockEntity = (StockEntity)this.stockRedisUtil.lIndex(
-                    this.stockRedisList, listSize - Long.valueOf(1));
-            startId = stockEntity.getId();
-        }
-        List<StockEntity> stockEntityList;
-        String limit = "500";
-        List<Integer> stockMarketList = new LinkedList<>();
-        stockMarketList.add(this.shStockMarket);
-        stockMarketList.add(this.szStockMarket);
-        while (true) {
-            stockEntityList = stockMapper.getListByType(this.stockType, startId, limit, stockMarketList);
-            if (null == stockEntityList || 0 == stockEntityList.size()) {
-                break;
-            }
-            startId = stockEntityList.get(stockEntityList.size() - 1).getId();
-            this.stockRedisUtil.lPushAll(this.stockRedisList, stockEntityList);
-        }
+        System.out.println(this.stockRedisUtil.zSize(this.redisRealtimeRankUptickRateZSet));
+        Set<Object> downSet = this.stockRedisUtil.zReverseRangeByScore(this.redisRealtimeRankUptickRateZSet, (double)-1.0, (double)-0.00001);
+//        System.out.println(downSet);
+        System.out.println(downSet.size());
+        Set<Object> zeroSet = this.stockRedisUtil.zReverseRangeByScore(this.redisRealtimeRankUptickRateZSet, (double)-0.00001, (double)0.00001);
+//        System.out.println(zeroSet);
+        System.out.println(zeroSet.size());
+        Set<Object> upSet = this.stockRedisUtil.zReverseRangeByScore(this.redisRealtimeRankUptickRateZSet, (double)0.00001, (double)1.0);
+//        System.out.println(upSet);
+        System.out.println(upSet.size());
+//        Set<Object> set = this.stockRedisUtil.zReverseRangeWithScores(this.redisRealtimeRankUptickRateZSet, (long)0, (long)10);
+//        Map<Integer, Double> scoreMap = new HashMap<>();
+//        List list = new LinkedList();
+//        for(Object object : set) {
+//            Integer value = (Integer) ((DefaultTypedTuple)object).getValue();
+//            Double score = ((DefaultTypedTuple)object).getScore();
+//            list.add(value.toString());
+//            scoreMap.put(value, score);
+//        }
+//
+//        List<Object> stockEntityList = this.stockRedisUtil.hMultiGet(this.redisStockHash, list);
+//        for (Object stockEntity : stockEntityList) {
+//            stockEntity = (StockEntity)stockEntity;
+//            System.out.println(((StockEntity) stockEntity).getId()
+//                    + "\t" + ((StockEntity) stockEntity).getStockCode()
+//                    + "\t" + ((StockEntity) stockEntity).getStockName()
+//                    + "\t" + scoreMap.get(((StockEntity) stockEntity).getId())
+//            );
+//        }
     }
 }

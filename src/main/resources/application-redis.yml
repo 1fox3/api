@@ -5,12 +5,20 @@ redis:
 
   stock:
     stock:
+      hash: stockRedisHash #股票在缓存中使用的队列
       list: stockRedisList #股票在缓存中使用的队列
+      id-list: stockRedisIdList #股票id在缓存中使用的队列
       heat-list: stockRedisHeatList # 用户当前正在访问的股票列表,一般用于预加载实时分钟线图数据，因为网易接口只支持当个查询，使用线程网络负载有点大
     realtime:
       stock:
+        rank:
+          uptick: stockRealtimeStockUptickRateZSet
+          surge: stockRealtimeStockSurgeRateZSet
+          deal:
+            num: stockRealtimeStockDealNumZSet
+            money: stockRealtimeStockDealMoneyZSet
         info:
-          single: 'stockRealtimeStockInfo:'
           hash: stockRealtimeStockInfoHash #股票在缓存中使用的hash表
         line:
+          single: 'stockRealtimeStockLineSingle:'
           hash: stockRealtimeStockLineHash

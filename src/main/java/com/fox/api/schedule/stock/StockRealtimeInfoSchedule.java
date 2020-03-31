@@ -23,7 +23,7 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule{
     @Scheduled(cron="*/5 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeInfo() {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println(df.format(System.currentTimeMillis()));
+        System.out.println("stockRealtimeInfo:start:" + df.format(System.currentTimeMillis()));
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
         Map<String, StockRealtimePo> stockRealtimePoMap = new HashMap<>();
@@ -51,6 +51,6 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule{
             }
             this.stockRedisUtil.hPutAll(this.redisRealtimeStockInfoHash, stockRealtimePoMap);
         }
-        System.out.println(df.format(System.currentTimeMillis()));
+        System.out.println("stockRealtimeInfo:end:" + df.format(System.currentTimeMillis()));
     }
 }

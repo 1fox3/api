@@ -21,6 +21,12 @@ public class StockBaseSchedule {
     @Value("${redis.stock.stock.list}")
     protected String redisStockList;
 
+    @Value("${redis.stock.stock.hash}")
+    protected String redisStockHash;
+
+    @Value("${redis.stock.stock.id-list}")
+    protected String redisStockIdList;
+
     @Value("${redis.stock.stock.heat-list}")
     protected String redisStockHeatList;
 
@@ -29,6 +35,18 @@ public class StockBaseSchedule {
 
     @Value("${redis.stock.realtime.stock.line.hash}")
     protected String redisRealtimeStockLineHash;
+
+    @Value("${redis.stock.realtime.stock.rank.uptick}")
+    protected String redisRealtimeRankUptickRateZSet;
+
+    @Value("${redis.stock.realtime.stock.rank.surge}")
+    protected String redisRealtimeRankSurgeRateZSet;
+
+    @Value("${redis.stock.realtime.stock.rank.deal.num}")
+    protected String redisRealtimeRankDealNumZSet;
+
+    @Value("${redis.stock.realtime.stock.rank.deal.money}")
+    protected String redisRealtimeRankDealMoneyZSet;
 
     @Autowired
     protected StockRedisUtil stockRedisUtil;

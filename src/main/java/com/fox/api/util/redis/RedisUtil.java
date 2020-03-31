@@ -4,6 +4,7 @@ import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -703,6 +704,131 @@ public abstract class RedisUtil {
         } catch (Throwable e) {
             this.logThrowable(e);
             return null;
+        }
+    }
+
+    /**
+     * 长度
+     * @param key
+     * @return
+     */
+    public Long zSize(Object key) {
+        try {
+            return this.getRedisTemplate().opsForZSet().size(key);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return Long.valueOf(0);
+        }
+    }
+
+    /**
+     * 有续集增加元素
+     * @param key
+     * @param value
+     * @param score
+     * @return
+     */
+    public Boolean zAdd(Object key, Object value, Double score) {
+        try {
+            return this.getRedisTemplate().opsForZSet().add(key, value, score);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return false;
+        }
+    }
+
+    /**
+     * 有序集批量添加元素
+     * @param key
+     * @param tuples
+     * @return
+     */
+    public Long zAdd(Object key, Set<? extends ZSetOperations.TypedTuple> tuples) {
+        try {
+            return this.getRedisTemplate().opsForZSet().add(key, tuples);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return Long.valueOf(-1);
+        }
+    }
+
+    /**
+     * 分值由小到大排序取
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    public Set<Object> zRange(Object key, Long start, Long end) {
+        try {
+            return this.getRedisTemplate().opsForZSet().range(key, start, end);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return new HashSet();
+        }
+    }
+
+    /**
+     * 分值由大到小排序取
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    public Set<Object> zReverseRange(Object key, Long start, Long end) {
+        try {
+            return this.getRedisTemplate().opsForZSet().reverseRange(key, start, end);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return new HashSet();
+        }
+    }
+
+    /**
+     * 分值由小到大排序取，返回key和值的组合
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    public Set<Object> zRangeWithScores(Object key, Long start, Long end) {
+        try {
+            return this.getRedisTemplate().opsForZSet().rangeWithScores(key, start, end);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return new HashSet();
+        }
+    }
+
+    /**
+     * 分值由大到小排序取，返回key和值的组合
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    public Set<Object> zReverseRangeWithScores(Object key, Long start, Long end) {
+        try {
+            return this.getRedisTemplate().opsForZSet().reverseRangeWithScores(key, start, end);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return new HashSet();
+        }
+    }
+
+    /**
+     * 按照分值范围查找
+     * @param key
+     * @param min
+     * @param max
+     * @return
+     */
+    public Set<Object> zReverseRangeByScore(Object key, Double min, Double max) {
+        try {
+            return this.getRedisTemplate().opsForZSet().reverseRangeByScore(key, min, max);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return new HashSet();
         }
     }
 }
