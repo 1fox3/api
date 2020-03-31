@@ -1,7 +1,10 @@
 package com.fox.api.controller.api.stock;
 
 import com.fox.api.entity.dto.result.ResultDto;
+import com.fox.api.entity.dto.stock.realtime.rank.StockRealtimeRankInfoDto;
+import com.fox.api.entity.po.PageInfoPo;
 import com.fox.api.enums.code.ReturnCode;
+import com.fox.api.service.stock.StockRealtimeRankService;
 import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = "*")//处理跨域问题
@@ -19,6 +23,9 @@ public class RealtimeController {
 
     @Autowired
     private StockRealtimeService stockRealtimeService;
+
+    @Autowired
+    private StockRealtimeRankService stockRealtimeRankService;
 
     @RequestMapping("/stock/realtime/info")
     public ResultDto realtime(int stockId) {
@@ -48,5 +55,14 @@ public class RealtimeController {
             return ResultDto.fail(ReturnCode.FAIL);
         }
         return ResultDto.success(stockRealtimeLineEntity);
+    }
+
+    @RequestMapping("/stock/realtime/rank")
+    public ResultDto rank(String type, String sortType, PageInfoPo pageInfo) {
+        List<StockRealtimeRankInfoDto> list = this.stockRealtimeRankService.rank(type, sortType, pageInfo);
+        if (null == list) {
+            return ResultDto.fail(ReturnCode.FAIL);
+        }
+        return ResultDto.success(list);
     }
 }

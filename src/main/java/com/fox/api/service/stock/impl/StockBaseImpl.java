@@ -13,6 +13,9 @@ public class StockBaseImpl {
     @Autowired
     protected StockRedisUtil stockRedisUtil;
 
+    @Value("${redis.stock.stock.hash}")
+    protected String redisStockHash;
+
     @Value("${redis.stock.realtime.stock.info.hash}")
     protected String redisRealtimeStockInfoHash;
 
@@ -21,6 +24,18 @@ public class StockBaseImpl {
 
     @Value("${redis.stock.realtime.stock.line.single}")
     protected String redisRealtimeStockLineSingle;
+
+    @Value("${redis.stock.realtime.stock.rank.uptick}")
+    protected String redisRealtimeRankUptickRateZSet;
+
+    @Value("${redis.stock.realtime.stock.rank.surge}")
+    protected String redisRealtimeRankSurgeRateZSet;
+
+    @Value("${redis.stock.realtime.stock.rank.deal.num}")
+    protected String redisRealtimeRankDealNumZSet;
+
+    @Value("${redis.stock.realtime.stock.rank.deal.money}")
+    protected String redisRealtimeRankDealMoneyZSet;
 
     @Autowired
     protected StockMapper stockMapper;
