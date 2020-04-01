@@ -28,7 +28,8 @@ public class RealtimeController {
     private StockRealtimeRankService stockRealtimeRankService;
 
     @RequestMapping("/stock/realtime/info")
-    public ResultDto realtime(int stockId) {
+    public ResultDto realtime(Integer stockId) {
+        System.out.println(stockId);
         StockRealtimePo stockRealtimeEntity = stockRealtimeService.info(stockId);
         if (null == stockRealtimeEntity) {
             return ResultDto.fail(ReturnCode.FAIL);
@@ -37,7 +38,7 @@ public class RealtimeController {
     }
 
     @RequestMapping("/stock/realtime/priceList")
-    public ResultDto priceList(int stockId) {
+    public ResultDto priceList(Integer stockId) {
         StockRealtimePo stockRealtimeEntity = stockRealtimeService.info(stockId);
         if (null == stockRealtimeEntity) {
             return ResultDto.fail(ReturnCode.FAIL);
@@ -49,7 +50,7 @@ public class RealtimeController {
     }
 
     @RequestMapping("/stock/realtime/line")
-    public ResultDto lint(int stockId) {
+    public ResultDto lint(Integer stockId) {
         StockRealtimeLinePo stockRealtimeLineEntity = stockRealtimeService.line(stockId);
         if (null == stockRealtimeLineEntity) {
             return ResultDto.fail(ReturnCode.FAIL);

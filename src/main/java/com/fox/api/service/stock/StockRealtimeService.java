@@ -5,7 +5,7 @@ import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 
 public interface StockRealtimeService {
 
-    StockRealtimePo info(int stockId);
+    StockRealtimePo info(Integer stockId);
 
-    StockRealtimeLinePo line(int stockId);
+    StockRealtimeLinePo line(Integer stockId);
 }

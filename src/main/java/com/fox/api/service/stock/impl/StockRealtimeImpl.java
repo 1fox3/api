@@ -16,14 +16,14 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
      * @return
      */
     @Override
-    public StockRealtimePo info(int stockId) {
-        if (this.stockRedisUtil.hHasKey(this.redisRealtimeStockInfoHash, stockId)) {
-            return (StockRealtimePo)this.stockRedisUtil.hGet(this.redisRealtimeStockInfoHash, stockId);
+    public StockRealtimePo info(Integer stockId) {
+        if (this.stockRedisUtil.hHasKey(this.redisRealtimeStockInfoHash, stockId.toString())) {
+            return (StockRealtimePo)this.stockRedisUtil.hGet(this.redisRealtimeStockInfoHash, stockId.toString());
         }
         SinaRealtime sinaRealtime = new SinaRealtime();
         StockRealtimePo stockRealtimePo = sinaRealtime.getRealtimeData(this.getSinaStockCode(stockId));
         if (null != stockRealtimePo && null != stockRealtimePo.getStockName()) {
-            this.stockRedisUtil.hPut(this.redisRealtimeStockInfoHash, stockId, stockRealtimePo);
+            this.stockRedisUtil.hPut(this.redisRealtimeStockInfoHash, stockId.toString(), stockRealtimePo);
         }
         return  stockRealtimePo;
     }
@@ -34,7 +34,7 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
      * @return
      */
     @Override
-    public StockRealtimeLinePo line(int stockId) {
+    public StockRealtimeLinePo line(Integer stockId) {
         String redisKey = this.redisRealtimeStockLineSingle + stockId;
         StockRealtimeLinePo stockRealtimeLinePo = (StockRealtimeLinePo)this.stockRedisUtil.get(redisKey);
         if (null != stockRealtimeLinePo) {
