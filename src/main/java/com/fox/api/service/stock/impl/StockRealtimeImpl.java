@@ -22,9 +22,6 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
         }
         SinaRealtime sinaRealtime = new SinaRealtime();
         StockRealtimePo stockRealtimePo = sinaRealtime.getRealtimeData(this.getSinaStockCode(stockId));
-        if (null != stockRealtimePo && null != stockRealtimePo.getStockName()) {
-            this.stockRedisUtil.hPut(this.redisRealtimeStockInfoHash, stockId.toString(), stockRealtimePo);
-        }
         return  stockRealtimePo;
     }
 
