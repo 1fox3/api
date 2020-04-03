@@ -133,7 +133,7 @@ public class NetsDayLine extends NetsStockBaseApi {
                         stockDayNodeEntity.setHighestPrice(singleArr.getDouble(3));
                         stockDayNodeEntity.setLowestPrice(singleArr.getDouble(4));
                         stockDayNodeEntity.setDealNum(singleArr.getLong(5));
-                        stockDayNodeEntity.setAmplitude(singleArr.getDouble(6));
+                        stockDayNodeEntity.setUptickRate(singleArr.getDouble(6));
                         nodeList.add(stockDayNodeEntity);
                     }
                 }

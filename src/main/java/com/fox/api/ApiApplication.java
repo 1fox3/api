@@ -7,7 +7,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableScheduling
 @EnableCaching
 @ComponentScan(basePackages = {"com.fox.api.*"})
 public class ApiApplication {

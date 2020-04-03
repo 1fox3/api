@@ -3,8 +3,8 @@ package com.fox.api.service.stock;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
 
 public interface StockOfflineService {
-    StockDayLinePo line(int stockId);
-    StockDayLinePo line(int stockId, String startDate);
-    StockDayLinePo line(int stockId, int dayLen);
-    StockDayLinePo line(int stockId, String startDate, String endDate);
+    StockDayLinePo line(Integer stockId);
+    StockDayLinePo line(Integer stockId, String startDate);
+    StockDayLinePo line(Integer stockId, Integer dayLen);
+    StockDayLinePo line(Integer stockId, String startDate, String endDate);
 }

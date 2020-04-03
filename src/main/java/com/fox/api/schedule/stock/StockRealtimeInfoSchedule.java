@@ -20,7 +20,7 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule{
     /**
      * 每5秒钟启动一次
      */
-    @Scheduled(cron="*/5 * 9,10,11,13,14 * * 1-5")
+    @Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeInfo() {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         System.out.println("stockRealtimeInfo:start:" + df.format(System.currentTimeMillis()));
@@ -32,6 +32,11 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule{
             List<Object> stockEntityList = this.stockRedisUtil.lRange(this.redisStockList, i, i + onceLimit - 1);
             if (null == stockEntityList || 0 >= stockEntityList.size()) {
                 continue;
+            }
+            if (0 == i) {//3个重要指数也更新
+                stockEntityList.add(this.stockMapper.getById(1));//上证指数
+                stockEntityList.add(this.stockMapper.getById(30028));//深证成指
+                stockEntityList.add(this.stockMapper.getById(30033));//创业板指
             }
             List<String> sinaStockCodeList = new ArrayList<>();
             for (Object stockEntity : stockEntityList) {

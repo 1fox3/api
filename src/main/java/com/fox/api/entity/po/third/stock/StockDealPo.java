@@ -20,5 +20,5 @@ public class StockDealPo {
     //成交数量
     private Long dealNum;
     //增幅
-    private Double amplitude;
+    private Double uptickRate;
 }

@@ -1,6 +1,7 @@
 package com.fox.api.controller.api.stock;
 
 import com.fox.api.entity.dto.result.ResultDto;
+import com.fox.api.entity.dto.stock.realtime.StockRealtimeInfoDto;
 import com.fox.api.entity.dto.stock.realtime.rank.StockRealtimeRankInfoDto;
 import com.fox.api.entity.po.PageInfoPo;
 import com.fox.api.enums.code.ReturnCode;
@@ -29,7 +30,6 @@ public class RealtimeController {
 
     @RequestMapping("/stock/realtime/info")
     public ResultDto realtime(Integer stockId) {
-        System.out.println(stockId);
         StockRealtimePo stockRealtimeEntity = stockRealtimeService.info(stockId);
         if (null == stockRealtimeEntity) {
             return ResultDto.fail(ReturnCode.FAIL);
@@ -61,6 +61,15 @@ public class RealtimeController {
     @RequestMapping("/stock/realtime/rank")
     public ResultDto rank(String type, String sortType, PageInfoPo pageInfo) {
         List<StockRealtimeRankInfoDto> list = this.stockRealtimeRankService.rank(type, sortType, pageInfo);
+        if (null == list) {
+            return ResultDto.fail(ReturnCode.FAIL);
+        }
+        return ResultDto.success(list);
+    }
+
+    @RequestMapping("/stock/realtime/topIndex")
+    public ResultDto topIndex() {
+        List<StockRealtimeInfoDto> list = this.stockRealtimeService.topIndex();
         if (null == list) {
             return ResultDto.fail(ReturnCode.FAIL);
         }

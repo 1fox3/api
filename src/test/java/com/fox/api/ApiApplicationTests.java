@@ -2,6 +2,10 @@ package com.fox.api;
 
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.property.stock.StockProperty;
+import com.fox.api.schedule.stock.StockScanSchedule;
+import com.fox.api.service.stock.StockRealtimeService;
+import com.fox.api.service.stock.StockUtilService;
 import com.fox.api.util.redis.StockRedisUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,40 +45,23 @@ class ApiApplicationTests {
     @Autowired
     private StockRedisUtil stockRedisUtil;
 
+    @Autowired
+    private StockUtilService stockUtilService;
+
+    @Autowired
+    private StockProperty stockProperty;
+
+    @Autowired
+    private StockScanSchedule stockScanSchedule;
+
+    @Autowired
+    private StockRealtimeService stockRealtimeService;
+
     @Test
     void contextLoads() {
     }
 
     @Test
     void redisTest() {
-        System.out.println(this.stockRedisUtil.zSize(this.redisRealtimeRankUptickRateZSet));
-        Set<Object> downSet = this.stockRedisUtil.zReverseRangeByScore(this.redisRealtimeRankUptickRateZSet, (double)-1.0, (double)-0.00001);
-//        System.out.println(downSet);
-        System.out.println(downSet.size());
-        Set<Object> zeroSet = this.stockRedisUtil.zReverseRangeByScore(this.redisRealtimeRankUptickRateZSet, (double)-0.00001, (double)0.00001);
-//        System.out.println(zeroSet);
-        System.out.println(zeroSet.size());
-        Set<Object> upSet = this.stockRedisUtil.zReverseRangeByScore(this.redisRealtimeRankUptickRateZSet, (double)0.00001, (double)1.0);
-//        System.out.println(upSet);
-        System.out.println(upSet.size());
-//        Set<Object> set = this.stockRedisUtil.zReverseRangeWithScores(this.redisRealtimeRankUptickRateZSet, (long)0, (long)10);
-//        Map<Integer, Double> scoreMap = new HashMap<>();
-//        List list = new LinkedList();
-//        for(Object object : set) {
-//            Integer value = (Integer) ((DefaultTypedTuple)object).getValue();
-//            Double score = ((DefaultTypedTuple)object).getScore();
-//            list.add(value.toString());
-//            scoreMap.put(value, score);
-//        }
-//
-//        List<Object> stockEntityList = this.stockRedisUtil.hMultiGet(this.redisStockHash, list);
-//        for (Object stockEntity : stockEntityList) {
-//            stockEntity = (StockEntity)stockEntity;
-//            System.out.println(((StockEntity) stockEntity).getId()
-//                    + "\t" + ((StockEntity) stockEntity).getStockCode()
-//                    + "\t" + ((StockEntity) stockEntity).getStockName()
-//                    + "\t" + scoreMap.get(((StockEntity) stockEntity).getId())
-//            );
-//        }
     }
 }

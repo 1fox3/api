@@ -16,7 +16,7 @@ public class OfflineController {
     private StockOfflineService stockOfflineService;
 
     @RequestMapping("/stock/offline/line")
-    public ResultDto realtime(int stockId) {
+    public ResultDto realtime(Integer stockId) {
         StockDayLinePo stockDayLineEntity = stockOfflineService.line(stockId);
         if (null == stockDayLineEntity) {
             return ResultDto.fail(ReturnCode.FAIL);

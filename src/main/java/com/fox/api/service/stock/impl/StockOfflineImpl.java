@@ -14,23 +14,23 @@ import java.util.List;
 @Service
 public class StockOfflineImpl extends StockBaseImpl implements StockOfflineService {
     @Override
-    public StockDayLinePo line(int stockId) {
+    public StockDayLinePo line(Integer stockId) {
         return this.line(stockId, DateUtil.getRelateDate(-1, 0, 0, DateUtil.DATE_FORMAT_1));
     }
 
     @Override
-    public StockDayLinePo line(int stockId, String startDate) {
+    public StockDayLinePo line(Integer stockId, String startDate) {
         return this.line(stockId, startDate, DateUtil.getRelateDate(0, 0, 0, DateUtil.DATE_FORMAT_1));
     }
 
     @Override
-    public StockDayLinePo line(int stockId, String startDate, String endDate) {
+    public StockDayLinePo line(Integer stockId, String startDate, String endDate) {
         NetsDayLine netsDayLine = new NetsDayLine();
         return netsDayLine.getDayLine(this.getNetsStockInfoMap(stockId), startDate, endDate);
     }
 
     @Override
-    public StockDayLinePo line(int stockId, int dayLen) {
+    public StockDayLinePo line(Integer stockId, Integer dayLen) {
         StockEntity stockEntity = this.getStockEntity(stockId);
         StockDayLinePo stockDayLineEntity = new StockDayLinePo();
         stockDayLineEntity.setStockCode(stockEntity.getStockCode());

@@ -20,5 +20,5 @@ redis:
         info:
           hash: stockRealtimeStockInfoHash #股票在缓存中使用的hash表
         line:
-          single: 'stockRealtimeStockLineSingle:'
+          single: "stockRealtimeStockLineSingle:"
           hash: stockRealtimeStockLineHash

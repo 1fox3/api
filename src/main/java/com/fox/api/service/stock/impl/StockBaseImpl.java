@@ -2,16 +2,23 @@ package com.fox.api.service.stock.impl;
 
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.property.stock.StockProperty;
 import com.fox.api.util.StockUtil;
 import com.fox.api.util.redis.StockRedisUtil;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.relational.core.sql.In;
 
+import java.util.List;
 import java.util.Map;
 
 public class StockBaseImpl {
     @Autowired
     protected StockRedisUtil stockRedisUtil;
+
+    @Autowired
+    protected StockProperty stockProperty;
 
     @Value("${redis.stock.stock.hash}")
     protected String redisStockHash;
