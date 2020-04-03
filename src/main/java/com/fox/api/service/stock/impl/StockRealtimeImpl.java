@@ -9,8 +9,10 @@ import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeService {
@@ -50,6 +52,10 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
         return  stockRealtimeLinePo;
     }
 
+    /**
+     * 获取重要指标信息
+     * @return
+     */
     @Override
     public List<StockRealtimeInfoDto> topIndex() {
         List<StockRealtimeInfoDto> list = new LinkedList<>();
@@ -62,5 +68,18 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
             list.add(stockRealtimeInfoDto);
         }
         return list;
+    }
+
+    /**
+     * 获取增幅统计信息
+     * @return
+     */
+    @Override
+    public Map<String, Integer> uptickRateStatistics() {
+        Object object = this.stockRedisUtil.get(this.stockRealtimeStockUptickRateStatistics);
+        if (null == object) {
+            return new HashMap<>();
+        }
+        return (Map<String, Integer>)object;
     }
 }

@@ -34,9 +34,10 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule{
                 continue;
             }
             if (0 == i) {//3个重要指数也更新
-                stockEntityList.add(this.stockMapper.getById(1));//上证指数
-                stockEntityList.add(this.stockMapper.getById(30028));//深证成指
-                stockEntityList.add(this.stockMapper.getById(30033));//创业板指
+                List<Integer> topIndexList = this.stockProperty.getTopIndex();
+                for (Integer stockId : topIndexList) {
+                    stockEntityList.add(this.stockMapper.getById(stockId));
+                }
             }
             List<String> sinaStockCodeList = new ArrayList<>();
             for (Object stockEntity : stockEntityList) {

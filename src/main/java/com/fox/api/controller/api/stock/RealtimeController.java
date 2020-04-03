@@ -75,4 +75,13 @@ public class RealtimeController {
         }
         return ResultDto.success(list);
     }
+
+    @RequestMapping("/stock/realtime/uptickRateStatistics")
+    public ResultDto uptickRateStatistics() {
+        Map<String, Integer> map = this.stockRealtimeService.uptickRateStatistics();
+        if (null == map) {
+            return ResultDto.fail(ReturnCode.FAIL);
+        }
+        return ResultDto.success(map);
+    }
 }

@@ -5,6 +5,7 @@ import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface StockRealtimeService {
 
@@ -13,4 +14,6 @@ public interface StockRealtimeService {
     StockRealtimeLinePo line(Integer stockId);
 
     List<StockRealtimeInfoDto> topIndex();
+
+    Map<String, Integer> uptickRateStatistics();
 }

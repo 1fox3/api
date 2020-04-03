@@ -44,6 +44,9 @@ public class StockBaseImpl {
     @Value("${redis.stock.realtime.stock.rank.deal.money}")
     protected String redisRealtimeRankDealMoneyZSet;
 
+    @Value("${redis.stock.realtime.stock.rank.uptick-statistics}")
+    protected String stockRealtimeStockUptickRateStatistics;
+
     @Autowired
     protected StockMapper stockMapper;
 

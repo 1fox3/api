@@ -2,10 +2,6 @@ package com.fox.api;
 
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockMapper;
-import com.fox.api.property.stock.StockProperty;
-import com.fox.api.schedule.stock.StockScanSchedule;
-import com.fox.api.service.stock.StockRealtimeService;
-import com.fox.api.service.stock.StockUtilService;
 import com.fox.api.util.redis.StockRedisUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,17 +41,8 @@ class ApiApplicationTests {
     @Autowired
     private StockRedisUtil stockRedisUtil;
 
-    @Autowired
-    private StockUtilService stockUtilService;
-
-    @Autowired
-    private StockProperty stockProperty;
-
-    @Autowired
-    private StockScanSchedule stockScanSchedule;
-
-    @Autowired
-    private StockRealtimeService stockRealtimeService;
+    @Value("${redis.stock.realtime.stock.rank.uptick-statistics}")
+    protected String stockRealtimeStockUptickRateStatistics;
 
     @Test
     void contextLoads() {

@@ -104,4 +104,37 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
         }
         System.out.println("stockRealtimeRank:end:" + df.format(System.currentTimeMillis()));
     }
+
+    @Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
+    public void stockRealtimeUptickRateStatistics() {
+        Map<String, Integer> uptickRateStatisticsMap = new  LinkedHashMap<>();
+        Map<String, List<Double>> scoreMap = new LinkedHashMap<String, List<Double>>(){{
+            put("up", Arrays.asList(0.00001, 1.0));
+            put("down", Arrays.asList(-1.0, -0.00001));
+            put("zero", Arrays.asList(-0.00001, 0.00001));
+            put("-3~0", Arrays.asList(-0.02999, -0.00001));
+            put("-5~-3", Arrays.asList(-0.04999, -0.03000));
+            put("-7~-5", Arrays.asList(-0.06999, -0.05000));
+            put("-7", Arrays.asList(-1.0, -0.07000));
+            put("0~3", Arrays.asList(0.00001, 0.02999));
+            put("3~5", Arrays.asList(0.03000, 0.04999));
+            put("5~7", Arrays.asList(0.05000, 0.06999));
+            put("7", Arrays.asList(0.07000, 1.0));
+        }};
+
+        Double startScore;
+        Double endScore;
+        for (String key : scoreMap.keySet()) {
+            List<Double> list = scoreMap.get(key);
+            startScore = list.get(0);
+            endScore = list.get(1);
+            Set<Object> set = this.stockRedisUtil.zReverseRangeByScore(
+                    this.redisRealtimeRankUptickRateZSet,
+                    startScore,
+                    endScore
+            );
+            uptickRateStatisticsMap.put(key, set.size());
+        }
+        this.stockRedisUtil.set(this.stockRealtimeStockUptickRateStatistics, uptickRateStatisticsMap);
+    }
 }

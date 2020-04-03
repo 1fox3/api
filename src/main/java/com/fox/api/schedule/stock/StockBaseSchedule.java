@@ -1,6 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.property.stock.StockProperty;
 import com.fox.api.util.redis.StockRedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 public class StockBaseSchedule {
     @Autowired
     protected StockMapper stockMapper;
+
+    @Autowired
+    protected StockProperty stockProperty;
 
     @Value("${stock.type.stock.stock-type}")
     protected int stockType;
@@ -47,6 +51,9 @@ public class StockBaseSchedule {
 
     @Value("${redis.stock.realtime.stock.rank.deal.money}")
     protected String redisRealtimeRankDealMoneyZSet;
+
+    @Value("${redis.stock.realtime.stock.rank.uptick-statistics}")
+    protected String stockRealtimeStockUptickRateStatistics;
 
     @Autowired
     protected StockRedisUtil stockRedisUtil;
