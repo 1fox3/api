@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.stock.mapper.StockDealDayMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockDealDayEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="stock_id" property="stockId" jdbcType="INTEGER" />
+        <result column="dt" property="dt" jdbcType="DATE" />
+        <result column="fq_type" property="fqType" jdbcType="INTEGER" />
+        <result column="open_price" property="openPrice" jdbcType="DOUBLE" />
+        <result column="close_price" property="closePrice" jdbcType="DOUBLE" />
+        <result column="highest_price" property="highestPrice" jdbcType="DOUBLE" />
+        <result column="lowest_price" property="lowestPrice" jdbcType="DOUBLE" />
+        <result column="deal_num" property="dealNum" jdbcType="BIGINT" />
+        <result column="deal_money" property="dealMoney" jdbcType="DOUBLE" />
+        <result column="uptick_rate" property="uptickRate" jdbcType="DOUBLE" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockDealDayEntity" keyColumn="id"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_stock_deal_day (
+            stock_id,
+            dt,
+            fq_type,
+            open_price,
+            close_price,
+            highest_price,
+            lowest_price,
+            deal_num,
+            deal_money,
+            uptick_rate
+        )
+        VALUES
+            (
+                #{stockId},
+                #{dt},
+                #{fqType},
+                #{openPrice},
+                #{closePrice},
+                #{highestPrice},
+                #{lowestPrice},
+                #{dealNum},
+                #{dealMoney},
+                #{uptickRate}
+            );
+    </insert>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO t_stock_deal_day (
+            stock_id,
+            dt,
+            fq_type,
+            open_price,
+            close_price,
+            highest_price,
+            lowest_price,
+            deal_num,
+            deal_money,
+            uptick_rate
+        )
+        VALUES
+        <foreach collection ="list" item="stockDealDayEntity" index= "index" separator =",">
+            (
+                #{stockDealDayEntity.stockId},
+                #{stockDealDayEntity.dt},
+                #{stockDealDayEntity.fqType},
+                #{stockDealDayEntity.openPrice},
+                #{stockDealDayEntity.closePrice},
+                #{stockDealDayEntity.highestPrice},
+                #{stockDealDayEntity.lowestPrice},
+                #{stockDealDayEntity.dealNum},
+                #{stockDealDayEntity.dealMoney},
+                #{stockDealDayEntity.uptickRate}
+            )
+        </foreach >
+    </insert>
+
+    <update id="truncate">
+        TRUNCATE TABLE t_stock_deal_day;
+    </update>
+
+    <update id="optimize">
+        OPTIMIZE TABLE t_stock_deal_day;
+    </update>
+</mapper>

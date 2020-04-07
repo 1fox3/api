@@ -34,6 +34,25 @@ public class DateUtil {
     }
 
     /**
+     * 获取当前日期
+     * @return
+     */
+    public static String getCurrentDate() {
+        return getCurrentDate(DATE_FORMAT_1);
+    }
+
+    /**
+     * 获取当前日期
+     * @param format
+     * @return
+     */
+    public static String getCurrentDate(String format) {
+        simpleDateFormat.applyPattern(format);
+        Date date = new Date();
+        return simpleDateFormat.format(date);
+    }
+
+    /**
      * 日期字符串转换格式
      * @param str
      * @param oldFormat
