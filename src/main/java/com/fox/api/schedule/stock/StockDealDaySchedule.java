@@ -28,7 +28,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     /**
      * 同步所有的按天交易信息数据
      */
-    @Scheduled(cron="0 5 15 * * 1-5")
+    @Scheduled(cron="0 30 16 * * 1-5")
     public void syncTotalDealDayInfo() {
         //截断表
         stockDealDayMapper.truncate();
@@ -39,7 +39,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
         NetsDayLine netsDayLine = new NetsDayLine();
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
-        for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit - 1) {
+        for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit) {
             List<Object> stockEntityList = this.stockRedisUtil.lRange(this.redisStockList, i, i + onceLimit - 1);
             if (null == stockEntityList || 0 >= stockEntityList.size()) {
                 continue;

@@ -1,5 +1,7 @@
 package com.fox.api.service.stock.impl;
 
+import com.fox.api.entity.po.third.stock.StockDealNumPo;
+import com.fox.api.service.third.stock.sina.api.SinaDealRatio;
 import com.fox.api.util.DateUtil;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.service.stock.StockOfflineService;
@@ -27,6 +29,19 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
     public StockDayLinePo line(Integer stockId, String startDate, String endDate) {
         NetsDayLine netsDayLine = new NetsDayLine();
         return netsDayLine.getDayLine(this.getNetsStockInfoMap(stockId), startDate, endDate);
+    }
+
+    /**
+     * 获取价格成交比例
+     * @param stockId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    @Override
+    public List<StockDealNumPo> dealRatio(Integer stockId, String startDate, String endDate) {
+        SinaDealRatio sinaDealRatio = new SinaDealRatio();
+        return sinaDealRatio.getDealRatio(this.getSinaStockCode(stockId), startDate, endDate);
     }
 
     @Override

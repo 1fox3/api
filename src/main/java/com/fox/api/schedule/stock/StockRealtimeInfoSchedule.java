@@ -28,7 +28,7 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule{
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
         Map<String, StockRealtimePo> stockRealtimePoMap = new HashMap<>();
         SinaRealtime sinaRealtime = new SinaRealtime();
-        for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit - 1) {
+        for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit) {
             List<Object> stockEntityList = this.stockRedisUtil.lRange(this.redisStockList, i, i + onceLimit - 1);
             if (null == stockEntityList || 0 >= stockEntityList.size()) {
                 continue;

@@ -1,6 +1,7 @@
 package com.fox.api.controller.api.stock;
 
 import com.fox.api.entity.dto.result.ResultDto;
+import com.fox.api.entity.po.third.stock.StockDealNumPo;
 import com.fox.api.enums.code.ReturnCode;
 import com.fox.api.service.stock.StockOfflineService;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @CrossOrigin(origins = "*")//处理跨域问题
 @RestController
@@ -22,5 +25,14 @@ public class OfflineController {
             return ResultDto.fail(ReturnCode.FAIL);
         }
         return ResultDto.success(stockDayLineEntity);
+    }
+
+    @RequestMapping("/stock/offline/dealRatio")
+    public ResultDto dealRatio(Integer stockId, String startDate, String endDate) {
+        List<StockDealNumPo> list = stockOfflineService.dealRatio(stockId, startDate, endDate);
+        if (null == list) {
+            return ResultDto.fail(ReturnCode.FAIL);
+        }
+        return ResultDto.success(list);
     }
 }
