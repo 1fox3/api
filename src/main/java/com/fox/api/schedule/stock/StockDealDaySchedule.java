@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class StockDealDaySchedule extends StockBaseSchedule {
@@ -28,13 +31,16 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     /**
      * 同步所有的按天交易信息数据
      */
-    @Scheduled(cron="0 30 16 * * 1-5")
+//    @Scheduled(cron="0 5 15 * * 1-5")
     public void syncTotalDealDayInfo() {
         //截断表
         stockDealDayMapper.truncate();
         //优化表空间
         stockDealDayMapper.optimize();
-        Integer startYear = 1990;
+        //上交和深交均成立于1990年
+//        Integer startYear = 1990;
+        //暂时只存近5年的数据就好
+        Integer startYear = 2016;
         Integer endYear = Integer.valueOf(DateUtil.getCurrentYear());
         NetsDayLine netsDayLine = new NetsDayLine();
         Integer onceLimit = 200;
@@ -70,8 +76,8 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                             list.add(stockDealDayEntity);
                         }
                         if (list.size() > 0 ){
-                            stockDealDayMapper.batchInsert(list);
                             try{
+                                stockDealDayMapper.batchInsert(list);
                                 Thread.sleep(100);
                             } catch (InterruptedException e){}
                         }
@@ -98,12 +104,14 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     /**
      * 同步当天的交易
      */
-//    @Scheduled(cron="0 5 15 * * 1-5")
+    @Scheduled(cron="0 5 15 * * 1-5")
     public void syncCurrentDealDayInfo() {
+        String startDate = DateUtil.getCurrentDate();
+        String endDate = startDate;
         NetsDayLine netsDayLine = new NetsDayLine();
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
-        for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit - 1) {
+        for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit) {
             List<Object> stockEntityList = this.stockRedisUtil.lRange(this.redisStockList, i, i + onceLimit - 1);
             if (null == stockEntityList || 0 >= stockEntityList.size()) {
                 continue;
@@ -111,8 +119,6 @@ public class StockDealDaySchedule extends StockBaseSchedule {
             for (Object object : stockEntityList) {
                 Double dealMoney = this.getDealMoney(((StockEntity) object).getId());
                 for (String fqType : this.fqTypeMap.keySet()) {
-                    String startDate = DateUtil.getCurrentDate();
-                    String endDate = startDate;
                     Map<String, String> netsParams = StockUtil.getNetsStockInfoMap((StockEntity) object);
                     netsParams.put("rehabilitationType", fqType);
                     StockDayLinePo stockDayLinePo = netsDayLine.getDayLine(netsParams, startDate, endDate);
@@ -137,12 +143,11 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                         list.add(stockDealDayEntity);
                     }
                     if (list.size() > 0 ){
-                        stockDealDayMapper.batchInsert(list);
                         try{
+                            stockDealDayMapper.batchInsert(list);
                             Thread.sleep(100);
-                        } catch (InterruptedException e){}
+                        } catch (Exception e){}
                     }
-                    System.out.println(((StockEntity) object).getId());
                 }
             }
         }

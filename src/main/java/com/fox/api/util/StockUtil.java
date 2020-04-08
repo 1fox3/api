@@ -16,10 +16,10 @@ public class StockUtil {
      * @return
      */
     public static String getStockMarketStr(Integer stockMarket) {
-        if (1 == stockMarket) {
+        if (2 == stockMarket) {
             return "sz";
         }
-        if (2 == stockMarket) {
+        if (3 == stockMarket) {
             return "hk";
         }
         return "sh";
