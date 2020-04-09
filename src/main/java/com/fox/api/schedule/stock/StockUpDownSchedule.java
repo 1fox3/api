@@ -1,15 +1,15 @@
 package com.fox.api.schedule.stock;
 
-import com.fox.api.util.DateUtil;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockLimitUpDownEntity;
 import com.fox.api.dao.stock.entity.StockUpDownEntity;
 import com.fox.api.dao.stock.mapper.StockLimitUpDownMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.dao.stock.mapper.StockUpDownMapper;
+import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
+import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
 import com.fox.api.service.stock.StockOfflineService;
-import com.fox.api.entity.po.third.stock.StockDayLinePo;
-import com.fox.api.entity.po.third.stock.StockDealPo;
+import com.fox.api.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -72,33 +72,33 @@ public class StockUpDownSchedule {
             }
             stockUpDownEntity.setStockId(stockEntity.getId());
             if (stockEntity.getId() > 0) {
-                StockDayLinePo stockDayLineEntity = stockOfflineService.line(stockEntity.getId(), DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1));
-                List<StockDealPo> list = stockDayLineEntity.getLineNode();
-                if (null == list) {
+                StockDealDayLineDto stockDealDayLineDto = stockOfflineService.line(stockEntity.getId(), DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1));
+                List<StockDealDayDto> stockDealDayDtos = stockDealDayLineDto.getLineNode();
+                if (null == stockDealDayDtos) {
                     continue;
                 }
-                int len = list.size();
+                int len = stockDealDayDtos.size();
                 if (0 == len) {
                     continue;
                 }
                 for (int j = 0; j<= limitLen; j++) {
                     int pos = len - j - 1;
                     if (pos >= 0) {
-                        StockDealPo stockDealEntity = list.get(pos);
-                        currentPrice = 0.0 == currentPrice ? stockDealEntity.getClosePrice() : currentPrice;
+                        StockDealDayDto stockDealDayDto = stockDealDayDtos.get(pos);
+                        currentPrice = 0.0 == currentPrice ? stockDealDayDto.getClosePrice() : currentPrice;
                         if (0 == j) {
-                            today = stockDealEntity.getDateTime();
-                            todayPrice = stockDealEntity.getClosePrice();
+                            today = stockDealDayDto.getDt();
+                            todayPrice = stockDealDayDto.getClosePrice();
                         }
                         if (1 == j) {
-                            yesterday = stockDealEntity.getDateTime();
-                            yesterdayPrice = stockDealEntity.getClosePrice();
+                            yesterday = stockDealDayDto.getDt();
+                            yesterdayPrice = stockDealDayDto.getClosePrice();
                         }
 
-                        highestPrice = stockDealEntity.getHighestPrice() > highestPrice ?
-                                stockDealEntity.getHighestPrice() : highestPrice;
-                        lowestPrice = 0.0 == lowestPrice || stockDealEntity.getLowestPrice() < lowestPrice ?
-                                stockDealEntity.getLowestPrice() : lowestPrice;
+                        highestPrice = stockDealDayDto.getHighestPrice() > highestPrice ?
+                                stockDealDayDto.getHighestPrice() : highestPrice;
+                        lowestPrice = 0.0 == lowestPrice || stockDealDayDto.getLowestPrice() < lowestPrice ?
+                                stockDealDayDto.getLowestPrice() : lowestPrice;
                     }
 
                     if (scopeList.contains(j) && currentPrice > 0 && lowestPrice > 0 && lowestPrice > 0) {

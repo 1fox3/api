@@ -8,6 +8,7 @@ import com.fox.api.enums.code.CodeMsgEnum;
 public enum ReturnCode implements CodeMsgEnum {
     SUCCESS(0, "成功"),
     FAIL(1, "失败"),
+    CONTROLLER_EXCEPTION(1000, "请求出现异常"),
     PARAM_FORMAT_ERROR(1001, "参数格式错误"),
     PARAM_VERIFY_ERROR(1002, "参数校验失败");
 

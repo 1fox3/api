@@ -7,6 +7,7 @@ import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
 import com.fox.api.entity.po.third.stock.StockDealPo;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
+import com.fox.api.service.stock.StockInfoService;
 import com.fox.api.service.third.stock.nets.api.NetsDayLine;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.util.DateUtil;
@@ -56,6 +57,9 @@ class ApiApplicationTests {
 
     @Autowired
     protected StockDealDayMapper stockDealDayMapper;
+
+    @Autowired
+    private StockInfoService stockInfoService;
 
     @Test
     void contextLoads() {

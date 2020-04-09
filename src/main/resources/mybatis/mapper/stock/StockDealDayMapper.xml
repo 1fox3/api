@@ -83,4 +83,21 @@
     <update id="optimize">
         OPTIMIZE TABLE t_stock_deal_day;
     </update>
+
+    <select id="getByDate" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_day
+        WHERE
+            fq_type = #{fqType}
+            AND
+            stock_id = #{stockId}
+            AND
+            dt >= #{startDate}
+            AND
+            dt &lt;= #{endDate}
+        ORDER BY
+            dt ASC;
+    </select>
 </mapper>

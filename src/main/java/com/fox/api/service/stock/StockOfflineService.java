@@ -1,14 +1,12 @@
 package com.fox.api.service.stock;
 
-import com.fox.api.entity.po.third.stock.StockDayLinePo;
+import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
 import com.fox.api.entity.po.third.stock.StockDealNumPo;
 
 import java.util.List;
 
 public interface StockOfflineService {
-    StockDayLinePo line(Integer stockId);
-    StockDayLinePo line(Integer stockId, String startDate);
-    StockDayLinePo line(Integer stockId, Integer dayLen);
-    StockDayLinePo line(Integer stockId, String startDate, String endDate);
+    StockDealDayLineDto line(Integer stockId, String startDate);
+    StockDealDayLineDto line(Integer stockId, String startDate, String endDate);
     List<StockDealNumPo> dealRatio(Integer stockId, String startDate, String endDate);
 }

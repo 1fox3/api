@@ -11,4 +11,5 @@ public interface StockDealDayMapper {
     Integer batchInsert(List<StockDealDayEntity> list);
     Boolean truncate();
     Boolean optimize();
+    List<StockDealDayEntity> getByDate(Integer stockId, String startDate, String endDate, Integer fqType);
 }

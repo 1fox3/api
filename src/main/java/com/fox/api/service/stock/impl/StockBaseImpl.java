@@ -1,6 +1,7 @@
 package com.fox.api.service.stock.impl;
 
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.mapper.StockDealDayMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.property.stock.StockProperty;
 import com.fox.api.util.StockUtil;
@@ -49,6 +50,9 @@ public class StockBaseImpl {
 
     @Autowired
     protected StockMapper stockMapper;
+
+    @Autowired
+    protected StockDealDayMapper stockDealDayMapper;
 
     /**
      * 获取股票信息
