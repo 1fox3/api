@@ -2,7 +2,9 @@ package com.fox.api;
 
 import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.entity.StockInfoEntity;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
+import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
 import com.fox.api.entity.po.third.stock.StockDealPo;
@@ -60,6 +62,9 @@ class ApiApplicationTests {
 
     @Autowired
     private StockInfoService stockInfoService;
+
+    @Autowired
+    private StockInfoMapper stockInfoMapper;
 
     @Test
     void contextLoads() {

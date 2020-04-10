@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.stock.mapper.StockInfoMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockInfoEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="stock_id" property="stockId" jdbcType="INTEGER" />
+        <result column="stock_market" property="stockMarket" jdbcType="INTEGER" />
+        <result column="stock_code" property="stockCode" jdbcType="VARCHAR" />
+        <result column="stock_name" property="stockName" jdbcType="VARCHAR" />
+        <result column="stock_name_en" property="stockNameEn" jdbcType="VARCHAR" />
+        <result column="stock_full_name" property="stockFullName" jdbcType="VARCHAR" />
+        <result column="stock_full_name_en" property="stockFullNameEn" jdbcType="VARCHAR" />
+        <result column="stock_legal" property="stockLegal" jdbcType="VARCHAR" />
+        <result column="stock_register_address" property="stockRegisterAddress" jdbcType="VARCHAR" />
+        <result column="stock_connect_address" property="stockConnectAddress" jdbcType="VARCHAR" />
+        <result column="stock_email" property="stockEmail" jdbcType="VARCHAR" />
+        <result column="stock_website" property="stockWebsite" jdbcType="VARCHAR" />
+        <result column="stock_on_date" property="stockOnDate" jdbcType="VARCHAR" />
+        <result column="stock_total_equity" property="stockTotalEquity" jdbcType="DOUBLE" />
+        <result column="stock_circ_equity" property="stockCircEquity" jdbcType="DOUBLE" />
+        <result column="stock_area" property="stockArea" jdbcType="VARCHAR" />
+        <result column="stock_province" property="stockProvince" jdbcType="VARCHAR" />
+        <result column="stock_city" property="stockCity" jdbcType="VARCHAR" />
+        <result column="stock_industry" property="stockIndustry" jdbcType="VARCHAR" />
+        <result column="stock_carc" property="stockCarc" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockInfoEntity" keyColumn="id"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_stock_info (
+            stock_id,
+            stock_market,
+            stock_code,
+            stock_name,
+            stock_name_en,
+            stock_full_name,
+            stock_full_name_en,
+            stock_legal,
+            stock_register_address,
+            stock_connect_address,
+            stock_email,
+            stock_website,
+            stock_on_date,
+            stock_total_equity,
+            stock_circ_equity,
+            stock_area,
+            stock_province,
+            stock_city,
+            stock_industry,
+            stock_carc
+        )
+        VALUES
+            (
+                #{stockId},
+                #{stockMarket},
+                #{stockCode},
+                #{stockName},
+                #{stockNameEn},
+                #{stockFullName},
+                #{stockFullNameEn},
+                #{stockLegal},
+                #{stockRegisterAddress},
+                #{stockConnectAddress},
+                #{stockEmail},
+                #{stockWebsite},
+                #{stockOnDate},
+                #{stockTotalEquity},
+                #{stockCircEquity},
+                #{stockArea},
+                #{stockProvince},
+                #{stockCity},
+                #{stockIndustry},
+                #{stockCarc}
+            );
+    </insert>
+
+    <update id="update" parameterType="com.fox.api.dao.stock.entity.StockInfoEntity">
+        UPDATE t_stock_info
+        SET
+            stock_id = #{stockId},
+            stock_market = #{stockMarket},
+            stock_code = #{stockCode},
+            stock_name = #{stockName},
+            stock_name_en = #{stockNameEn},
+            stock_full_name = #{stockFullName},
+            stock_full_name_en = #{stockFullNameEn},
+            stock_legal = #{stockLegal},
+            stock_register_address = #{stockRegisterAddress},
+            stock_connect_address = #{stockConnectAddress},
+            stock_email = #{stockEmail},
+            stock_website = #{stockWebsite},
+            stock_on_date = #{stockOnDate},
+            stock_total_equity = #{stockTotalEquity},
+            stock_circ_equity = #{stockCircEquity},
+            stock_area = #{stockArea},
+            stock_province = #{stockProvince},
+            stock_city = #{stockCity},
+            stock_industry = #{stockIndustry},
+            stock_carc = #{stockCarc}
+        WHERE
+            id = #{id};
+    </update>
+
+    <select id="getByStockId" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_info
+        WHERE
+            stock_id = #{id};
+    </select>
+</mapper>

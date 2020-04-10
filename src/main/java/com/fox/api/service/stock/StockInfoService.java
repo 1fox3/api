@@ -1,7 +1,8 @@
 package com.fox.api.service.stock;
 
-import java.util.Map;
+import com.fox.api.dao.stock.entity.StockInfoEntity;
 
 public interface StockInfoService {
-    String getInfoFromStockExchange(Integer stockId);
+    StockInfoEntity getInfoFromStockExchange(Integer stockId);
+    StockInfoEntity getInfo(Integer stockId);
 }

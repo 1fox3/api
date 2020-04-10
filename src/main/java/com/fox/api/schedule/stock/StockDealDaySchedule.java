@@ -104,10 +104,12 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     /**
      * 同步当天的交易
      */
-    @Scheduled(cron="0 5 15 * * 1-5")
+    @Scheduled(cron="0 35 17 * * 1-5")
     public void syncCurrentDealDayInfo() {
-        String startDate = DateUtil.getCurrentDate();
-        String endDate = startDate;
+        String today = DateUtil.getCurrentDate();
+        String startDate, endDate;
+        startDate = today;
+        endDate = today;
         NetsDayLine netsDayLine = new NetsDayLine();
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
@@ -121,7 +123,8 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                 for (String fqType : this.fqTypeMap.keySet()) {
                     Map<String, String> netsParams = StockUtil.getNetsStockInfoMap((StockEntity) object);
                     netsParams.put("rehabilitationType", fqType);
-                    StockDayLinePo stockDayLinePo = netsDayLine.getDayLine(netsParams, startDate, endDate);
+                    StockDayLinePo stockDayLinePo;
+                    stockDayLinePo = netsDayLine.getDayLine(netsParams, startDate, endDate);
                     if (null == stockDayLinePo.getLineNode()) {
                         continue;
                     }
@@ -143,10 +146,12 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                         list.add(stockDealDayEntity);
                     }
                     if (list.size() > 0 ){
-                        try{
+                        try {
                             stockDealDayMapper.batchInsert(list);
                             Thread.sleep(100);
-                        } catch (Exception e){}
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
