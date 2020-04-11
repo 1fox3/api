@@ -21,7 +21,7 @@ public class StockInfoSchedule extends StockBaseSchedule {
     /**
      * 同步所有的按天交易信息数据
      */
-    @Scheduled(cron="0 0 1 * * 1-5")
+    @Scheduled(cron="0 0 1 * * 1")
     public void stockInfo() {
         Integer onceLimit = 200;
         Integer stockId = 0;

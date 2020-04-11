@@ -36,7 +36,7 @@ public abstract class RedisUtil {
     public boolean expire(Object key, Long time) {
         try {
             if (time > 0) {
-                this.getRedisTemplate().expire(key, time, TimeUnit.SECONDS);
+                this.getRedisTemplate().expire(key.toString(), time, TimeUnit.SECONDS);
             }
             return true;
         } catch (Throwable e) {
@@ -51,7 +51,7 @@ public abstract class RedisUtil {
      * @return
      */
     public Long getExpire(Object key) {
-        return this.getRedisTemplate().getExpire(key, TimeUnit.SECONDS);
+        return this.getRedisTemplate().getExpire(key.toString(), TimeUnit.SECONDS);
     }
 
     /**
@@ -61,7 +61,7 @@ public abstract class RedisUtil {
      */
     public boolean hasKey(Object key) {
         try {
-            return this.getRedisTemplate().hasKey(key);
+            return this.getRedisTemplate().hasKey(key.toString());
         } catch (Throwable e) {
             this.logThrowable(e);
             return false;
@@ -77,9 +77,13 @@ public abstract class RedisUtil {
     public Long delete(Object... key) {
         if (null != key && key.length > 0) {
             if (1 == key.length) {
-                return this.getRedisTemplate().delete(key) ? Long.valueOf(1) : Long.valueOf(-1);
+                return this.getRedisTemplate().delete(key[0].toString()) ? Long.valueOf(1) : Long.valueOf(-1);
             } else {
-                return this.getRedisTemplate().delete(CollectionUtils.arrayToList(key));
+                List<String> keyList = new LinkedList<>();
+                for (Object object : key) {
+                    keyList.add(object.toString());
+                }
+                return this.getRedisTemplate().delete(keyList);
             }
         }
         return Long.valueOf(-1);
