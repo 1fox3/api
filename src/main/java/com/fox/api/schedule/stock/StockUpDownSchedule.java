@@ -1,5 +1,6 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockLimitUpDownEntity;
 import com.fox.api.dao.stock.entity.StockUpDownEntity;
@@ -18,11 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class StockUpDownSchedule {
-
-    @Autowired
-    private StockMapper stockMapper;
-
+public class StockUpDownSchedule extends StockBaseSchedule {
     @Autowired
     private StockUpDownMapper stockUpDownMapper;
 
@@ -35,6 +32,7 @@ public class StockUpDownSchedule {
     /**
      * 执行时间请设置在股市结束之后，因为接口会反回当天数据，影响涨跌停的判断
      */
+    @LogShowTimeAnt
     @Scheduled(cron="0 5 15 * * 1-5")
     public void stockUpDown() {
         int bigId = stockMapper.getLastId();

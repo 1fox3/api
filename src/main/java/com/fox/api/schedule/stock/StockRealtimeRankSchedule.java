@@ -1,5 +1,6 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,10 +18,9 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
     /**
      * 没分钟执行一次
      */
+    @LogShowTimeAnt
     @Scheduled(cron="0 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeRank() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("stockRealtimeRank:start:" + df.format(System.currentTimeMillis()));
         Long stockIdListSize = this.stockRedisUtil.lSize(this.redisStockIdList);
         Long onceLimit = (long)600;
         for (Long i = Long.valueOf(0); i < stockIdListSize; i += onceLimit) {
@@ -102,9 +102,9 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                 this.stockRedisUtil.zAdd(this.redisRealtimeRankDealMoneyZSet, dealMoneySet);
             }
         }
-        System.out.println("stockRealtimeRank:end:" + df.format(System.currentTimeMillis()));
     }
 
+    @LogShowTimeAnt
     @Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeUptickRateStatistics() {
         Map<String, Integer> uptickRateStatisticsMap = new  LinkedHashMap<>();

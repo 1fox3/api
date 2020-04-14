@@ -150,7 +150,7 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
                 if (!baseObject.isNullObject() && baseObject.containsKey("data")) {
                     JSONObject dataObject = baseObject.getJSONObject("data");
                     if (null != dataObject) {
-                        String typeStr = 8 == stockEntity.getStockKind() ? "a" : "b";
+                        String typeStr = 9 == stockEntity.getStockKind() ? "b" : "a";
 
                         if (dataObject.containsKey(typeStr + "gjc")) {
                             stockInfoEntity.setStockName(dataObject.getString(typeStr + "gjc"));

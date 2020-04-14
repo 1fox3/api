@@ -2,9 +2,12 @@ package com.fox.api.schedule.stock;
 
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.property.stock.StockProperty;
+import com.fox.api.service.stock.StockUtilService;
 import com.fox.api.util.redis.StockRedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+
+import java.text.SimpleDateFormat;
 
 public class StockBaseSchedule {
     @Autowired
@@ -57,4 +60,10 @@ public class StockBaseSchedule {
 
     @Autowired
     protected StockRedisUtil stockRedisUtil;
+
+    @Autowired
+    protected StockUtilService stockUtilService;
+
+    @Autowired
+    protected StockProperty stockConfig;
 }

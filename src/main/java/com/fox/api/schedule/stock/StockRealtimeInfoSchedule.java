@@ -1,5 +1,6 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
@@ -16,14 +17,13 @@ import java.util.Map;
  * 批量获取股票的实时信息数据
  */
 @Component
-public class StockRealtimeInfoSchedule extends StockBaseSchedule{
+public class StockRealtimeInfoSchedule extends StockBaseSchedule {
     /**
      * 每5秒钟启动一次
      */
+    @LogShowTimeAnt
     @Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeInfo() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("stockRealtimeInfo:start:" + df.format(System.currentTimeMillis()));
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
         Map<String, StockRealtimePo> stockRealtimePoMap = new HashMap<>();
@@ -57,6 +57,5 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule{
             }
             this.stockRedisUtil.hPutAll(this.redisRealtimeStockInfoHash, stockRealtimePoMap);
         }
-        System.out.println("stockRealtimeInfo:end:" + df.format(System.currentTimeMillis()));
     }
 }

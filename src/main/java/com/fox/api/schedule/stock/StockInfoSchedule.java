@@ -1,5 +1,6 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockInfoEntity;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
@@ -21,7 +22,8 @@ public class StockInfoSchedule extends StockBaseSchedule {
     /**
      * 同步所有的按天交易信息数据
      */
-    @Scheduled(cron="0 0 1 * * 1")
+    @LogShowTimeAnt
+    @Scheduled(cron="0 45 11 * * 1-5")
     public void stockInfo() {
         Integer onceLimit = 200;
         Integer stockId = 0;
@@ -35,6 +37,9 @@ public class StockInfoSchedule extends StockBaseSchedule {
                 try{
                     stockId = ((StockEntity)object).getId();
                     StockInfoEntity shStockInfoEntity = stockInfoService.getInfoFromStockExchange(stockId);
+                    if (null == shStockInfoEntity.getStockOnDate() || "".equals(shStockInfoEntity.getStockOnDate())) {
+                        continue;
+                    }
                     StockInfoEntity dbSHStockInfoEntity = stockInfoMapper.getByStockId(stockId);
                     if (null != dbSHStockInfoEntity && null != dbSHStockInfoEntity.getId()) {
                         shStockInfoEntity.setId(dbSHStockInfoEntity.getId());

@@ -1,5 +1,6 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.thread.stock.StockRealtimeLineThread;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,9 @@ public class StockRealtimeLineSchedule extends StockBaseSchedule {
     /**
      * 每5秒钟启动一次,暂时不执行，时效性不好
      */
+    @LogShowTimeAnt
 //    @Scheduled(cron="0/5 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeLine() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("stockRealtimeLine:start:" + df.format(System.currentTimeMillis()));
         //需要开启的线程数量
         Integer threadNum = 50;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
@@ -64,6 +64,5 @@ public class StockRealtimeLineSchedule extends StockBaseSchedule {
             } catch (Exception e) {
             }
         }
-        System.out.println("stockRealtimeLine:end:" + df.format(System.currentTimeMillis()));
     }
 }

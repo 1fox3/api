@@ -1,5 +1,6 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
@@ -31,6 +32,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     /**
      * 同步所有的按天交易信息数据
      */
+    @LogShowTimeAnt
 //    @Scheduled(cron="0 5 15 * * 1-5")
     public void syncTotalDealDayInfo() {
         //截断表
@@ -104,6 +106,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     /**
      * 同步当天的交易
      */
+    @LogShowTimeAnt
     @Scheduled(cron="0 35 17 * * 1-5")
     public void syncCurrentDealDayInfo() {
         String today = DateUtil.getCurrentDate();

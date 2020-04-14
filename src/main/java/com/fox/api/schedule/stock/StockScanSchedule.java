@@ -1,34 +1,22 @@
 package com.fox.api.schedule.stock;
 
-import com.fox.api.property.stock.StockProperty;
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
+import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
+import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.property.stock.StockKindInfoProperty;
 import com.fox.api.entity.property.stock.StockMarketInfoProperty;
-import com.fox.api.dao.stock.entity.StockEntity;
-import com.fox.api.dao.stock.mapper.StockMapper;
-import com.fox.api.service.stock.StockUtilService;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
-import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
 import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.service.third.stock.sina.api.SinaStockBaseApi;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 @Component
-public class StockScanSchedule {
-
-    @Autowired
-    private StockMapper stockMapper;
-
-    @Autowired
-    private StockUtilService stockUtilService;
-
-    @Autowired
-    private StockProperty stockConfig;
+public class StockScanSchedule extends StockBaseSchedule {
 
     private static Map<String, Map<String, String>> stockScanConfig = new LinkedHashMap<String, Map<String, String>>(){{
         put("sh", new HashMap<String, String>(){{
@@ -64,6 +52,7 @@ public class StockScanSchedule {
      * 扫描股票代码
      * 对应新浪和网易的股票代码
      */
+    @LogShowTimeAnt
     @Scheduled(cron="0 0 1 * * 1-5")
     public void stockCodeScan() {
         List<String> stockCodeList = new LinkedList<>();

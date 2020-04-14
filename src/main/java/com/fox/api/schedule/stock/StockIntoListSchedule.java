@@ -1,5 +1,6 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ public class StockIntoListSchedule extends StockBaseSchedule {
     /**
      * 每天凌晨1点中清除一次，并重新填充
      */
+    @LogShowTimeAnt
     @Scheduled(cron="0 0 1 * * ?")
     public void clearStockIntoList() {
         this.stockRedisUtil.delete(this.redisStockHash);
@@ -26,10 +28,9 @@ public class StockIntoListSchedule extends StockBaseSchedule {
     /**
      * 每5分钟检查一次,防止缓存失效或者重启导致的缓存数据丢失
      */
+    @LogShowTimeAnt
     @Scheduled(cron="0 */5 * * * 1-5")
     public void stockIntoList() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("stockIntoList:start:" + df.format(System.currentTimeMillis()));
         int startId = 0;
         if (this.stockRedisUtil.hasKey(this.redisStockList)) {
             Long listSize = this.stockRedisUtil.lSize(this.redisStockList);
@@ -62,6 +63,5 @@ public class StockIntoListSchedule extends StockBaseSchedule {
             this.stockRedisUtil.hPutAll(this.redisStockHash, stockEntityMap);
             this.stockRedisUtil.lPushAll(this.redisStockIdList, idList);
         }
-        System.out.println("stockIntoList:end:" + df.format(System.currentTimeMillis()));
     }
 }
