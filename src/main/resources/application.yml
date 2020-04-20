@@ -3,6 +3,7 @@ spring:
     include:
       - stock
       - redis
+      - log
     active: online # 当前运行环境
 
   redis: # redis配置
