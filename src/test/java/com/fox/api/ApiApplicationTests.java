@@ -3,15 +3,15 @@ package com.fox.api;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.entity.po.PageInfoPo;
 import com.fox.api.service.stock.StockInfoService;
+import com.fox.api.service.stock.StockRealtimeRankService;
 import com.fox.api.util.redis.StockRedisUtil;
-import jdk.javadoc.internal.doclets.toolkit.PropertyUtils;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.jaxb.SpringDataJaxb;
 
 @SpringBootTest
 class ApiApplicationTests {
@@ -54,6 +54,9 @@ class ApiApplicationTests {
 
     @Autowired
     private StockInfoMapper stockInfoMapper;
+
+    @Autowired
+    private StockRealtimeRankService stockRealtimeRankService;
 
     @Test
     void contextLoads() {

@@ -1,9 +1,8 @@
 package com.fox.api.enums.code;
 
-import com.fox.api.enums.code.CodeMsgEnum;
-
 /**
  * 业务错误代码
+ * @author lusongsong
  */
 public enum ReturnCode implements CodeMsgEnum {
     SUCCESS(0, "成功"),

@@ -1,9 +1,8 @@
 package com.fox.api.enums.code;
 
-import com.fox.api.enums.code.CodeMsgEnum;
-
 /**
  * 业务错误代码
+ * @author lusongsong
  */
 public enum LoginCode implements CodeMsgEnum {
     LOGIN_FAIL(1001, "登录失败");

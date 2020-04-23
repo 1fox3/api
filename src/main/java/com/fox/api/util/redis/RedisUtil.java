@@ -726,6 +726,21 @@ public abstract class RedisUtil {
     }
 
     /**
+     * 获取分值
+     * @param key
+     * @param value
+     * @return
+     */
+    public Double zScore(Object key, Object value) {
+        try {
+            return this.getRedisTemplate().opsForZSet().score(key, value);
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return Double.valueOf(0);
+        }
+    }
+
+    /**
      * 有续集增加元素
      * @param key
      * @param value
