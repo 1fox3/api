@@ -15,6 +15,7 @@ import java.util.Map;
 
 /**
  * 批量获取股票的实时信息数据
+ * @author lusongsong
  */
 @Component
 public class StockRealtimeInfoSchedule extends StockBaseSchedule {

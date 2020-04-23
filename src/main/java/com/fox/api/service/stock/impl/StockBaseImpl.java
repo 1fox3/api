@@ -28,9 +28,6 @@ public class StockBaseImpl {
     @Value("${redis.stock.realtime.stock.info.hash}")
     protected String redisRealtimeStockInfoHash;
 
-    @Value("${redis.stock.stock.heat-list}")
-    protected String redisStockHeatList;
-
     @Value("${redis.stock.realtime.stock.line.single}")
     protected String redisRealtimeStockLineSingle;
 

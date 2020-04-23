@@ -19,6 +19,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 股票按天交易
+ * @author lusongsong
+ */
 @Component
 public class StockDealDaySchedule extends StockBaseSchedule {
     @Autowired

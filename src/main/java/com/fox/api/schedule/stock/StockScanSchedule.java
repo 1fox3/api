@@ -15,6 +15,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+/**
+ * 股票代码扫描
+ * @author lusongsong
+ */
 @Component
 public class StockScanSchedule extends StockBaseSchedule {
 

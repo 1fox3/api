@@ -18,6 +18,10 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * 股票增幅统计
+ * @author lusongsong
+ */
 @Component
 public class StockUpDownSchedule extends StockBaseSchedule {
     @Autowired
@@ -49,22 +53,27 @@ public class StockUpDownSchedule extends StockBaseSchedule {
                 continue;
             }
 
+            /**
+             * 过滤掉港股
+             * 过滤掉已退市的
+             * 过滤掉不是股票类型的
+             */
+            if (3 == stockEntity.getStockMarket() || 1 == stockEntity.getStockStatus()
+                    || 2 != stockEntity.getStockType()) {
+                continue;
+            }
+
             StockUpDownEntity stockUpDownEntity = stockUpDownMapper.getByStockId(stockEntity.getId());
             StockLimitUpDownEntity stockLimitUpDownEntity =
                     stockLimitUpDownMapper.getByStockId(stockEntity.getId());
 
-            if (3 == stockEntity.getStockMarket() //过滤掉港股
-                    || 1 == stockEntity.getStockStatus() //过滤掉已退市的
-                    || 2 != stockEntity.getStockType() //过滤掉不是股票类型的
-            ) {
-                if (null != stockUpDownEntity) {
-                    stockUpDownMapper.deleteById(stockUpDownEntity.getId());
-                }
-                if (null != stockLimitUpDownEntity) {
-                    stockLimitUpDownMapper.deleteById(stockLimitUpDownEntity.getId());
-                }
-                continue;
+            if (null != stockUpDownEntity) {
+                stockUpDownMapper.deleteById(stockUpDownEntity.getId());
             }
+            if (null != stockLimitUpDownEntity) {
+                stockLimitUpDownMapper.deleteById(stockLimitUpDownEntity.getId());
+            }
+
             if (null == stockUpDownEntity) {
                 stockUpDownEntity = new StockUpDownEntity();
             }

@@ -7,8 +7,10 @@ import com.fox.api.util.redis.StockRedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.text.SimpleDateFormat;
-
+/**
+ * 计划任务基类
+ * @author lusongsong
+ */
 public class StockBaseSchedule {
     @Autowired
     protected StockMapper stockMapper;
@@ -33,9 +35,6 @@ public class StockBaseSchedule {
 
     @Value("${redis.stock.stock.id-list}")
     protected String redisStockIdList;
-
-    @Value("${redis.stock.stock.heat-list}")
-    protected String redisStockHeatList;
 
     @Value("${redis.stock.realtime.stock.info.hash}")
     protected String redisRealtimeStockInfoHash;

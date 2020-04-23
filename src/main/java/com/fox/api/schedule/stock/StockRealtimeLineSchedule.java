@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * 批量获取股票的实时线图数据
+ * @author lusongsong
  */
 @Component
 public class StockRealtimeLineSchedule extends StockBaseSchedule {

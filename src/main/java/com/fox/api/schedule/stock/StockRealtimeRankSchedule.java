@@ -11,6 +11,7 @@ import java.util.*;
 
 /**
  * 股票实时信息数据
+ * @author lusongsong
  */
 @Component
 public class StockRealtimeRankSchedule extends StockBaseSchedule {

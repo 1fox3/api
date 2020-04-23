@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 关注列表
+ * @author lusongsong
+ */
 @CrossOrigin(origins = "*")//处理跨域问题
 @RestController
 public class FollowController {

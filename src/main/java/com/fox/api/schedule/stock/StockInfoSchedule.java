@@ -11,6 +11,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 股票信息同步任务
+ * @author lusongsong
+ */
 @Component
 public class StockInfoSchedule extends StockBaseSchedule {
     @Autowired
@@ -20,10 +24,10 @@ public class StockInfoSchedule extends StockBaseSchedule {
     private StockInfoService stockInfoService;
 
     /**
-     * 同步所有的按天交易信息数据
+     * 同步所有股票的信息
      */
     @LogShowTimeAnt
-    @Scheduled(cron="0 45 11 * * 1-5")
+    @Scheduled(cron="0 0 5 * * 1-5")
     public void stockInfo() {
         Integer onceLimit = 200;
         Integer stockId = 0;
