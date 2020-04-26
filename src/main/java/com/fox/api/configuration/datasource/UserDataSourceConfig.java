@@ -1,7 +1,6 @@
 package com.fox.api.configuration.datasource;
 
 import com.fox.api.annotation.mapper.UserMapperConfig;
-import com.fox.api.configuration.datasource.AbstractDataSourceConfig;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
@@ -14,6 +13,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
+/**
+ * 用户信息相关数据源
+ * @author lusongsong
+ */
 @Configuration
 @MapperScan(basePackages = {"com.fox"}, annotationClass = UserMapperConfig.class, sqlSessionFactoryRef = "userSqlSessionFactory")
 public class UserDataSourceConfig extends AbstractDataSourceConfig {

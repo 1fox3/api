@@ -23,6 +23,11 @@ spring:
       username: root
       password:
       driver-class-name: com.mysql.cj.jdbc.Driver
+    quartz:
+      url: jdbc:mysql://127.0.0.1:3306/quartz?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&characterEncoding=utf-8
+      username: root
+      password:
+      driver-class-name: com.mysql.cj.jdbc.Driver
 
 # 阿里接口账号信息
 ali:
@@ -42,6 +47,8 @@ mybatis:
     mapper-location: classpath:mybatis/mapper/user/*.xml
   api:
     mapper-location: classpath:mybatis/mapper/api/*.xml
+  quartz:
+    mapper-location: classpath:mybatis/mapper/quartz/*.xml
 
 
 

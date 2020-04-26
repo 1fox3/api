@@ -44,6 +44,17 @@ spring:
           max-idle: 8
           max-wait: 1000ms
 
+  quartz:
+    jdbc:
+      initialize-schema: never
+    job-store-type: jdbc
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: "clusteredScheduler"
+            instanceId: "AUTO"
+
 login:
   aes:
     key: cdb2b4b4bd6a4a710757ceaf5461d9bc

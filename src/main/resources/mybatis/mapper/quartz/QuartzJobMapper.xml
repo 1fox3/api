@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.quartz.mapper.QuartzJobMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.quartz.entity.QuartzJobEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="job_key" property="jobKey" jdbcType="VARCHAR" />
+        <result column="job_name" property="jobName" jdbcType="VARCHAR" />
+        <result column="job_status" property="jobStatus" jdbcType="VARCHAR" />
+        <result column="job_group" property="jobGroup" jdbcType="VARCHAR" />
+        <result column="cron_expr" property="cronExpr" jdbcType="VARCHAR" />
+        <result column="note" property="note" jdbcType="VARCHAR" />
+        <result column="bean_name" property="beanName" jdbcType="VARCHAR" />
+        <result column="method_name" property="methodName" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.dao.quartz.entity.QuartzJobEntity" keyColumn="id"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_quartz_job (
+            job_key,
+            job_name,
+            job_status,
+            job_group,
+            cron_expr,
+            note,
+            bean_name,
+            method_name
+        )
+        VALUES
+            (
+                #{jobKey},
+                #{jobName},
+                #{jobStatus},
+                #{jobGroup},
+                #{cronExpr},
+                #{note},
+                #{beanName},
+                #{methodName}
+            );
+    </insert>
+
+    <select id="getById" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_quartz_job
+        WHERE
+            id = #{id};
+    </select>
+
+    <update id="updateStatusById">
+        UPDATE
+            t_quartz_job
+        SET job_status = #{jobStatus}
+        WHERE
+            id = #{id};
+    </update>
+
+    <select id="getListByStatus" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_quartz_job
+        WHERE
+            id > #{startId}
+            AND
+            job_status = #{jobStatus}
+        LIMIT ${num};
+    </select>
+</mapper>
