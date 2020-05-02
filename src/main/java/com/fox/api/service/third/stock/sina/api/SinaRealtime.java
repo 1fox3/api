@@ -4,6 +4,7 @@ import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StringUtil;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
@@ -12,6 +13,7 @@ import java.util.*;
  * 实时信息
  * @author lusongsong
  */
+@Component
 public class SinaRealtime extends SinaStockBaseApi {
     /**
      * 接口链接,例：http://hq.sinajs.cn/list=sh603383,sh601519

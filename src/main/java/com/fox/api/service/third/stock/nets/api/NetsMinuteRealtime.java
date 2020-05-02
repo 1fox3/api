@@ -7,12 +7,15 @@ import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeNodePo;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
 
+@Component
 /**
  * 实时分钟信息
+ * @author lusongsong
  */
 public class NetsMinuteRealtime extends NetsStockBaseApi {
     //样例链接

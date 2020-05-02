@@ -16,11 +16,11 @@ import java.util.Map;
  */
 @Component
 public class StockIntoListSchedule extends StockBaseSchedule {
+    @LogShowTimeAnt
+//    @Scheduled(cron="0 0 8 * * ?")
     /**
      * 每天早晨8点中清除一次，并重新填充
      */
-    @LogShowTimeAnt
-    @Scheduled(cron="0 0 8 * * ?")
     public void clearStockIntoList() {
         this.stockRedisUtil.delete(this.redisStockHash);
         this.stockRedisUtil.delete(this.redisStockList);
@@ -28,11 +28,11 @@ public class StockIntoListSchedule extends StockBaseSchedule {
         this.stockIntoList();
     }
 
+    @LogShowTimeAnt
+//    @Scheduled(cron="0 0 9 * * ?")
     /**
      * 每天早晨9点删除数据信息
      */
-    @LogShowTimeAnt
-    @Scheduled(cron="0 0 9 * * ?")
     public void clearStockDealList() {
         this.stockRedisUtil.delete(this.redisRealtimeStockInfoHash);
         this.stockRedisUtil.delete(this.redisRealtimeStockLineHash);
@@ -42,11 +42,12 @@ public class StockIntoListSchedule extends StockBaseSchedule {
         this.stockIntoList();
     }
 
+
+    @LogShowTimeAnt
+//    @Scheduled(cron="0 */5 * * * 1-5")
     /**
      * 每5分钟检查一次,防止缓存失效或者重启导致的缓存数据丢失
      */
-    @LogShowTimeAnt
-    @Scheduled(cron="0 */5 * * * 1-5")
     public void stockIntoList() {
         int startId = 0;
         if (this.stockRedisUtil.hasKey(this.redisStockList)) {

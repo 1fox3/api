@@ -21,11 +21,11 @@ public class StockRealtimeLineSchedule extends StockBaseSchedule {
     @Autowired
     private StockRealtimeService stockRealtimeService;
 
+    @LogShowTimeAnt
+//    @Scheduled(cron="0/5 * 9,10,11,13,14 * * 1-5")
     /**
      * 每5秒钟启动一次,暂时不执行，时效性不好
      */
-    @LogShowTimeAnt
-//    @Scheduled(cron="0/5 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeLine() {
         //需要开启的线程数量
         Integer threadNum = 50;
@@ -61,7 +61,8 @@ public class StockRealtimeLineSchedule extends StockBaseSchedule {
                 break;
             }
             try {
-                Thread.sleep(1000);   //休眠
+                //休眠
+                Thread.sleep(1000);
             } catch (Exception e) {
             }
         }

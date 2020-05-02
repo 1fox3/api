@@ -33,11 +33,11 @@ public class StockDealDaySchedule extends StockBaseSchedule {
         put("klinederc", 1);
     }};
 
+    @LogShowTimeAnt
+//    @Scheduled(cron="0 5 15 * * 1-5")
     /**
      * 同步所有的按天交易信息数据
      */
-    @LogShowTimeAnt
-//    @Scheduled(cron="0 5 15 * * 1-5")
     public void syncTotalDealDayInfo() {
         //截断表
         stockDealDayMapper.truncate();
@@ -107,11 +107,11 @@ public class StockDealDaySchedule extends StockBaseSchedule {
         return stockRealtimePo.getDealMoney();
     }
 
+    @LogShowTimeAnt
+//    @Scheduled(cron="0 35 17 * * 1-5")
     /**
      * 同步当天的交易
      */
-    @LogShowTimeAnt
-    @Scheduled(cron="0 35 17 * * 1-5")
     public void syncCurrentDealDayInfo() {
         String today = DateUtil.getCurrentDate();
         String startDate, endDate;

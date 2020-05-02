@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author lusongsong
  */
 @SpringBootApplication
-@EnableScheduling
+//@EnableScheduling
 @EnableCaching
 @ComponentScan(basePackages = {"com.fox.api.*"})
 public class ApiApplication {

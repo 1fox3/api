@@ -7,7 +7,6 @@ import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,22 +18,24 @@ import java.util.Map;
  */
 @Component
 public class StockRealtimeInfoSchedule extends StockBaseSchedule {
-    /**
-     * 每5秒钟启动一次
-     */
+
     @LogShowTimeAnt
-    @Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
+//    @Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
+    /**
+     * 获取实时信息
+     */
     public void stockRealtimeInfo() {
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
-        Map<String, StockRealtimePo> stockRealtimePoMap = new HashMap<>();
+        Map<String, StockRealtimePo> stockRealtimePoMap = new HashMap<>(onceLimit);
         SinaRealtime sinaRealtime = new SinaRealtime();
         for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit) {
             List<Object> stockEntityList = this.stockRedisUtil.lRange(this.redisStockList, i, i + onceLimit - 1);
             if (null == stockEntityList || 0 >= stockEntityList.size()) {
                 continue;
             }
-            if (0 == i) {//3个重要指数也更新
+            //3个重要指数也更新
+            if (0 == i) {
                 List<Integer> topIndexList = this.stockProperty.getTopIndex();
                 for (Integer stockId : topIndexList) {
                     stockEntityList.add(this.stockMapper.getById(stockId));

@@ -23,11 +23,11 @@ public class StockInfoSchedule extends StockBaseSchedule {
     @Autowired
     private StockInfoService stockInfoService;
 
+    @LogShowTimeAnt
+//    @Scheduled(cron="0 0 5 * * 1-5")
     /**
      * 同步所有股票的信息
      */
-    @LogShowTimeAnt
-    @Scheduled(cron="0 0 5 * * 1-5")
     public void stockInfo() {
         Integer onceLimit = 200;
         Integer stockId = 0;

@@ -17,10 +17,10 @@ import java.util.*;
 public class StockRealtimeRankSchedule extends StockBaseSchedule {
 
     /**
-     * 没分钟执行一次
+     * 每分钟执行一次
      */
     @LogShowTimeAnt
-    @Scheduled(cron="0 * 9,10,11,13,14 * * 1-5")
+    //@Scheduled(cron="0 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeRank() {
         Long stockIdListSize = this.stockRedisUtil.lSize(this.redisStockIdList);
         Long onceLimit = (long)600;
@@ -105,8 +105,11 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
         }
     }
 
+    /**
+     * 实时增幅统计
+     */
     @LogShowTimeAnt
-    @Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
+    //@Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeUptickRateStatistics() {
         Map<String, Integer> uptickRateStatisticsMap = new  LinkedHashMap<>();
         Map<String, List<Double>> scoreMap = new LinkedHashMap<String, List<Double>>(){{
