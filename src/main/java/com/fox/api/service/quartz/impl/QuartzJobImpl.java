@@ -1,225 +1,121 @@
 package com.fox.api.service.quartz.impl;
 
-import com.fox.api.configuration.quartz.QuartzJobFactory;
 import com.fox.api.dao.quartz.entity.QuartzJobEntity;
 import com.fox.api.dao.quartz.mapper.QuartzJobMapper;
+import com.fox.api.enums.code.quartz.QuartzJobCode;
+import com.fox.api.exception.self.ServiceException;
 import com.fox.api.service.quartz.QuartzJobService;
-import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * 计划任务管理
  * @author lusongsong
  */
-@Service("quartzJobService")
+@Service
 public class QuartzJobImpl implements QuartzJobService {
     private static final Logger logger = LoggerFactory.getLogger(QuartzJobImpl.class);
+
+    /**
+     * 允许删除的任务状态
+     */
+    private static List<String> allowDeleteStatusList = new ArrayList<>(Arrays.asList("init", "deleted"));
 
     @Autowired
     private QuartzJobMapper quartzJobMapper;
 
-    @Autowired
-    private Scheduler scheduler;
-
     /**
-     * 获取任务唯一标识
+     * 添加任务信息
      * @param quartzJobEntity
      * @return
+     * @throws ServiceException
      */
-    private JobKey getJobKey(QuartzJobEntity quartzJobEntity) {
-        return JobKey.jobKey(quartzJobEntity.getJobKey(), quartzJobEntity.getJobGroup());
-    }
-
     @Override
-    public Integer insert(QuartzJobEntity quartzJobEntity) {
-        TriggerKey triggerKey = TriggerKey.triggerKey(quartzJobEntity.getJobKey(), quartzJobEntity.getJobGroup());
-
+    public Integer insert(QuartzJobEntity quartzJobEntity) throws ServiceException {
         try {
-            CronTrigger cronTrigger = (CronTrigger) scheduler.getTrigger(triggerKey);
-            if (null != cronTrigger) {
-                return null;
+            quartzJobEntity.setJobStatus("init");
+            Integer insertResult = quartzJobMapper.insert(quartzJobEntity);
+            if (1 == insertResult) {
+                return quartzJobEntity.getId();
             }
-        } catch (SchedulerException e) {
-            logger.error(e.getStackTrace().toString());
-            return null;
-        }
-
-        quartzJobEntity.setJobStatus("init");
-        Integer insertResult = quartzJobMapper.insert(quartzJobEntity);
-        if (1 == insertResult) {
-            //启动任务
-            this.startJob(quartzJobEntity);
-            return quartzJobEntity.getId();
+        } catch (Exception e) {
+            throw new ServiceException(1, e.getMessage());
         }
         return null;
     }
 
-    @Override
-    public QuartzJobEntity getById(Integer jobId) {
-        return quartzJobMapper.getById(jobId);
-    }
-
     /**
-     * 启动任务
+     * 更新任务信息
      * @param quartzJobEntity
      * @return
      */
     @Override
-    public Boolean startJob(QuartzJobEntity quartzJobEntity) {
-        JobDetail jobDetail = JobBuilder.newJob(QuartzJobFactory.class)
-                .withIdentity(quartzJobEntity.getJobKey(), quartzJobEntity.getJobGroup())
-                .build();
-        jobDetail.getJobDataMap().put("scheduleJobEntity", quartzJobEntity);
-        CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(quartzJobEntity.getCronExpr());
-        CronTrigger cronTrigger = TriggerBuilder.newTrigger()
-                .withIdentity(quartzJobEntity.getJobKey(), quartzJobEntity.getJobGroup())
-                .withSchedule(cronScheduleBuilder).build();
-
+    public Boolean updateJob(QuartzJobEntity quartzJobEntity) {
         try {
-            Date date = scheduler.scheduleJob(jobDetail,cronTrigger);
-            if (null != date) {
-                quartzJobMapper.updateStatusById(quartzJobEntity.getId(), "running");
-                return true;
-            }
-        } catch (SchedulerException e) {
-            logger.error(e.getMessage());
+            return quartzJobMapper.update(quartzJobEntity);
+        } catch (Exception e) {
+            throw new ServiceException(1, e.getMessage());
         }
-        return false;
     }
 
     /**
-     * 启动任务
-     * @param jobId
-     * @return
-     */
-    @Override
-    public Boolean startJob(Integer jobId) {
-        QuartzJobEntity quartzJobEntity = this.getById(jobId);
-        if (null == quartzJobEntity) {
-            return false;
-        }
-        return this.startJob(quartzJobEntity);
-    }
-
-    /**
-     * 暂停任务
-     * @param jobId
-     * @return
-     */
-    @Override
-    public Boolean pauseJob(Integer jobId) {
-        QuartzJobEntity quartzJobEntity = this.getById(jobId);
-        if (null == quartzJobEntity) {
-            return false;
-        }
-        return this.pauseJob(quartzJobEntity);
-    }
-
-    /**
-     * 暂停任务
-     * @param quartzJobEntity
-     * @return
-     */
-    @Override
-    public Boolean pauseJob(QuartzJobEntity quartzJobEntity) {
-        try {
-            scheduler.pauseJob(this.getJobKey(quartzJobEntity));
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        quartzJobMapper.updateStatusById(quartzJobEntity.getId(), "paused");
-        return true;
-    }
-
-    /**
-     * 继续运行
-     * @param jobId
-     * @return
-     */
-    @Override
-    public Boolean resumeJob(Integer jobId) {
-        QuartzJobEntity quartzJobEntity = this.getById(jobId);
-        if (null == quartzJobEntity) {
-            return false;
-        }
-        return this.resumeJob(quartzJobEntity);
-    }
-
-    /**
-     * 继续运行
-     * @param quartzJobEntity
-     * @return
-     */
-    @Override
-    public Boolean resumeJob(QuartzJobEntity quartzJobEntity) {
-        try {
-            scheduler.resumeJob(this.getJobKey(quartzJobEntity));
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        quartzJobMapper.updateStatusById(quartzJobEntity.getId(), "running");
-        return true;
-    }
-
-    /**
-     * 删除任务
+     * 删除任务信息
      * @param jobId
      * @return
      */
     @Override
     public Boolean deleteJob(Integer jobId) {
-        QuartzJobEntity quartzJobEntity = this.getById(jobId);
-        if (null == quartzJobEntity) {
-            return false;
+        try {
+            QuartzJobEntity quartzJobEntity = this.getById(jobId);
+            if (null == quartzJobEntity
+                    || !QuartzJobImpl.allowDeleteStatusList.contains(quartzJobEntity.getJobStatus())) {
+                throw new ServiceException(QuartzJobCode.QUARTZ_JOB_DENY_DELETE);
+            }
+            return quartzJobMapper.updateStatusById(jobId, "useless");
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException(1, e.getMessage());
         }
-        return this.deleteJob(quartzJobEntity);
     }
 
     /**
-     * 删除任务
-     * @param quartzJobEntity
+     * 获取任务信息
+     * @param jobId
      * @return
      */
     @Override
-    public Boolean deleteJob(QuartzJobEntity quartzJobEntity) {
+    public QuartzJobEntity getById(Integer jobId) {
         try {
-            scheduler.deleteJob(this.getJobKey(quartzJobEntity));
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-            return false;
+            QuartzJobEntity quartzJobEntity = quartzJobMapper.getById(jobId);
+            if (null == quartzJobEntity) {
+                throw new ServiceException(QuartzJobCode.QUARTZ_JOB_NOT_FOUND);
+            }
+            return quartzJobEntity;
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException(1, e.getMessage());
         }
-
-        quartzJobMapper.updateStatusById(quartzJobEntity.getId(), "deleted");
-        return true;
     }
 
     /**
-     * 加载所有正在运行的任务
+     * 根据任务分组获取任务列表
+     * @param jobGroup
+     * @return
      */
     @Override
-    public void loadTotalQuartzJob() {
-        Integer startId = 0;
-        while (true) {
-            List<QuartzJobEntity> list = quartzJobMapper.getListByStatus("running", startId, 1);
-            if (null == list || 0 == list.size()) {
-                break;
-            }
-
-            for (QuartzJobEntity quartzJobEntity : list) {
-                startId = quartzJobEntity.getId();
-                this.startJob(quartzJobEntity);
-            }
+    public List<QuartzJobEntity> getListByGroup(String jobGroup) {
+        try {
+            return quartzJobMapper.getListByGroup(jobGroup);
+        } catch (Exception e) {
+            throw new ServiceException(1, e.getMessage());
         }
     }
-
 }

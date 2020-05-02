@@ -11,6 +11,7 @@
         <result column="note" property="note" jdbcType="VARCHAR" />
         <result column="bean_name" property="beanName" jdbcType="VARCHAR" />
         <result column="method_name" property="methodName" jdbcType="VARCHAR" />
+        <result column="use_lock" property="useLock" jdbcType="INTEGER" />
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
@@ -25,7 +26,8 @@
             cron_expr,
             note,
             bean_name,
-            method_name
+            method_name,
+            use_lock
         )
         VALUES
             (
@@ -36,7 +38,8 @@
                 #{cronExpr},
                 #{note},
                 #{beanName},
-                #{methodName}
+                #{methodName},
+                #{useLock}
             );
     </insert>
 
@@ -57,7 +60,7 @@
             id = #{id};
     </update>
 
-    <select id="getListByStatus" resultMap="BasicResultMap">
+    <select id="getLoadedJobList" resultMap="BasicResultMap">
         SELECT
             *
         FROM
@@ -65,7 +68,37 @@
         WHERE
             id > #{startId}
             AND
-            job_status = #{jobStatus}
+            job_status IN ('running', 'paused')
         LIMIT ${num};
     </select>
+
+    <select id="getListByGroup" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_quartz_job
+        WHERE
+            job_status != 'useless'
+        <if test="null != jobGroup and jobGroup.length() > 0" >
+            AND
+                job_group = #{jobGroup}
+        </if>
+        ORDER BY
+         update_time DESC
+    </select>
+
+    <update id="update" parameterType="com.fox.api.dao.stock.entity.StockEntity">
+        UPDATE t_quartz_job
+        SET
+            job_key = #{jobKey},
+            job_name = #{jobName},
+            job_group = #{jobGroup},
+            cron_expr = #{cronExpr},
+            note = #{note},
+            bean_name = #{beanName},
+            method_name = #{methodName},
+            use_lock = #{useLock}
+        WHERE
+            id = #{id};
+    </update>
 </mapper>

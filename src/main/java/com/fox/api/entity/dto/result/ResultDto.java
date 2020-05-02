@@ -27,4 +27,12 @@ public class ResultDto<T> {
     public static <T> ResultDto fail(CodeMsgEnum Obj) {
         return new ResultDto(Obj.getCode(), Obj.getMsg(), null);
     }
+
+    public static <T> ResultDto fail(Integer code, String msg) {
+        return new ResultDto(code, msg, null);
+    }
+
+    public static <T> ResultDto fail(Integer code, String msg, Object data) {
+        return new ResultDto(code, msg, data);
+    }
 }

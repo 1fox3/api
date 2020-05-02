@@ -7,13 +7,19 @@ import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.schedule.TestJob;
 import com.fox.api.service.quartz.QuartzJobService;
+import com.fox.api.service.quartz.QuartzService;
 import com.fox.api.service.stock.StockInfoService;
 import com.fox.api.service.stock.StockRealtimeRankService;
+import com.fox.api.util.ApplicationContextUtil;
 import com.fox.api.util.redis.StockRedisUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Method;
 
 @SpringBootTest
 class ApiApplicationTests {
@@ -72,60 +78,7 @@ class ApiApplicationTests {
     void contextLoads() {
     }
 
-    //@Test
-    void redisTest() {
-        QuartzJobEntity quartzJobEntity = new QuartzJobEntity();
-        quartzJobEntity.setJobKey("1");
-        quartzJobEntity.setJobName("测试任务1");
-        quartzJobEntity.setJobStatus("normal");
-        quartzJobEntity.setJobGroup("test");
-        quartzJobEntity.setCronExpr("* * * * * ?");
-        quartzJobEntity.setNote("随便说点什么吧");
-        quartzJobEntity.setBeanName("testJob");
-        quartzJobEntity.setMethodName("execute");
-        quartzJobService.insert(quartzJobEntity);
-        Integer jobId = quartzJobEntity.getId();
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        quartzJobService.startJob(jobId);
-        System.out.println("111111111111111111");
-
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        quartzJobService.pauseJob(jobId);
-        System.out.println("222222222222222222");
-
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        quartzJobService.resumeJob(jobId);
-        System.out.println("3333333333333333333");
-
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        quartzJobService.deleteJob(jobId);
-        System.out.println("444444444444444444444444");
-
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    @Test
+    void redisTest() throws Exception {
     }
 }

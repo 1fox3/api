@@ -34,11 +34,24 @@ public interface QuartzJobMapper {
     Boolean updateStatusById(Integer id, String jobStatus);
 
     /**
-     * 根据任务状态获取任务列表
-     * @param jobStatus
+     * 获取已加载的任务列表
      * @param startId
      * @param num
      * @return
      */
-    List<QuartzJobEntity> getListByStatus(String jobStatus, Integer startId, Integer num);
+    List<QuartzJobEntity> getLoadedJobList(Integer startId, Integer num);
+
+    /**
+     * 根据分组获取任务列表
+     * @param jobGroup
+     * @return
+     */
+    List<QuartzJobEntity> getListByGroup(String jobGroup);
+
+    /**
+     * 更新任务
+     * @param quartzJobEntity
+     * @return
+     */
+    Boolean update(QuartzJobEntity quartzJobEntity);
 }
