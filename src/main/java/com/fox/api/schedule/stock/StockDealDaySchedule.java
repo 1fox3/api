@@ -113,6 +113,10 @@ public class StockDealDaySchedule extends StockBaseSchedule {
      * 同步当天的交易
      */
     public void syncCurrentDealDayInfo() {
+        //非交易日不处理
+        if (!this.todayIsDealDate()) {
+            return;
+        }
         String today = DateUtil.getCurrentDate();
         String startDate, endDate;
         startDate = today;

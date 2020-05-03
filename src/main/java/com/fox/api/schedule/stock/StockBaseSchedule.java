@@ -3,6 +3,7 @@ package com.fox.api.schedule.stock;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.property.stock.StockProperty;
 import com.fox.api.service.stock.StockUtilService;
+import com.fox.api.util.StockUtil;
 import com.fox.api.util.redis.StockRedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,4 +66,23 @@ public class StockBaseSchedule {
 
     @Autowired
     protected StockProperty stockConfig;
+
+    /**
+     * 主要处理的信息股市，沪，深，已沪为例
+     */
+    protected String mainStockMarket = "sh";
+
+    /**
+     * 主要处理的信息股市id
+     */
+    protected Integer mainStockMarketId = 1;
+
+    /**
+     * 今天是否为交易日
+     * @return
+     */
+    protected Boolean todayIsDealDate()
+    {
+        return StockUtil.todayIsDealDate(mainStockMarket);
+    }
 }

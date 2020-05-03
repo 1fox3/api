@@ -39,6 +39,9 @@ public class StockUpDownSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     //@Scheduled(cron="0 5 15 * * 1-5")
     public void stockUpDown() {
+        if (!this.todayIsDealDate()) {
+            return;
+        }
         int bigId = stockMapper.getLastId();
         List<Integer> scopeList = Arrays.asList(10, 30, 50, 100, 200, 300);
         int limitLen = scopeList.get(scopeList.size() - 1);

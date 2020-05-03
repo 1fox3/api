@@ -22,6 +22,9 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     //@Scheduled(cron="0 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeRank() {
+        if (!this.todayIsDealDate()) {
+            return;
+        }
         Long stockIdListSize = this.stockRedisUtil.lSize(this.redisStockIdList);
         Long onceLimit = (long)600;
         for (Long i = Long.valueOf(0); i < stockIdListSize; i += onceLimit) {
@@ -111,6 +114,9 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     //@Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeUptickRateStatistics() {
+        if (!this.todayIsDealDate()) {
+            return;
+        }
         Map<String, Integer> uptickRateStatisticsMap = new  LinkedHashMap<>();
         Map<String, List<Double>> scoreMap = new LinkedHashMap<String, List<Double>>(){{
             put("up", Arrays.asList(0.00001, 1.0));

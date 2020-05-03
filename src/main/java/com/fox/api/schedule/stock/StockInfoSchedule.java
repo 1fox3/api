@@ -5,6 +5,8 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockInfoEntity;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.service.stock.StockInfoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,8 @@ import java.util.List;
  */
 @Component
 public class StockInfoSchedule extends StockBaseSchedule {
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private StockInfoMapper stockInfoMapper;
 
@@ -53,8 +57,8 @@ public class StockInfoSchedule extends StockBaseSchedule {
                     }
                     Thread.sleep(2000);
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println(stockId);
+                    logger.error(stockId.toString());
+                    logger.error(e.getMessage());
                 }
             }
         }

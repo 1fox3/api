@@ -25,6 +25,9 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
      * 获取实时信息
      */
     public void stockRealtimeInfo() {
+        if (!this.todayIsDealDate()) {
+            return;
+        }
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
         Map<String, StockRealtimePo> stockRealtimePoMap = new HashMap<>(onceLimit);

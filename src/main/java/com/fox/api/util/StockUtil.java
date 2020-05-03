@@ -79,4 +79,14 @@ public class StockUtil {
         }
         return "";
     }
+
+    /**
+     * 判断今天是否为交易日
+     * @param stockMarket
+     * @return
+     */
+    public static Boolean todayIsDealDate(String stockMarket) {
+        String today = DateUtil.getCurrentDate();
+        return today.equals(StockUtil.getLastDealDate(stockMarket));
+    }
 }

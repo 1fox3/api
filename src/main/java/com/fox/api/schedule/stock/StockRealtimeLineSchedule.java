@@ -27,6 +27,9 @@ public class StockRealtimeLineSchedule extends StockBaseSchedule {
      * 每5秒钟启动一次,暂时不执行，时效性不好
      */
     public void stockRealtimeLine() {
+        if (!this.todayIsDealDate()) {
+            return;
+        }
         //需要开启的线程数量
         Integer threadNum = 50;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);

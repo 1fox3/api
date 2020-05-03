@@ -22,6 +22,9 @@ public class StockIntoListSchedule extends StockBaseSchedule {
      * 每天早晨8点中清除一次，并重新填充
      */
     public void clearStockIntoList() {
+        if (!this.todayIsDealDate()) {
+            return;
+        }
         this.stockRedisUtil.delete(this.redisStockHash);
         this.stockRedisUtil.delete(this.redisStockList);
         this.stockRedisUtil.delete(this.redisStockIdList);
@@ -34,11 +37,16 @@ public class StockIntoListSchedule extends StockBaseSchedule {
      * 每天早晨9点删除数据信息
      */
     public void clearStockDealList() {
+        if (!this.todayIsDealDate()) {
+            return;
+        }
         this.stockRedisUtil.delete(this.redisRealtimeStockInfoHash);
         this.stockRedisUtil.delete(this.redisRealtimeStockLineHash);
         this.stockRedisUtil.delete(this.redisRealtimeRankUptickRateZSet);
         this.stockRedisUtil.delete(this.redisRealtimeRankSurgeRateZSet);
         this.stockRedisUtil.delete(this.redisRealtimeRankDealNumZSet);
+        this.stockRedisUtil.delete(this.redisRealtimeRankDealMoneyZSet);
+        this.stockRedisUtil.delete(this.stockRealtimeStockUptickRateStatistics);
         this.stockIntoList();
     }
 
