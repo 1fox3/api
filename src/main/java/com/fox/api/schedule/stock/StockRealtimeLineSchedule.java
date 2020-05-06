@@ -27,7 +27,7 @@ public class StockRealtimeLineSchedule extends StockBaseSchedule {
      * 每5秒钟启动一次,暂时不执行，时效性不好
      */
     public void stockRealtimeLine() {
-        if (!this.todayIsDealDate()) {
+        if (!this.isDealTime()) {
             return;
         }
         //需要开启的线程数量

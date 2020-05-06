@@ -25,7 +25,7 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
      * 获取实时信息
      */
     public void stockRealtimeInfo() {
-        if (!this.todayIsDealDate()) {
+        if (!this.isDealTime()) {
             return;
         }
         Integer onceLimit = 200;

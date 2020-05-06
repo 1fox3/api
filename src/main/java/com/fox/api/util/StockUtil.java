@@ -1,13 +1,8 @@
 package com.fox.api.util;
 
 import com.fox.api.dao.stock.entity.StockEntity;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
-import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.util.redis.StockRedisUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,21 +17,49 @@ public class StockUtil {
      */
     private static String stockMarketLastDealDateCacheKey = "stockMarketLastDealDate";
 
-    @Autowired
-    private static StockRedisUtil stockRedisUtil;
+    /**
+     * 沪
+     */
+    private static Integer shStockMarketId = 1;
+    private static String shStockMarket = "sh";
+    /**
+     * 深
+     */
+    private static Integer szStockMarketId = 2;
+    private static String szStockMarket = "sz";
+    /**
+     * 港
+     */
+    private static Integer hkStockMarketId = 3;
+    private static String hkStockMarket = "hk";
+
+    /**
+     * 沪深交易起止时间
+     */
+    private static String shMorningDealStartTime = "09:30:00";
+    private static String shMorningDealEndTime = "11:30:00";
+    private static String shAfternoonDealStartTime = "13:00:00";
+    private static String shAfternoonDealEndTime = "15:00:00";
+    /**
+     * 港交易起止时间
+     */
+    private static String hkMorningDealStartTime = "09:30:00";
+    private static String hkMorningDealEndTime = "12:00:00";
+    private static String hkAfternoonDealStartTime = "13:00:00";
+    private static String hkAfternoonDealEndTime = "16:10:00";
 
     /**
      * 获取股票集市字符串
      * @return
      */
     public static String getStockMarketStr(Integer stockMarket) {
-        if (2 == stockMarket) {
-            return "sz";
+        if (szStockMarketId.equals(stockMarket)) {
+            return szStockMarket;
         }
-        if (3 == stockMarket) {
-            return "hk";
+        if (hkStockMarketId.equals(stockMarket)) {
+            return hkStockMarket;
         }
-        return "sh";
+        return shStockMarket;
     }
 
     /**
@@ -71,8 +94,9 @@ public class StockUtil {
     public static String getLastDealDate(String stockMarket) {
         String cacheKey = StockUtil.getLastDealDateCacheKey(stockMarket);
         String lastDealDate = "";
-        if (StockUtil.stockRedisUtil.hasKey(cacheKey)) {
-            lastDealDate = (String)StockUtil.stockRedisUtil.get(cacheKey);
+        StockRedisUtil stockRedisUtil = (StockRedisUtil)ApplicationContextUtil.getBean("stockRedisUtil");
+        if (stockRedisUtil.hasKey(cacheKey)) {
+            lastDealDate = (String)stockRedisUtil.get(cacheKey);
             if (!lastDealDate.equals("")) {
                 return lastDealDate;
             }
@@ -88,5 +112,46 @@ public class StockUtil {
     public static Boolean todayIsDealDate(String stockMarket) {
         String today = DateUtil.getCurrentDate();
         return today.equals(StockUtil.getLastDealDate(stockMarket));
+    }
+
+    /**
+     * 判定当前是否为交易时间
+     * @param stockMarket
+     * @return
+     */
+    public static Boolean isDealTime(String stockMarket) {
+        if (!StockUtil.todayIsDealDate(stockMarket)) {
+            return false;
+        }
+
+        String currentTime = DateUtil.getCurrentTime(DateUtil.TIME_FORMAT_2);
+
+        if (shStockMarket.equals(stockMarket) || szStockMarket.equals(stockMarket)) {
+            //上午交易时间
+            if ((currentTime.compareTo(shMorningDealStartTime) >= 0
+                    && currentTime.compareTo(shMorningDealEndTime) <=0)) {
+                return true;
+            }
+
+            //下午交易时间
+            if (currentTime.compareTo(shAfternoonDealStartTime) >= 0
+                    && currentTime.compareTo(shAfternoonDealEndTime) <=0) {
+                return true;
+            }
+        }
+
+        if (hkStockMarket.equals(stockMarket)) {
+            //上午交易时间
+            if ((currentTime.compareTo(hkMorningDealStartTime) >= 0 && currentTime.compareTo(hkMorningDealEndTime) <=0)) {
+                return true;
+            }
+
+            //下午交易时间
+            if (currentTime.compareTo(hkAfternoonDealStartTime) >= 0 && currentTime.compareTo(hkAfternoonDealEndTime) <=0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

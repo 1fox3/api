@@ -22,10 +22,11 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     //@Scheduled(cron="0 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeRank() {
-        if (!this.todayIsDealDate()) {
+        if (!this.isDealTime()) {
             return;
         }
         Long stockIdListSize = this.stockRedisUtil.lSize(this.redisStockIdList);
+        int stopNum = 0;
         Long onceLimit = (long)600;
         for (Long i = Long.valueOf(0); i < stockIdListSize; i += onceLimit) {
             List<Object> stockIdList = this.stockRedisUtil.lRange(this.redisStockIdList, i, i + onceLimit - (long)1);
@@ -66,6 +67,12 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                 Long dealNum = stockRealtimePo.getDealNum();
                 //成交金额
                 Double dealMoney = stockRealtimePo.getDealMoney();
+                //交易状态
+                String dealStatus = stockRealtimePo.getDealStatus();
+                //统计停牌数
+                if (!("00").equals(dealStatus)) {
+                    stopNum++;
+                }
 
                 if (null == currentPrice || null == yesterdayClosePrice
                         || null == todayHighestPrice || null == todayLowestPrice || null == todayOpenPrice
@@ -106,6 +113,7 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                 this.stockRedisUtil.zAdd(this.redisRealtimeRankDealMoneyZSet, dealMoneySet);
             }
         }
+        this.stockRedisUtil.set(this.stockRealtimeStockStopStatistics, stopNum);
     }
 
     /**
@@ -114,7 +122,7 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     //@Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeUptickRateStatistics() {
-        if (!this.todayIsDealDate()) {
+        if (!this.isDealTime()) {
             return;
         }
         Map<String, Integer> uptickRateStatisticsMap = new  LinkedHashMap<>();
@@ -145,6 +153,7 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
             );
             uptickRateStatisticsMap.put(key, set.size());
         }
+        uptickRateStatisticsMap.put("stop", (int)this.stockRedisUtil.get(this.stockRealtimeStockStopStatistics));
         this.stockRedisUtil.set(this.stockRealtimeStockUptickRateStatistics, uptickRateStatisticsMap);
     }
 }

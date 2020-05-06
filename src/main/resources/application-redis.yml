@@ -11,6 +11,7 @@ redis:
     realtime:
       stock:
         rank:
+          stop: stockRealtimeStockStopStatistics
           uptick-statistics: stockRealtimeStockUptickRateStatistics
           uptick: stockRealtimeStockUptickRateZSet
           surge: stockRealtimeStockSurgeRateZSet

@@ -93,14 +93,14 @@ public class StockScanSchedule extends StockBaseSchedule {
                         && null != stockRealtimeEntity.getStockName()
                         && !stockRealtimeEntity.getStockName().equals("")) {
                     stockCode = currentStockCode.replace(sinaStockMarketPY, "");
-                    String stockCodeName = stockRealtimeEntity.getStockName();
-                    String netsStockCode = this.getNetsStockCode(netsStockMarketPY, stockCode, stockCodeName);
+                    String stockName = stockRealtimeEntity.getStockName();
+                    String netsStockCode = this.getNetsStockCode(netsStockMarketPY, stockCode, stockName);
                     StockEntity stockEntity = stockMapper.getByStockCode(stockCode, stockMarketId);
                     if (null == stockEntity) {
                         stockEntity = new StockEntity();
                     }
                     stockEntity.setStockCode(stockCode);
-                    stockEntity.setStockName(stockCodeName);
+                    stockEntity.setStockName(stockName);
                     if (null != stockRealtimeEntity.getStockNameEn()) {
                         stockEntity.setStockNameEn(stockRealtimeEntity.getStockNameEn());
                     }

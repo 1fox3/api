@@ -89,4 +89,8 @@
         WHERE
             id = #{id};
     </delete>
+
+    <update id="truncate">
+        TRUNCATE TABLE t_stock_limit_up_down;
+    </update>
 </mapper>

@@ -55,6 +55,9 @@ public class StockBaseSchedule {
     @Value("${redis.stock.realtime.stock.rank.deal.money}")
     protected String redisRealtimeRankDealMoneyZSet;
 
+    @Value("${redis.stock.realtime.stock.rank.stop}")
+    protected String stockRealtimeStockStopStatistics;
+
     @Value("${redis.stock.realtime.stock.rank.uptick-statistics}")
     protected String stockRealtimeStockUptickRateStatistics;
 
@@ -84,5 +87,14 @@ public class StockBaseSchedule {
     protected Boolean todayIsDealDate()
     {
         return StockUtil.todayIsDealDate(mainStockMarket);
+    }
+
+    /**
+     * 判定当前是否为交易时间
+     * @return
+     */
+    protected Boolean isDealTime()
+    {
+        return StockUtil.isDealTime(mainStockMarket);
     }
 }

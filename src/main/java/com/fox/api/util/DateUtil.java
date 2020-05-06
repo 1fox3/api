@@ -8,19 +8,29 @@ import java.util.Date;
 
 /**
  * 日期时间工具
+ * @author lusongsong
  */
 public class DateUtil {
-    //年期格式
+    /**
+     * 年期格式
+     */
     public static final String YEAR_FORMAT_1 = "yyyy";
 
-    //日期格式
+    /**
+     * 日期格式
+     */
     public static final String DATE_FORMAT_1 = "yyyy-MM-dd";
     public static final String DATE_FORMAT_2 = "yyyyMMdd";
 
-    //时间格式
+    /**
+     * 时间格式
+     */
     public static final String TIME_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
+    public static final String TIME_FORMAT_2 = "HH:mm:ss";
 
-    //格式类
+    /**
+     * 格式类
+     */
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 
     /**
@@ -47,6 +57,25 @@ public class DateUtil {
      * @return
      */
     public static String getCurrentDate(String format) {
+        simpleDateFormat.applyPattern(format);
+        Date date = new Date();
+        return simpleDateFormat.format(date);
+    }
+
+    /**
+     * 获取当前时间
+     * @return
+     */
+    public static String getCurrentTime() {
+        return getCurrentTime(TIME_FORMAT_1);
+    }
+
+    /**
+     * 获取当前时间
+     * @param format
+     * @return
+     */
+    public static String getCurrentTime(String format) {
         simpleDateFormat.applyPattern(format);
         Date date = new Date();
         return simpleDateFormat.format(date);
