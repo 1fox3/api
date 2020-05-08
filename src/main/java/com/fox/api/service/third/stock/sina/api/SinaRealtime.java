@@ -129,9 +129,9 @@ public class SinaRealtime extends SinaStockBaseApi {
         if (null == responseArr || responseArr.length == 0) {
             return stockRealtimeEntity;
         }
-        Map<Float, Map<String, Float>> sellList = new HashMap<>();
+        Map<Float, Map<String, Float>> sellList = new LinkedHashMap<>(5);
         List<Float> sellPriceList = new ArrayList<>();
-        Map<Float, Map<String, Float>> buyList = new HashMap<>();
+        Map<Float, Map<String, Float>> buyList = new LinkedHashMap<>(5);
         List<Float> buyPriceList = new ArrayList<>();
         Map<String, Float> temp = new LinkedHashMap<>();
         List<String> unknownList = new LinkedList<>();
@@ -209,7 +209,7 @@ public class SinaRealtime extends SinaStockBaseApi {
             Collections.sort(buyPriceList);
             List<Map<String, Float>> list = new LinkedList<>();
             for(Float price : buyPriceList) {
-                list.add(buyList.get(price));
+                list.add(0, buyList.get(price));
             }
             stockRealtimeEntity.setBuyPriceList(list);
         }
