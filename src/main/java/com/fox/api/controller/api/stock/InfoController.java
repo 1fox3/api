@@ -28,4 +28,14 @@ public class InfoController {
     public ResultDto base(@Valid StockVo stockVo) {
         return ResultDto.success(stockInfoService.getInfo(stockVo.getStockId()));
     }
+
+    /**
+     * 搜索股票
+     * @param search
+     * @return
+     */
+    @RequestMapping("/stock/info/search")
+    public ResultDto search(String search) {
+        return ResultDto.success(stockInfoService.search(search));
+    }
 }

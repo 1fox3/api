@@ -3,6 +3,7 @@ package com.fox.api.service.stock.impl;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockInfoEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.exception.self.ServiceException;
 import com.fox.api.service.stock.StockInfoService;
 import com.fox.api.util.HttpUtil;
 import net.sf.json.JSONArray;
@@ -11,8 +12,18 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 @Service
 @CacheConfig(cacheNames = {"StockInfoService"})
+/**
+ * 股票信息
+ * @author lusongsong
+ */
 public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
 
     /**
@@ -223,8 +234,49 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
      * @param stockId
      * @return
      */
+    @Override
     @Cacheable(key = "#stockId", cacheManager = "stockCacheManager")
     public StockInfoEntity getInfo(Integer stockId) {
         return this.stockInfoMapper.getByStockId(stockId);
+    }
+
+    /**
+     * 搜索
+     *
+     * @param search
+     * @return
+     */
+    @Override
+    public List<Map<String, Object>> search(String search) {
+        try {
+            int nameLengthLimit = 2;
+            int codeLengthLimit = 4;
+            List<Map<String, Object>> searchList = new LinkedList<>();
+            //空或者长度小于2，则不进行搜索
+            if (null == search || search.length() < nameLengthLimit) {
+                return searchList;
+            }
+            String pattern = "^\\d+$";
+            String key = "stock_name";
+            if (Pattern.matches(pattern, search)) {
+                //如果是按照股票代码搜索，至少4位
+                if (search.length() < codeLengthLimit) {
+                    return searchList;
+                }
+                key = "stock_code";
+            }
+            List<StockInfoEntity> infoList = this.stockInfoMapper.search(search, key);
+
+            for (StockInfoEntity stockInfoEntity : infoList) {
+                Map<String, Object> infoMap = new LinkedHashMap<>(3);
+                infoMap.put("stockId", stockInfoEntity.getStockId());
+                infoMap.put("stockCode", stockInfoEntity.getStockCode());
+                infoMap.put("stockName", stockInfoEntity.getStockName());
+                searchList.add(infoMap);
+            }
+            return searchList;
+        } catch (Exception e) {
+            throw new ServiceException(1, e.getMessage());
+        }
     }
 }

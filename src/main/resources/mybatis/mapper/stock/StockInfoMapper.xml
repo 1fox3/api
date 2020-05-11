@@ -111,4 +111,14 @@
         WHERE
             stock_id = #{id};
     </select>
+
+    <select id="search" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_info
+        WHERE
+            ${key} LIKE '%${search}%'
+        LIMIT 20;
+    </select>
 </mapper>
