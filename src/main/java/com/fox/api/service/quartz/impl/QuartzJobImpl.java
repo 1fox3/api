@@ -92,17 +92,7 @@ public class QuartzJobImpl implements QuartzJobService {
      */
     @Override
     public QuartzJobEntity getById(Integer jobId) {
-        try {
-            QuartzJobEntity quartzJobEntity = quartzJobMapper.getById(jobId);
-            if (null == quartzJobEntity) {
-                throw new ServiceException(QuartzJobCode.QUARTZ_JOB_NOT_FOUND);
-            }
-            return quartzJobEntity;
-        } catch (ServiceException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ServiceException(1, e.getMessage());
-        }
+        return quartzJobMapper.getById(jobId);
     }
 
     /**

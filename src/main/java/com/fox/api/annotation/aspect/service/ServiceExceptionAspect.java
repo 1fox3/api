@@ -18,9 +18,9 @@ public class ServiceExceptionAspect {
     public void serviceExceptionAnt() {}
 
     @Around("serviceExceptionAnt()")
-    public void around(ProceedingJoinPoint proceedingJoinPoint){
+    public Object around(ProceedingJoinPoint proceedingJoinPoint){
         try {
-            proceedingJoinPoint.proceed();//有这一句，目标方法才会执行，不然目标方法无法执行
+            return proceedingJoinPoint.proceed();//有这一句，目标方法才会执行，不然目标方法无法执行
         } catch (ServiceException se) {
             throw se;
         } catch (Throwable throwable) {

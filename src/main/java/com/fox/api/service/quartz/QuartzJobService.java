@@ -37,8 +37,6 @@ public interface QuartzJobService {
      */
     QuartzJobEntity getById(Integer jobId);
 
-
-
     /**
      * 根据分组获取数据
      * @param jobGroup

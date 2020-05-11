@@ -138,7 +138,7 @@ public class QuartzJobManageImpl implements QuartzJobManageService {
     public void loadTotalQuartzJob() {
         Integer startId = 0;
         while (true) {
-            List<QuartzJobEntity> list = quartzJobMapper.getLoadedJobList(startId, 1);
+            List<QuartzJobEntity> list = quartzJobMapper.getLoadedJobList(startId, 10);
             if (null == list || 0 == list.size()) {
                 break;
             }
