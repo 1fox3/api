@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.admin.mapper.SignalMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.admin.entity.SignalEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="signal" property="signal" jdbcType="VARCHAR" />
+        <result column="signal_value" property="signalValue" jdbcType="VARCHAR" />
+        <result column="start_handle_time" property="startHandleTime" jdbcType="TIMESTAMP" />
+        <result column="end_handle_time" property="endHandleTime" jdbcType="TIMESTAMP" />
+        <result column="handle_status" property="handleStatus" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <insert id="insert" parameterType="com.fox.api.dao.admin.entity.SignalEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_signal (
+            `signal`,
+            `signal_value`
+        ) VALUES (
+            #{signal},
+            #{signalValue}
+        );
+    </insert>
+    <select id="getList" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_signal
+        <if test="startId" >
+        WHERE
+            id &lt; #{startId}
+        </if>
+        LIMIT ${num};
+    </select>
+</mapper>

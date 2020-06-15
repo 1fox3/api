@@ -28,6 +28,11 @@ spring:
       username: root
       password: "`Lss19890228"
       driver-class-name: com.mysql.cj.jdbc.Driver
+    admin:
+      url: jdbc:mysql://47.104.29.59:3306/admin?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: "`Lss19890228"
+      driver-class-name: com.mysql.cj.jdbc.Driver
 
 # 阿里接口账号信息
 ali:
@@ -49,6 +54,8 @@ mybatis:
     mapper-location: classpath:mybatis/mapper/api/*.xml
   quartz:
     mapper-location: classpath:mybatis/mapper/quartz/*.xml
+  admin:
+    mapper-location: classpath:mybatis/mapper/admin/*.xml
 
 
 
