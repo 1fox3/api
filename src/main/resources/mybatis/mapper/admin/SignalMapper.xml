@@ -29,6 +29,7 @@
         WHERE
             id &lt; #{startId}
         </if>
+        ORDER BY id DESC
         LIMIT ${num};
     </select>
 </mapper>
