@@ -54,6 +54,12 @@ spring:
           scheduler:
             instanceName: "clusteredScheduler"
             instanceId: "AUTO"
+  mail:
+    host: smtp.mxhichina.com
+    username: lusongsong@1fox3.com
+    password: "`lss19890228"
+    protocol: smtp
+    default-encoding: UTF-8
 
 login:
   aes:
