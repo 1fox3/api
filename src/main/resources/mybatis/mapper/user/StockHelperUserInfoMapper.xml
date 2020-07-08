@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao..mapper.StockHelperUserInfoMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.user.entity.StockHelperUserInfoEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="account" property="account" jdbcType="VARCHAR" />
+        <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+        <result column="salt" property="salt" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <insert id="insert" parameterType="com.fox.api.dao.user.entity.StockHelperUserInfoEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_stock_helper_user_info (
+            account,
+            pwd,
+            salt
+        ) VALUES (
+            #{account},
+            #{pwd},
+            #{salt}
+        );
+    </insert>
+    <update id="update" parameterType="com.fox.api.dao.user.entity.StockHelperUserInfoEntity">
+        UPDATE t_stock_helper_user_info
+        SET
+            account = #{account},
+            pwd = #{pwd},
+            salt = #{salt}
+        WHERE
+            id = #{id}
+    </update>
+    <select id="getBuAccount" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_helper_user_info
+        WHERE
+            account = #{account}
+    </select>
+</mapper>

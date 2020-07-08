@@ -16,7 +16,12 @@ public enum CodeScopeEnum {
     /**
      * 计划任务管理
      */
-    QUARTZ_CODE_SCOPE(2);
+    QUARTZ_CODE_SCOPE(2),
+
+    /**
+     * 股票助手用户
+     */
+    STOCK_HELPER_USER_SCOPE(3);
 
     /**
      * 号码段
