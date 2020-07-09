@@ -11,7 +11,8 @@ public class ParamCheckUtil {
     /**
      * 邮件验证
      */
-    final static String EMAIL_PATTERN = "^([a-z0-9A-Z]+[-|//.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?//.)+[a-zA-Z]{2,}$";
+    final static String EMAIL_PATTERN =
+            "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
 
     /**
      * 是否为邮箱
@@ -34,6 +35,10 @@ public class ParamCheckUtil {
         }
         Pattern pattern = Pattern.compile(patternStr);
         Matcher matcher = pattern.matcher(param);
-        return matcher.find();
+        if(matcher.matches()){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

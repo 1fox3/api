@@ -18,10 +18,6 @@ public class StockHelperUserInfoEntity {
     */
     private String account;
     /**
-     * 昵称
-     */
-    private String nickname;
-    /**
      * 账号类型
      */
     private Integer type = 1;

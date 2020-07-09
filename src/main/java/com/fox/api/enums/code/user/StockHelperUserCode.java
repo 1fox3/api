@@ -45,7 +45,7 @@ public enum StockHelperUserCode implements CodeMsgEnum {
      */
     @Override
     public Integer getCode() {
-        return null;
+        return code;
     }
 
     /**
@@ -55,6 +55,6 @@ public enum StockHelperUserCode implements CodeMsgEnum {
      */
     @Override
     public String getMsg() {
-        return null;
+        return msg;
     }
 }

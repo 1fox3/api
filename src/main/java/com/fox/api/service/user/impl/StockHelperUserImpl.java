@@ -120,7 +120,11 @@ public class StockHelperUserImpl implements StockHelperUserService {
      */
     @Override
     public StockHelperUserInfoEntity getInfoByAccount(String account) {
-        return stockHelperUserInfoMapper.getByAccount(account);
+        try {
+            return stockHelperUserInfoMapper.getByAccount(account);
+        } catch (Exception e) {
+            throw new ServiceException(1, e.getMessage());
+        }
     }
 
     /**
@@ -140,6 +144,7 @@ public class StockHelperUserImpl implements StockHelperUserService {
         //保存用户信息
         StockHelperUserInfoEntity stockHelperUserInfoEntity = getInfoByAccount(account);
         if (null == stockHelperUserInfoEntity || null == stockHelperUserInfoEntity.getId()) {
+            stockHelperUserInfoEntity = new StockHelperUserInfoEntity();
             stockHelperUserInfoEntity.setAccount(account);
             stockHelperUserInfoEntity.setType(1);
             try {
@@ -152,6 +157,7 @@ public class StockHelperUserImpl implements StockHelperUserService {
         //添加到用户列表
         UserEntity userEntity = userMapper.getByPlatUserId(account, PLAT_ID, PLAT_TYPE);
         if (null == userEntity || null == userEntity.getId()) {
+            userEntity = new UserEntity();
             userEntity.setPlatId(PLAT_ID);
             userEntity.setPlatType(PLAT_TYPE);
             userEntity.setPlatUserId(account);
@@ -167,7 +173,7 @@ public class StockHelperUserImpl implements StockHelperUserService {
         Date loginDate = new Date();
         String loginTime = DateUtil.dateToStr(loginDate, DateUtil.TIME_FORMAT_1);
         userLoginEntity.setLoginTime(loginTime);
-        userLoginEntity.setExpireTime(DateUtil.getRelateDate(0, LOGIN_TIME, 0, DateUtil.TIME_FORMAT_1));
+        userLoginEntity.setExpireTime(DateUtil.getRelateDate(0, 0, LOGIN_TIME, DateUtil.TIME_FORMAT_1));
         String sessionid = userLoginService.login(userLoginEntity);
         LoginDto loginDto = new LoginDto();
         loginDto.setSessionid(sessionid);

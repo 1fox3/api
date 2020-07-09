@@ -4,7 +4,6 @@
     <resultMap id="BasicResultMap" type="com.fox.api.dao.user.entity.StockHelperUserInfoEntity">
         <id column="id" property="id" jdbcType="INTEGER" />
         <result column="account" property="account" jdbcType="VARCHAR" />
-        <result column="nickname" property="nickname" jdbcType="VARCHAR" />
         <result column="type" property="type" jdbcType="INTEGER" />
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
@@ -26,7 +25,7 @@
         WHERE
             id = #{id}
     </update>
-    <select id="getBuAccount" resultMap="BasicResultMap">
+    <select id="getByAccount" resultMap="BasicResultMap">
         SELECT
             *
         FROM
