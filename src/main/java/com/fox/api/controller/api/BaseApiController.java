@@ -1,11 +1,9 @@
 package com.fox.api.controller.api;
 
-import com.fox.api.util.AESUtil;
 import com.fox.api.dao.user.entity.UserLoginEntity;
 import com.fox.api.entity.dto.login.LoginDto;
 import com.fox.api.service.user.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -14,13 +12,14 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * 接口基本类
+ * @author lusongsong
+ */
 @Controller
 public class BaseApiController {
     @Autowired
     protected UserLoginService userLoginService;
-
-    @Value("${login.aes.key}")
-    private String loginAesKey;
 
     /**
      * 用户id
@@ -56,9 +55,7 @@ public class BaseApiController {
                     for(Cookie cookie : cookies) {
                         if ("sessionid".equals(cookie.getName())) {
                             try {
-                                Integer sessionid = Integer.valueOf(
-                                        AESUtil.decrypt(String.valueOf(cookie.getValue()), this.loginAesKey)
-                                );
+                                String sessionid = String.valueOf(cookie.getValue());
                                 if (null != sessionid) {
                                     this.userLoginEntity = userLoginService.getUserLoginBySessionid(sessionid);
                                     if (null != this.userLoginEntity) {

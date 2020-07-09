@@ -43,4 +43,14 @@
         WHERE
             id = #{id};
     </select>
+
+    <update id="logout" parameterType="com.fox.api.dao.user.entity.UserLoginEntity">
+        UPDATE t_user_login
+        SET
+            expire_time = #{expireTime}
+        WHERE
+            id = #{id}
+            AND
+            user_id = #{userId};
+    </update>
 </mapper>

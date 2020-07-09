@@ -1,14 +1,13 @@
 package com.fox.api.service.open.wechat.impl;
 
-import com.fox.api.util.DateUtil;
 import com.fox.api.dao.user.entity.UserEntity;
 import com.fox.api.dao.user.entity.UserLoginEntity;
-import com.fox.api.dao.user.mapper.UserLoginMapper;
 import com.fox.api.dao.user.mapper.UserMapper;
 import com.fox.api.entity.dto.login.LoginDto;
 import com.fox.api.service.open.wechat.WechatLogin;
+import com.fox.api.service.user.UserLoginService;
+import com.fox.api.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -19,10 +18,7 @@ public class WechatLoginImpl implements WechatLogin {
     private UserMapper userMapper;
 
     @Autowired
-    private UserLoginMapper userLoginMapper;
-
-    @Value("${login.aes.key}")
-    private String loginAesKey;
+    private UserLoginService userLoginService;
 
     /**
      * 默认登录时间
@@ -45,9 +41,8 @@ public class WechatLoginImpl implements WechatLogin {
         );
         userLoginEntity.setLoginTime(loginTime);
         userLoginEntity.setExpireTime(expireTime);
-        userLoginMapper.insert(userLoginEntity);
-        Integer sessionid = userLoginEntity.getId();
-        loginEntity.setSessionid(sessionid, this.loginAesKey);
+        String sessionid = userLoginService.login(userLoginEntity);
+        loginEntity.setSessionid(sessionid);
         loginEntity.setExpireTime(WechatLoginImpl.loginExpireDate*86400);
         return loginEntity;
     }

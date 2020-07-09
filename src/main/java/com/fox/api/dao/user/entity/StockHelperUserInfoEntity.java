@@ -18,13 +18,13 @@ public class StockHelperUserInfoEntity {
     */
     private String account;
     /**
-     * 密码
-    */
-    private String pwd;
+     * 昵称
+     */
+    private String nickname;
     /**
-     * 密码加密盐
-    */
-    private String salt;
+     * 账号类型
+     */
+    private Integer type = 1;
     /**
      * 更新时间
     */

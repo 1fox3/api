@@ -9,9 +9,10 @@ import com.fox.api.enums.code.CodeScopeEnum;
  */
 public enum StockHelperUserCode implements CodeMsgEnum {
     /**
-     * 账号错误
+     * 错误枚举值
      */
-    ACCOUNT_ERROR(1,"账号错误");
+    ACCOUNT_ERROR(1,"账号错误"),
+    VERIFY_CODE_ERROR(2,"验证码错误");
 
     /**
      * 错误码

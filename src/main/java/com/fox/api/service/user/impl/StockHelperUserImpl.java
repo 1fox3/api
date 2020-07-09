@@ -1,18 +1,24 @@
 package com.fox.api.service.user.impl;
 
 import com.fox.api.dao.user.entity.StockHelperUserInfoEntity;
+import com.fox.api.dao.user.entity.UserEntity;
+import com.fox.api.dao.user.entity.UserLoginEntity;
 import com.fox.api.dao.user.mapper.StockHelperUserInfoMapper;
+import com.fox.api.dao.user.mapper.UserMapper;
+import com.fox.api.entity.dto.login.LoginDto;
 import com.fox.api.enums.code.user.StockHelperUserCode;
 import com.fox.api.exception.self.ServiceException;
 import com.fox.api.service.user.StockHelperUserService;
+import com.fox.api.service.user.UserLoginService;
+import com.fox.api.util.DateUtil;
 import com.fox.api.util.ParamCheckUtil;
 import com.fox.api.util.RandomStrUtil;
 import com.fox.api.util.redis.UserRedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -24,7 +30,14 @@ import java.util.Date;
  * 股票助手用户服务
  * @author lusongsong
  */
+@Service
 public class StockHelperUserImpl implements StockHelperUserService {
+    final static String PLAT_ID = "stock_helper";
+    final static Integer PLAT_TYPE = 3;
+    /**
+     * 默认登录有效时间(天)
+     */
+    final static Integer LOGIN_TIME = 180;
     final static String STOCK_HELPER_VERIFY_CODE_CACHE_KEY = "StockHelperVerifyCode:";
 
     @Autowired
@@ -35,6 +48,12 @@ public class StockHelperUserImpl implements StockHelperUserService {
 
     @Autowired
     private StockHelperUserInfoMapper stockHelperUserInfoMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private UserLoginService userLoginService;
 
     /**
      * 获取保存验证码的缓存key
@@ -85,13 +104,11 @@ public class StockHelperUserImpl implements StockHelperUserService {
 
     /**
      * 验证验证码
-     *
      * @param account
      * @param verifyCode
      * @return
      */
-    @Override
-    public boolean verifyCode(String account, String verifyCode) {
+    private boolean verifyCode(String account, String verifyCode) {
         return null != verifyCode && verifyCode.equals(userRedisUtil.get(getVerifyCodeCacheKey(account)));
     }
 
@@ -107,65 +124,74 @@ public class StockHelperUserImpl implements StockHelperUserService {
     }
 
     /**
-     * 验证账号密码
-     *
-     * @param account
-     * @param pwd
-     * @return
-     */
-    @Override
-    public boolean verifyPwd(String account, String pwd) {
-        return false;
-    }
-
-    /**
-     * 注册
-     *
-     * @param account
-     * @param pwd
-     * @param verifyCode
-     * @return
-     */
-    @Override
-    public boolean register(String account, String pwd, String verifyCode) {
-        return false;
-    }
-
-    /**
      * 用户登录
      *
      * @param account
-     * @param pwd
      * @param verifyCode
      * @return
      */
     @Override
-    public boolean login(String account, String pwd, String verifyCode) {
-        return false;
-    }
+    public LoginDto login(String account, String verifyCode) {
+        //验证码错误
+        if (false == verifyCode(account, verifyCode)) {
+            throw new ServiceException(StockHelperUserCode.VERIFY_CODE_ERROR);
+        }
 
-    /**
-     * 无验证码登录
-     *
-     * @param account
-     * @param pwd
-     * @return
-     */
-    @Override
-    public boolean login(String account, String pwd) {
-        return false;
+        //保存用户信息
+        StockHelperUserInfoEntity stockHelperUserInfoEntity = getInfoByAccount(account);
+        if (null == stockHelperUserInfoEntity || null == stockHelperUserInfoEntity.getId()) {
+            stockHelperUserInfoEntity.setAccount(account);
+            stockHelperUserInfoEntity.setType(1);
+            try {
+                stockHelperUserInfoMapper.insert(stockHelperUserInfoEntity);
+            } catch (Exception e) {
+                throw new ServiceException(1, "用户信息保存失败：" + e.getMessage());
+            }
+        }
+
+        //添加到用户列表
+        UserEntity userEntity = userMapper.getByPlatUserId(account, PLAT_ID, PLAT_TYPE);
+        if (null == userEntity || null == userEntity.getId()) {
+            userEntity.setPlatId(PLAT_ID);
+            userEntity.setPlatType(PLAT_TYPE);
+            userEntity.setPlatUserId(account);
+            try {
+                userMapper.insert(userEntity);
+            } catch (Exception e) {
+                throw new ServiceException(1, "用户添加失败：" + e.getMessage());
+            }
+        }
+
+        UserLoginEntity userLoginEntity = new UserLoginEntity();
+        userLoginEntity.setUserId(userEntity.getId());
+        Date loginDate = new Date();
+        String loginTime = DateUtil.dateToStr(loginDate, DateUtil.TIME_FORMAT_1);
+        userLoginEntity.setLoginTime(loginTime);
+        userLoginEntity.setExpireTime(DateUtil.getRelateDate(0, LOGIN_TIME, 0, DateUtil.TIME_FORMAT_1));
+        String sessionid = userLoginService.login(userLoginEntity);
+        LoginDto loginDto = new LoginDto();
+        loginDto.setSessionid(sessionid);
+        loginDto.setExpireTime(LOGIN_TIME * 86400);
+        return loginDto;
     }
 
     /**
      * 退出
      *
      * @param account
-     * @param pwd
      * @param sessionid
      * @return
      */
     @Override
-    public boolean logout(String account, String pwd, String sessionid) {
+    public boolean logout(String account, String sessionid) {
+        UserLoginEntity userLoginEntity = userLoginService.getUserLoginBySessionid(sessionid);
+        UserEntity userEntity = userMapper.getByPlatUserId(account, PLAT_ID, PLAT_TYPE);
+        if (null != userLoginEntity && null != userEntity
+                && null != userLoginEntity.getUserId() && null != userEntity.getId()
+                && userLoginEntity.getUserId().equals(userEntity.getId())) {
+            userLoginService.logout(sessionid, userEntity.getId());
+            return true;
+        }
         return false;
     }
 }

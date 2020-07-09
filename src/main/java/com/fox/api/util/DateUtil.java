@@ -188,4 +188,20 @@ public class DateUtil {
         }
         return date;
     }
+
+    /**
+     * 时间比较
+     * @param first
+     * @param second
+     * @param format
+     * @return
+     * @throws ParseException
+     */
+    public static boolean compare(String first, String second, String format) throws ParseException {
+        simpleDateFormat.applyPattern(format);
+        Date firstDate, secondDate;
+        firstDate = simpleDateFormat.parse(first);
+        secondDate = simpleDateFormat.parse(second);
+        return firstDate.before(secondDate);
+    }
 }

@@ -12,5 +12,20 @@ public interface UserLoginService {
      * @param sessionid
      * @return
      */
-    UserLoginEntity getUserLoginBySessionid(Integer sessionid);
+    UserLoginEntity getUserLoginBySessionid(String sessionid);
+
+    /**
+     * 登录
+     * @param userLoginEntity
+     * @return
+     */
+    String login(UserLoginEntity userLoginEntity);
+
+    /**
+     * 退出登录
+     * @param sessionid
+     * @param userId
+     * @return
+     */
+    boolean logout(String sessionid, Integer userId);
 }

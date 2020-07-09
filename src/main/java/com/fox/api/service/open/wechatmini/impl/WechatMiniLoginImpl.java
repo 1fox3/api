@@ -1,6 +1,7 @@
 package com.fox.api.service.open.wechatmini.impl;
 
 import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.service.user.UserLoginService;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.entity.vo.open.wechatmini.login.WechatMiniLoginVo;
@@ -23,7 +24,7 @@ public class WechatMiniLoginImpl implements WechatMiniLogin {
     private UserMapper userMapper;
 
     @Autowired
-    private UserLoginMapper userLoginMapper;
+    private UserLoginService userLoginService;
 
     @Value("${open.wechat-mini.url.login}")
     private String wechatMiniLoginUrl;
@@ -59,14 +60,12 @@ public class WechatMiniLoginImpl implements WechatMiniLogin {
             userLoginEntity.setUserId(userEntity.getId());
             Date loginDate = new Date();
             String loginTime = DateUtil.dateToStr(loginDate, DateUtil.TIME_FORMAT_1);
-            String expireTime = DateUtil.getRelateDate(
-                    loginTime, 0,0, WechatMiniLoginImpl.loginExpireDate, DateUtil.TIME_FORMAT_1
+            String expireTime = DateUtil.getRelateDate(0,0, WechatMiniLoginImpl.loginExpireDate, DateUtil.TIME_FORMAT_1
             );
             userLoginEntity.setLoginTime(loginTime);
             userLoginEntity.setExpireTime(expireTime);
-            userLoginMapper.insert(userLoginEntity);
-            Integer sessionid = userLoginEntity.getId();
-            loginEntity.setSessionid(sessionid, this.loginAesKey);
+            String sessionid = userLoginService.login(userLoginEntity);
+            loginEntity.setSessionid(sessionid);
             loginEntity.setExpireTime(WechatMiniLoginImpl.loginExpireDate*86400);
         } catch (Exception e) {}
         return loginEntity;
