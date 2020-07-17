@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * 字符串编码格式转换
+ * @author lusongsong
  */
 public class CharsetUtil {
 

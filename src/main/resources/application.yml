@@ -60,6 +60,17 @@ spring:
     password: "`lss19890228"
     protocol: smtp
     default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 50000
+          starttls:
+            enable: true
+          socketFactory:
+            port: 465
+            class: "javax.net.ssl.SSLSocketFactory"
+            fallback: false
 
 login:
   aes:

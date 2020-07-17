@@ -14,11 +14,16 @@ import java.util.List;
 
 /**
  * 获取成交信息
+ * @author lusongsong
  */
 public class SinaDeal extends SinaStockBaseApi {
-    //接口
+    /**
+     * 接口
+     */
     private static String apiUrl = "http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData";
-    //支持的时间粒度
+    /**
+     * 支持的时间粒度
+     */
     private static List<Integer> scaleList = Arrays.asList(5, 15, 30, 60, 240, 1200, 1680, 86400);
 
     /**
@@ -31,7 +36,7 @@ public class SinaDeal extends SinaStockBaseApi {
     public List<StockDealPo> getDealList(String stockCode, Integer scale, Integer dataLen) {
         List<StockDealPo> list = new LinkedList<>();
         try {
-            if (!this.scaleList.contains(scale)) {
+            if (!scaleList.contains(scale)) {
                 return list;
             }
             HttpUtil httpUtil = new HttpUtil();

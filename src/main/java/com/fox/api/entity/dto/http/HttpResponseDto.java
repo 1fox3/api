@@ -1,6 +1,7 @@
 package com.fox.api.entity.dto.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -9,15 +10,19 @@ import java.util.Map;
 
 /**
  * 请求响应结果
+ * @author lusongsong
  */
+@Data
 public class HttpResponseDto {
     private int code;
+    private String msg;
     private Map<String, List<String>> headers;
     private String requestUrl;
     private String content;
 
-    public HttpResponseDto(int code, Map<String, List<String>> headers, String requestUrl, String content) {
+    public HttpResponseDto(int code, String msg, Map<String, List<String>> headers, String requestUrl, String content) {
         this.code = code;
+        this.msg = msg;
         this.headers = headers;
         this.requestUrl = requestUrl;
         this.content = content;
@@ -28,33 +33,5 @@ public class HttpResponseDto {
             return new ObjectMapper().readValue(content, clz);
         }
         return null;
-    }
-
-    /**
-     * 获取响应状态码
-     */
-    public int getCode() {
-        return code;
-    }
-
-    /**
-     * 获取响应头
-     */
-    public Map<String, List<String>> getHeaders() {
-        return headers;
-    }
-
-    /**
-     * 获取最后请求地址
-     */
-    public String getRequestUrl() {
-        return requestUrl;
-    }
-
-    /**
-     * 获取响应内容
-     */
-    public String getContent() {
-        return content;
     }
 }

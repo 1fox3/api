@@ -9,53 +9,97 @@ import java.util.*;
 
 /**
  * HTTP请求工具类
+ * @author lusongsong
  */
 public class HttpUtil {
-    //请求方式
+    /**
+     * 请求方式
+     */
     private static final String METHOD_GET = "GET";
     private static final String METHOD_POST = "POST";
-    //字符
+    /**
+     * 字符编码
+     */
     private static final String CHARSET_UTF8 = "UTF-8";
     private static final String CHARSET_GBK = "GBK";
-    //请求头参数方式KEY
+    /**
+     * 请求头参数方式KEY
+     */
     private static final String CONTENT_TYPE="Content-Type";
-    //请求头参数方式
+    /**
+     * 请求头参数方式
+     */
     private static final String CONTENT_TYPE_JSON = "application/json";
     private static final String CONTENT_TYPE_PARAM = "application/x-www-form-urlencoded";
     private static final String CONTENT_TYPE_FORM = "multipart/form-data";
-    //请求参数方式
+    /**
+     * 请求参数方式
+     */
     private static final String PARAM_TYPE_JSON = "JSON";
     private static final String PARAM_TYPE_PARAM = "PARAM";
     private static final String PARAM_TYPE_FORM = "FORM";
-    //支持的请求方式
+    /**
+     * 支持的请求方式
+     */
     private static final ArrayList<String> methodScope = new ArrayList<>(
         Arrays.asList(METHOD_GET, METHOD_POST)
     );
+    /**
+     * 数据类型
+     */
     private static final Map<String, String> CONTENT_TYPE_MAP = new HashMap<String, String>(){{
         put(PARAM_TYPE_JSON, CONTENT_TYPE_JSON);
         put(PARAM_TYPE_PARAM, CONTENT_TYPE_PARAM);
         put(PARAM_TYPE_FORM, CONTENT_TYPE_FORM);
     }};
-    //请求链接
+    /**
+     * 请求链接
+     */
     private String url;
-    //请求方式
+    /**
+     * 请求方式
+     */
     private String method = METHOD_GET;
-    //请求参数类型
+    /**
+     * 请求参数类型
+     */
     private String paramType = PARAM_TYPE_PARAM;
-    //请求参数
+    /**
+     * 请求参数
+     */
     private Map<String, String> params = new HashMap<>();
-    //请求数据
+    /**
+     * 请求数据
+     */
     private String body = "";
-    //请求头
+    /**
+     * 请求头
+     */
     private Map<String, String> headers = new HashMap<>();
-    //请求返回数据的初始字符集
+    /**
+     * 请求返回数据的初始字符集
+     */
     private String desCharset = CHARSET_UTF8;
-    //请求返回数据的目标字符集
+    /**
+     * 请求返回数据的目标字符集
+     */
     private String oriCharset = CHARSET_UTF8;
-    //连接超时时间
+    /**
+     * 连接超时时间
+     */
     private int connectTimeout = 60000;
-    //数据传输超时时间
+    /**
+     * 数据传输超时时间
+     */
     private int readTimeout = 60000;
+    /**
+     * 开始时间
+     */
+    private long startTime;
+    /**
+     * 结束时间
+     */
+    private long endTime;
 
     /**
      * 设置请求链接
@@ -209,6 +253,14 @@ public class HttpUtil {
     }
 
     /**
+     * 获取消耗的时间
+     * @return
+     */
+    public long getRequestTime() {
+        return this.endTime - this.startTime;
+    }
+
+    /**
      * 获取请求参数
      * @return
      */
@@ -328,6 +380,7 @@ public class HttpUtil {
         if (!this.getParams().isEmpty()) {
             requestBody = this.paramsToUrlParams();
         }
+        this.startTime = System.currentTimeMillis();
         //初始化
         URL urlObj = new URL(this.getRequestUrl(requestBody));
         HttpURLConnection urlCon = (HttpURLConnection) urlObj.openConnection();
@@ -384,13 +437,14 @@ public class HttpUtil {
                     response = CharsetUtil.convertGBKToUtf8(response);
                 }
             }
-            return new HttpResponseDto(urlCon.getResponseCode(), urlCon.getHeaderFields(),
-                    urlCon.getURL().toString(), response);
+            return new HttpResponseDto(urlCon.getResponseCode(), urlCon.getResponseMessage(),
+                    urlCon.getHeaderFields(), urlCon.getURL().toString(), response);
         } catch (Exception e) {
-            return new HttpResponseDto(urlCon.getResponseCode(), urlCon.getHeaderFields(),
-                    urlCon.getURL().toString(), "");
+            return new HttpResponseDto(urlCon.getResponseCode(), urlCon.getResponseMessage(),
+                    urlCon.getHeaderFields(), urlCon.getURL().toString(), "");
         } finally {
             urlCon.disconnect();
+            this.endTime = System.currentTimeMillis();
         }
     }
 }
