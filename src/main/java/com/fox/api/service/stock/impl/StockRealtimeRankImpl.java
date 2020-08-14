@@ -3,6 +3,7 @@ package com.fox.api.service.stock.impl;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.realtime.rank.StockRealtimeRankInfoDto;
 import com.fox.api.entity.po.PageInfoPo;
+import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.stock.StockRealtimeRankService;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.stereotype.Service;
@@ -18,16 +19,27 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
     public String asc = "ASC";
     /**
      * 支持的排行分类
+     * price:价格
      * uptickRate:涨幅
      * surgeRate:波动
      * dealNum:成交量
      * dealMoney:成交金额
      */
+    public static final String RANK_TYPE_PRICE = "price";
+    public static final String RANK_TYPE_UPTICK_RATE = "uptickRate";
+    public static final String RANK_TYPE_SURGE_RATE = "surgeRate";
+    public static final String RANK_TYPE_DEAL_NUM = "dealNum";
+    public static final String RANK_TYPE_DEAL_MONEY = "dealMoney";
+
+    /**
+     * 支持的排行分类列表
+     */
     private List<String> supportRankTypeList = Arrays.asList(
-            "uptickRate",
-            "surgeRate",
-            "dealNum",
-            "dealMoney"
+            StockRealtimeRankImpl.RANK_TYPE_PRICE,
+            StockRealtimeRankImpl.RANK_TYPE_UPTICK_RATE,
+            StockRealtimeRankImpl.RANK_TYPE_SURGE_RATE,
+            StockRealtimeRankImpl.RANK_TYPE_DEAL_NUM,
+            StockRealtimeRankImpl.RANK_TYPE_DEAL_MONEY
     );
 
 
@@ -40,9 +52,11 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
     @Override
     public List<StockRealtimeRankInfoDto> rank(String type, String sortType, PageInfoPo pageInfo) {
         List<StockRealtimeRankInfoDto> list = new LinkedList<>();
+        //排序类型错误直接返回空列表
         if (!this.supportRankTypeList.contains(type)) {
             return list;
         }
+        //根据排序类型获取列表
         Integer start = (pageInfo.getPageNum() - 1) * pageInfo.getPageSize();
         Integer end = pageInfo.getPageNum() * pageInfo.getPageSize() - 1;
         Set<Object> set;
@@ -61,63 +75,36 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
             return list;
         }
 
-        Map<Integer, Double> scoreMap = new HashMap<>(set.size());
+        //获取股票id列表
         List stockIdList = new LinkedList();
         for(Object object : set) {
             Integer value = (Integer) ((DefaultTypedTuple)object).getValue();
-            Double score = ((DefaultTypedTuple)object).getScore();
             stockIdList.add(value.toString());
-            scoreMap.put(value, score);
         }
 
-        Map<String, Map<Integer, Double>> rankScoreMap = new HashMap<>(this.supportRankTypeList.size());
-
-        for (String rankType : this.supportRankTypeList) {
-            if (type.equals(rankType)) {
-                rankScoreMap.put(rankType, scoreMap);
-            } else {
-                redisZSetKey = this.getRedisZSetKey(rankType);
-                HashMap<Integer, Double> hashMap = new HashMap<>(set.size());
-                for (Object stockId : stockIdList) {
-                    hashMap.put(Integer.valueOf(stockId.toString()), this.stockRedisUtil.zScore(redisZSetKey, Integer.valueOf(stockId.toString())));
-                }
-                rankScoreMap.put(rankType, hashMap);
-            }
+        //获取股票实时信息
+        List<Object> stockRealtimePoList = this.stockRedisUtil.hMultiGet(this.redisRealtimeStockInfoHash, stockIdList);
+        Map<Integer, StockRealtimePo> stockRealtimePoMap = new HashMap<>(stockRealtimePoList.size());
+        for (Object stockRealtimePo : stockRealtimePoList) {
+            stockRealtimePoMap.put(
+                    ((StockRealtimePo) stockRealtimePo).getStockId(),
+                    (StockRealtimePo) stockRealtimePo
+            );
         }
 
-        List<Object> stockEntityList = this.stockRedisUtil.hMultiGet(this.redisStockHash, stockIdList);
-        for (Object stockEntity : stockEntityList) {
+        //根据排序结果遍历补充数据
+        for(Object object : set) {
+            Integer stockId = (Integer)((DefaultTypedTuple)object).getValue();
+            StockRealtimePo stockRealtimePo = stockRealtimePoMap.get(stockId);
             StockRealtimeRankInfoDto stockRealtimeRankInfoDto = new StockRealtimeRankInfoDto();
-            stockRealtimeRankInfoDto.setStockId(((StockEntity) stockEntity).getId());
-            stockRealtimeRankInfoDto.setStockCode(((StockEntity) stockEntity).getStockCode());
-            stockRealtimeRankInfoDto.setStockName(((StockEntity) stockEntity).getStockName());
-            for (String rankType : this.supportRankTypeList) {
-                Map<Integer, Double> map = rankScoreMap.get(rankType);
-                if (null == map) {
-                    continue;
-                }
-                Integer stockId = ((StockEntity) stockEntity).getId();
-                if (!map.containsKey(stockId) || null == map.get(stockId)) {
-                    continue;
-                }
-
-                if ("uptickRate".equals(rankType)) {
-                    stockRealtimeRankInfoDto.setUptickRate(Double.valueOf(map.get(stockId)));
-                }
-
-                if ("surgeRate".equals(rankType)) {
-                    stockRealtimeRankInfoDto.setSurgeRate(Double.valueOf(map.get(stockId)));
-                }
-
-                if ("dealNum".equals(rankType)) {
-                    stockRealtimeRankInfoDto.setDealNum(Double.valueOf(map.get(stockId)));
-                }
-
-                if ("dealMoney".equals(rankType)) {
-                    stockRealtimeRankInfoDto.setDealMoney(Double.valueOf(map.get(stockId)));
-                }
-            }
-
+            stockRealtimeRankInfoDto.setStockId(stockRealtimePo.getStockId());
+            stockRealtimeRankInfoDto.setStockCode(stockRealtimePo.getStockCode());
+            stockRealtimeRankInfoDto.setStockName(stockRealtimePo.getStockName());
+            stockRealtimeRankInfoDto.setPrice((double)stockRealtimePo.getCurrentPrice());
+            stockRealtimeRankInfoDto.setUptickRate((double)stockRealtimePo.getUptickRate());
+            stockRealtimeRankInfoDto.setSurgeRate((double)stockRealtimePo.getSurgeRate());
+            stockRealtimeRankInfoDto.setDealNum((double)stockRealtimePo.getDealNum());
+            stockRealtimeRankInfoDto.setDealMoney((double)stockRealtimePo.getDealMoney());
             list.add(stockRealtimeRankInfoDto);
         }
 
@@ -130,19 +117,23 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
      * @return
      */
     public String getRedisZSetKey(String type) {
-        if ("uptickRate".equals(type)) {
+        if (StockRealtimeRankImpl.RANK_TYPE_PRICE.equals(type)) {
+            return this.redisRealtimeRankPriceZSet;
+        }
+
+        if (StockRealtimeRankImpl.RANK_TYPE_UPTICK_RATE.equals(type)) {
             return this.redisRealtimeRankUptickRateZSet;
         }
 
-        if ("surgeRate".equals(type)) {
+        if (StockRealtimeRankImpl.RANK_TYPE_SURGE_RATE.equals(type)) {
             return this.redisRealtimeRankSurgeRateZSet;
         }
 
-        if ("dealNum".equals(type)) {
+        if (StockRealtimeRankImpl.RANK_TYPE_DEAL_NUM.equals(type)) {
             return this.redisRealtimeRankDealNumZSet;
         }
 
-        if ("dealMoney".equals(type)) {
+        if (StockRealtimeRankImpl.RANK_TYPE_DEAL_MONEY.equals(type)) {
             return this.redisRealtimeRankDealMoneyZSet;
         }
         return this.redisRealtimeRankUptickRateZSet;

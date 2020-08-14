@@ -43,6 +43,9 @@ public class StockBaseSchedule {
     @Value("${redis.stock.realtime.stock.line.hash}")
     protected String redisRealtimeStockLineHash;
 
+    @Value("${redis.stock.realtime.stock.rank.price}")
+    protected String redisRealtimeRankPriceZSet;
+
     @Value("${redis.stock.realtime.stock.rank.uptick}")
     protected String redisRealtimeRankUptickRateZSet;
 

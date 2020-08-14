@@ -42,6 +42,7 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                     hashKeyList
             );
 
+            Set<DefaultTypedTuple> priceSet = new HashSet<>();
             Set<DefaultTypedTuple> uptickRateSet = new HashSet<>();
             Set<DefaultTypedTuple> surgeRateSet = new HashSet<>();
             Set<DefaultTypedTuple> dealNumSet = new HashSet<>();
@@ -57,14 +58,16 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                 Float todayOpenPrice = stockRealtimePo.getTodayOpenPrice();
                 //昨日收盘价
                 Float yesterdayClosePrice = stockRealtimePo.getYesterdayClosePrice();
-                //当前价格
-                Float currentPrice = stockRealtimePo.getCurrentPrice();
-                //今日最高价
-                Float todayHighestPrice = stockRealtimePo.getTodayHighestPrice();
-                //今日最低价
-                Float todayLowestPrice = stockRealtimePo.getTodayLowestPrice();
+                if (0 == yesterdayClosePrice || 0 == todayOpenPrice) {
+                    continue;
+                }
+                //增幅
+                Double currentPrice = (double)stockRealtimePo.getCurrentPrice();
+                Double uptickRate = (double)stockRealtimePo.getUptickRate();
+                //波动
+                Double surgeRate = (double)stockRealtimePo.getSurgeRate();
                 //成交股数
-                Long dealNum = stockRealtimePo.getDealNum();
+                Double dealNum = (double)stockRealtimePo.getDealNum();
                 //成交金额
                 Double dealMoney = stockRealtimePo.getDealMoney();
                 //交易状态
@@ -74,31 +77,24 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                     stopNum++;
                 }
 
-                if (null == currentPrice || null == yesterdayClosePrice
-                        || null == todayHighestPrice || null == todayLowestPrice || null == todayOpenPrice
-                ) {
-                    continue;
-                }
-
-                //增幅
-                Double uptickRate = (double)(currentPrice - yesterdayClosePrice) / yesterdayClosePrice;
-                //波动
-                Double surgeRate = (double)(todayHighestPrice - todayLowestPrice) / todayOpenPrice;
-                if (0 == yesterdayClosePrice || 0 == todayOpenPrice) {
-                    continue;
+                if (null != currentPrice) {
+                    priceSet.add(new DefaultTypedTuple(stockId, currentPrice));
                 }
                 if (null != uptickRate) {
-                    uptickRateSet.add(new DefaultTypedTuple(stockId, (double)uptickRate));
+                    uptickRateSet.add(new DefaultTypedTuple(stockId, uptickRate));
                 }
                 if (null != surgeRate) {
-                    surgeRateSet.add(new DefaultTypedTuple(stockId, (double)surgeRate));
+                    surgeRateSet.add(new DefaultTypedTuple(stockId, surgeRate));
                 }
                 if (null != dealNum) {
-                    dealNumSet.add(new DefaultTypedTuple(stockId, (double)dealNum));
+                    dealNumSet.add(new DefaultTypedTuple(stockId, dealNum));
                 }
                 if (null != dealMoney) {
-                    dealMoneySet.add(new DefaultTypedTuple(stockId, (double)dealMoney));
+                    dealMoneySet.add(new DefaultTypedTuple(stockId, dealMoney));
                 }
+            }
+            if (0 < priceSet.size()) {
+                this.stockRedisUtil.zAdd(this.redisRealtimeRankPriceZSet, priceSet);
             }
             if (0 < uptickRateSet.size()) {
                 this.stockRedisUtil.zAdd(this.redisRealtimeRankUptickRateZSet, uptickRateSet);

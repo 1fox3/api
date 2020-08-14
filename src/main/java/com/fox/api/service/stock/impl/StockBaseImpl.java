@@ -31,6 +31,9 @@ public class StockBaseImpl {
     @Value("${redis.stock.realtime.stock.line.single}")
     protected String redisRealtimeStockLineSingle;
 
+    @Value("${redis.stock.realtime.stock.rank.price}")
+    protected String redisRealtimeRankPriceZSet;
+
     @Value("${redis.stock.realtime.stock.rank.uptick}")
     protected String redisRealtimeRankUptickRateZSet;
 

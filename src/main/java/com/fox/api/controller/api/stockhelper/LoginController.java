@@ -1,6 +1,7 @@
 package com.fox.api.controller.api.stockhelper;
 
 import com.fox.api.controller.api.BaseApiController;
+import com.fox.api.entity.dto.login.LoginDto;
 import com.fox.api.entity.dto.result.ResultDto;
 import com.fox.api.service.user.StockHelperUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,9 @@ public class LoginController extends BaseApiController {
 
     @RequestMapping("login")
     public ResultDto login(String account, String verifyCode) {
-        return ResultDto.success(stockHelperUserService.login(account, verifyCode));
+        LoginDto loginDTO = stockHelperUserService.login(account, verifyCode);
+        this.setSessionCookie(loginDTO);
+        return ResultDto.success(loginDTO);
     }
 
     @RequestMapping("logout")

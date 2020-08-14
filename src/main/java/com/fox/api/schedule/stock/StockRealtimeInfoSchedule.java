@@ -4,7 +4,6 @@ import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -57,7 +56,10 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
                 Integer stockId = ((StockEntity)stockEntity).getId();
                 String sinaStockCode = ((StockEntity)stockEntity).getSinaStockCode();
                 if (null != stockId && null != sinaStockCode && sinaStockRealtimePoMap.containsKey(sinaStockCode)) {
-                    stockRealtimePoMap.put(String.valueOf(stockId), sinaStockRealtimePoMap.get(sinaStockCode));
+                    StockRealtimePo stockRealtimePo = sinaStockRealtimePoMap.get(sinaStockCode);
+                    stockRealtimePo.setStockId(((StockEntity) stockEntity).getId());
+                    stockRealtimePo.setStockCode(((StockEntity) stockEntity).getStockCode());
+                    stockRealtimePoMap.put(String.valueOf(stockId), stockRealtimePo);
                 }
             }
             this.stockRedisUtil.hPutAll(this.redisRealtimeStockInfoHash, stockRealtimePoMap);

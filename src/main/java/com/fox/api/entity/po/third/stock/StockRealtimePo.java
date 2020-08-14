@@ -12,6 +12,14 @@ import java.util.Map;
  */
 public class StockRealtimePo {
     /**
+     * 股票id
+     */
+    private Integer stockId;
+    /**
+     * 股票代码
+     */
+    private String stockCode;
+    /**
      * 股票名称
      */
     private String stockName;
@@ -47,6 +55,10 @@ public class StockRealtimePo {
      * 增长率
      */
     private Float uptickRate;
+    /**
+     * 波动
+     */
+    private Float surgeRate;
     /**
      * 竞买价
      */

@@ -71,9 +71,9 @@ public class SinaRealtime extends SinaStockBaseApi {
             for (int i = 0; i< responseArr.length; i++) {
                 if (!responseArr[i].equals("")) {
                     String key = getStockCode(responseArr[i]);
-                    StockRealtimePo stockRealtimeEntity = getStockRealtimeEntity(responseArr[i]);
+                    StockRealtimePo stockRealtimePo = getStockRealtimeEntity(responseArr[i]);
                     if (!key.equals("")) {
-                        hashMap.put(key, stockRealtimeEntity);
+                        hashMap.put(key, stockRealtimePo);
                     }
                 }
             }
@@ -100,7 +100,7 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @return
      */
     private static StockRealtimePo getStockRealtimeEntity(String response) {
-        StockRealtimePo stockRealtimeEntity = new StockRealtimePo();
+        StockRealtimePo stockRealtimePo = new StockRealtimePo();
         String stockCode = getStockCode(response);
         int startIndex = response.indexOf("\"");
         int endIndex = response.lastIndexOf("\"");
@@ -109,14 +109,14 @@ public class SinaRealtime extends SinaStockBaseApi {
             if (response.contains(",")) {
                 String[] responseArr = response.split(",");
                 if (stockCode.startsWith("hk")) {
-                    stockRealtimeEntity = buildHkStockRealtimeEntity(responseArr);
+                    stockRealtimePo = buildHkStockRealtimeEntity(responseArr);
                 } else {
-                    stockRealtimeEntity = buildCnStockRealtimeEntity(responseArr);
+                    stockRealtimePo = buildCnStockRealtimeEntity(responseArr);
                 }
             }
 
         }
-        return stockRealtimeEntity;
+        return stockRealtimePo;
     }
 
     /**
@@ -125,9 +125,9 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @return
      */
     private static StockRealtimePo buildCnStockRealtimeEntity(String[] responseArr) {
-        StockRealtimePo stockRealtimeEntity = new StockRealtimePo();
+        StockRealtimePo stockRealtimePo = new StockRealtimePo();
         if (null == responseArr || responseArr.length == 0) {
-            return stockRealtimeEntity;
+            return stockRealtimePo;
         }
         Map<Float, Map<String, Float>> sellList = new LinkedHashMap<>(5);
         List<Float> sellPriceList = new ArrayList<>();
@@ -140,34 +140,34 @@ public class SinaRealtime extends SinaStockBaseApi {
                 continue;
             }
             if (0 == i) {
-                stockRealtimeEntity.setStockName(responseArr[i]);
+                stockRealtimePo.setStockName(responseArr[i]);
             }
             if (1 == i) {
-                stockRealtimeEntity.setTodayOpenPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setTodayOpenPrice(Float.valueOf(responseArr[i]));
             }
             if (2 == i) {
-                stockRealtimeEntity.setYesterdayClosePrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setYesterdayClosePrice(Float.valueOf(responseArr[i]));
             }
             if (3 == i) {
-                stockRealtimeEntity.setCurrentPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setCurrentPrice(Float.valueOf(responseArr[i]));
             }
             if (4 == i) {
-                stockRealtimeEntity.setTodayHighestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setTodayHighestPrice(Float.valueOf(responseArr[i]));
             }
             if (5 == i) {
-                stockRealtimeEntity.setTodayLowestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setTodayLowestPrice(Float.valueOf(responseArr[i]));
             }
             if (6 == i) {
-                stockRealtimeEntity.setCompeteBuyPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setCompeteBuyPrice(Float.valueOf(responseArr[i]));
             }
             if (7 == i) {
-                stockRealtimeEntity.setCompeteSellPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setCompeteSellPrice(Float.valueOf(responseArr[i]));
             }
             if (8 == i) {
-                stockRealtimeEntity.setDealNum(Long.valueOf(responseArr[i]));
+                stockRealtimePo.setDealNum(Long.valueOf(responseArr[i]));
             }
             if (9 == i) {
-                stockRealtimeEntity.setDealMoney(Double.valueOf(responseArr[i]));
+                stockRealtimePo.setDealMoney(Double.valueOf(responseArr[i]));
             }
             if (10 <= i && 29 >= i) {
                 if (0 == i % 2) {
@@ -185,13 +185,13 @@ public class SinaRealtime extends SinaStockBaseApi {
                 }
             }
             if (30 == i) {
-                stockRealtimeEntity.setCurrentDate(responseArr[i]);
+                stockRealtimePo.setCurrentDate(responseArr[i]);
             }
             if (31 == i) {
-                stockRealtimeEntity.setCurrentTime(responseArr[i]);
+                stockRealtimePo.setCurrentTime(responseArr[i]);
             }
             if (32 == i) {
-                stockRealtimeEntity.setDealStatus(responseArr[i]);
+                stockRealtimePo.setDealStatus(responseArr[i]);
             }
             if (33 <= i) {
                 unknownList.add(responseArr[i]);
@@ -203,7 +203,7 @@ public class SinaRealtime extends SinaStockBaseApi {
             for(Float price : sellPriceList) {
                 list.add(sellList.get(price));
             }
-            stockRealtimeEntity.setSellPriceList(list);
+            stockRealtimePo.setSellPriceList(list);
         }
         if (buyList.size() > 0) {
             Collections.sort(buyPriceList);
@@ -211,12 +211,33 @@ public class SinaRealtime extends SinaStockBaseApi {
             for(Float price : buyPriceList) {
                 list.add(0, buyList.get(price));
             }
-            stockRealtimeEntity.setBuyPriceList(list);
+            stockRealtimePo.setBuyPriceList(list);
         }
         if (unknownList.size() > 0) {
-            stockRealtimeEntity.setUnknownKeyList(unknownList);
+            stockRealtimePo.setUnknownKeyList(unknownList);
         }
-        return stockRealtimeEntity;
+        //昨日收盘价
+        Float yesterdayClosePrice = stockRealtimePo.getYesterdayClosePrice();
+        //当前价格
+        Float currentPrice = stockRealtimePo.getCurrentPrice();
+        //今日最高价
+        Float todayHighestPrice = stockRealtimePo.getTodayHighestPrice();
+        //今日最低价
+        Float todayLowestPrice = stockRealtimePo.getTodayLowestPrice();
+        if (null == currentPrice || null == yesterdayClosePrice
+                || null == todayHighestPrice || null == todayLowestPrice
+        ) {
+            return stockRealtimePo;
+        }
+        Float uptickPrice = currentPrice - yesterdayClosePrice;
+        stockRealtimePo.setUptickPrice(uptickPrice);
+        //增幅
+        Float uptickRate = uptickPrice / yesterdayClosePrice;
+        //波动
+        Float surgeRate = (todayHighestPrice - todayLowestPrice) / yesterdayClosePrice;
+        stockRealtimePo.setUptickRate(uptickRate);
+        stockRealtimePo.setSurgeRate(surgeRate);
+        return stockRealtimePo;
     }
 
     /**
@@ -225,9 +246,9 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @return
      */
     private static StockRealtimePo buildHkStockRealtimeEntity(String[] responseArr) {
-        StockRealtimePo stockRealtimeEntity = new StockRealtimePo();
+        StockRealtimePo stockRealtimePo = new StockRealtimePo();
         if (null == responseArr || responseArr.length == 0) {
-            return stockRealtimeEntity;
+            return stockRealtimePo;
         }
         List<String> unknownList = new LinkedList<>();
         for (int i = 0; i < responseArr.length; i++) {
@@ -235,58 +256,79 @@ public class SinaRealtime extends SinaStockBaseApi {
                 continue;
             }
             if (0 == i) {
-                stockRealtimeEntity.setStockNameEn(responseArr[i]);
+                stockRealtimePo.setStockNameEn(responseArr[i]);
             }
             if (1 == i) {
-                stockRealtimeEntity.setStockName(responseArr[i]);
+                stockRealtimePo.setStockName(responseArr[i]);
             }
             if (2 == i) {
-                stockRealtimeEntity.setTodayOpenPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setTodayOpenPrice(Float.valueOf(responseArr[i]));
             }
             if (3 == i) {
-                stockRealtimeEntity.setYesterdayClosePrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setYesterdayClosePrice(Float.valueOf(responseArr[i]));
             }
             if (4 == i) {
-                stockRealtimeEntity.setTodayHighestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setTodayHighestPrice(Float.valueOf(responseArr[i]));
             }
             if (5 == i) {
-                stockRealtimeEntity.setTodayLowestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setTodayLowestPrice(Float.valueOf(responseArr[i]));
             }
             if (6 == i) {
-                stockRealtimeEntity.setCurrentPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setCurrentPrice(Float.valueOf(responseArr[i]));
             }
             if (7 == i) {
-                stockRealtimeEntity.setUptickPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setUptickPrice(Float.valueOf(responseArr[i]));
             }
             if (8 == i) {
-                stockRealtimeEntity.setUptickRate(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setUptickRate(Float.valueOf(responseArr[i]));
             }
             if (9 == i) {
-                stockRealtimeEntity.setMinuteLowestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setMinuteLowestPrice(Float.valueOf(responseArr[i]));
             }
             if (10 == i) {
-                stockRealtimeEntity.setMinuteHighestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setMinuteHighestPrice(Float.valueOf(responseArr[i]));
             }
             if (11 == i) {
-                stockRealtimeEntity.setDealMoney(Double.valueOf(responseArr[i]));
+                stockRealtimePo.setDealMoney(Double.valueOf(responseArr[i]));
             }
             if (12 == i) {
-                stockRealtimeEntity.setDealNum(Long.valueOf(responseArr[i]));
+                stockRealtimePo.setDealNum(Long.valueOf(responseArr[i]));
             }
             if (13 <= i && 16 >= i) {
                 //i==15或16时，近期的最高，底价，时间范围不定，暂时观察至少是近一年的
                 unknownList.add(responseArr[i]);
             }
             if (17 == i) {
-                stockRealtimeEntity.setCurrentDate(responseArr[i].replace("/", "-"));
+                stockRealtimePo.setCurrentDate(responseArr[i].replace("/", "-"));
             }
             if (18 == i) {
-                stockRealtimeEntity.setCurrentTime(responseArr[i] + ":00");
+                stockRealtimePo.setCurrentTime(responseArr[i] + ":00");
             }
         }
         if (unknownList.size() > 0) {
-            stockRealtimeEntity.setUnknownKeyList(unknownList);
+            stockRealtimePo.setUnknownKeyList(unknownList);
         }
-        return stockRealtimeEntity;
+        //昨日收盘价
+        Float yesterdayClosePrice = stockRealtimePo.getYesterdayClosePrice();
+        //当前价格
+        Float currentPrice = stockRealtimePo.getCurrentPrice();
+        //今日最高价
+        Float todayHighestPrice = stockRealtimePo.getTodayHighestPrice();
+        //今日最低价
+        Float todayLowestPrice = stockRealtimePo.getTodayLowestPrice();
+        if (null == currentPrice || null == yesterdayClosePrice
+                || null == todayHighestPrice || null == todayLowestPrice
+        ) {
+            return stockRealtimePo;
+        }
+        Float uptickPrice = currentPrice - yesterdayClosePrice;
+        stockRealtimePo.setUptickPrice(uptickPrice);
+        //增幅
+        Float uptickRate = uptickPrice / yesterdayClosePrice;
+        //波动
+        Float surgeRate = (todayHighestPrice - todayLowestPrice) / yesterdayClosePrice;
+        stockRealtimePo.setUptickRate(uptickRate);
+        stockRealtimePo.setSurgeRate(surgeRate);
+        return stockRealtimePo;
     }
 }

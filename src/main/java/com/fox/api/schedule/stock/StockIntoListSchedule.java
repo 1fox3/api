@@ -42,6 +42,7 @@ public class StockIntoListSchedule extends StockBaseSchedule {
         }
         this.stockRedisUtil.delete(this.redisRealtimeStockInfoHash);
         this.stockRedisUtil.delete(this.redisRealtimeStockLineHash);
+        this.stockRedisUtil.delete(this.redisRealtimeRankPriceZSet);
         this.stockRedisUtil.delete(this.redisRealtimeRankUptickRateZSet);
         this.stockRedisUtil.delete(this.redisRealtimeRankSurgeRateZSet);
         this.stockRedisUtil.delete(this.redisRealtimeRankDealNumZSet);
