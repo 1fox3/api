@@ -78,7 +78,7 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
     public Map<String, Integer> uptickRateStatistics() {
         Object object = this.stockRedisUtil.get(this.stockRealtimeStockUptickRateStatistics);
         if (null == object) {
-            return new HashMap<>();
+            return new HashMap<>(0);
         }
         return (Map<String, Integer>)object;
     }

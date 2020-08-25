@@ -123,17 +123,19 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
         }
         Map<String, Integer> uptickRateStatisticsMap = new  LinkedHashMap<>();
         Map<String, List<Double>> scoreMap = new LinkedHashMap<String, List<Double>>(){{
-            put("up", Arrays.asList(0.00001, 1.0));
+            put("up", Arrays.asList(0.00001, 100.0));
+            put("upLimit", Arrays.asList(0.09700, 100.0));
             put("down", Arrays.asList(-1.0, -0.00001));
-            put("zero", Arrays.asList(-0.00001, 0.00001));
-            put("-3~0", Arrays.asList(-0.02999, -0.00001));
-            put("-5~-3", Arrays.asList(-0.04999, -0.03000));
-            put("-7~-5", Arrays.asList(-0.06999, -0.05000));
-            put("-7", Arrays.asList(-1.0, -0.07000));
-            put("0~3", Arrays.asList(0.00001, 0.02999));
-            put("3~5", Arrays.asList(0.03000, 0.04999));
-            put("5~7", Arrays.asList(0.05000, 0.06999));
-            put("7", Arrays.asList(0.07000, 1.0));
+            put("downLimit", Arrays.asList(-1.0, -0.09701));
+            put("flat", Arrays.asList(-0.00001, 0.00001));
+//            put("scopeOne", Arrays.asList(-1.0, -0.07000));
+//            put("scopeTwo", Arrays.asList(-0.06999, -0.05000));
+//            put("scopeThree", Arrays.asList(-0.04999, -0.03000));
+//            put("scopeFour", Arrays.asList(-0.02999, -0.00001));
+//            put("scopeFive", Arrays.asList(0.00001, 0.02999));
+//            put("scopeSix", Arrays.asList(0.03000, 0.04999));
+//            put("scopeSeven", Arrays.asList(0.05000, 0.06999));
+//            put("scopeEight", Arrays.asList(0.07000, 100.0));
         }};
 
         Double startScore;
