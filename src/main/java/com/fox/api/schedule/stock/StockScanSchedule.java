@@ -114,10 +114,15 @@ public class StockScanSchedule extends StockBaseSchedule {
                             0 : stockKindInfoEntity.getStockType());
                     stockEntity.setStockKind(null == stockKindInfoEntity.getStockKind() ?
                             0 : stockKindInfoEntity.getStockKind());
-                    if (null != stockEntity.getId()) {
-                        stockMapper.update(stockEntity);
-                    } else {
-                        stockMapper.insert(stockEntity);
+                    try {
+                        if (null != stockEntity.getId()) {
+                            stockMapper.update(stockEntity);
+                        } else {
+                            stockMapper.insert(stockEntity);
+                        }
+                    } catch (Exception e) {
+                        System.out.println(stockEntity);
+                        e.printStackTrace();
                     }
                 }
             }
@@ -150,7 +155,11 @@ public class StockScanSchedule extends StockBaseSchedule {
             stockCodeList.add(sinaStockCode);
 
             if (stockCodeList.size() >= 500 || maxLimit.equals(i)) {
-                this.scanStockCodeList(stockMarket, stockCodeList);
+                try {
+                    this.scanStockCodeList(stockMarket, stockCodeList);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
