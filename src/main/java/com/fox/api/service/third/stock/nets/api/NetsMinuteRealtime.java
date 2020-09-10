@@ -1,16 +1,18 @@
 package com.fox.api.service.third.stock.nets.api;
 
 import com.fox.api.entity.dto.http.HttpResponseDto;
-import com.fox.api.util.DateUtil;
-import com.fox.api.util.HttpUtil;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeNodePo;
+import com.fox.api.util.DateUtil;
+import com.fox.api.util.HttpUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @Component
 /**

@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * HTTP请求工具类
@@ -423,7 +424,22 @@ public class HttpUtil {
      */
     private HttpResponseDto readResponse(HttpURLConnection urlCon) throws IOException {
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(urlCon.getInputStream(), this.oriCharset));
+            Map<String,List<String>> headerMap = urlCon.getHeaderFields();
+            String encodingTypeHeader = "Content-Encoding";
+            boolean isGZip = false;
+            if (null != headerMap && headerMap.containsKey(encodingTypeHeader)) {
+                List<String> contentEncodingList = headerMap.get(encodingTypeHeader);
+                if (contentEncodingList.get(0).equals("gzip")) {
+                    isGZip = true;
+                }
+            }
+            BufferedReader br;
+            if (isGZip) {
+                GZIPInputStream gzin = new GZIPInputStream(urlCon.getInputStream());
+                br = new BufferedReader(new InputStreamReader(gzin, "GB2312"));
+            } else {
+                br = new BufferedReader(new InputStreamReader(urlCon.getInputStream(), this.oriCharset));
+            }
             StringBuilder sb = new StringBuilder();
             String read = null;
             while ((read = br.readLine()) != null) {

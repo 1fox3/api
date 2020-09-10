@@ -107,7 +107,13 @@ public class StockScanSchedule extends StockBaseSchedule {
                     stockEntity.setSinaStockCode(currentStockCode);
                     stockEntity.setNetsStockCode(netsStockCode);
                     stockEntity.setStockMarket(stockMarketId);
-                    stockEntity.setStockStatus(lastDealDate.equals(stockRealtimeEntity.getCurrentDate()) ? 0 : 1);
+                    int stockStatus = 0;
+                    if (lastDealDate.equals(stockRealtimeEntity.getCurrentDate())
+                            && !"-2".equals(stockRealtimeEntity.getDealStatus())
+                    ) {
+                        stockStatus = 1;
+                    }
+                    stockEntity.setStockStatus(stockStatus);
                     //判定类别
                     StockKindInfoProperty stockKindInfoEntity = stockUtilService.getStockKindInfo(stockCode, stockMarketId);
                     stockEntity.setStockType(null == stockKindInfoEntity.getStockType() ?
