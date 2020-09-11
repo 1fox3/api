@@ -108,8 +108,8 @@ public class StockScanSchedule extends StockBaseSchedule {
                     stockEntity.setNetsStockCode(netsStockCode);
                     stockEntity.setStockMarket(stockMarketId);
                     int stockStatus = 0;
-                    if (lastDealDate.equals(stockRealtimeEntity.getCurrentDate())
-                            && !"-2".equals(stockRealtimeEntity.getDealStatus())
+                    if (!lastDealDate.equals(stockRealtimeEntity.getCurrentDate())
+                            || "-2".equals(stockRealtimeEntity.getDealStatus())
                     ) {
                         stockStatus = 1;
                     }
