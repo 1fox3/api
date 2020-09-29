@@ -4,6 +4,7 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.dao.stock.mapper.StockPriceDayMapper;
 import com.fox.api.property.stock.StockProperty;
 import com.fox.api.util.StockUtil;
 import com.fox.api.util.redis.StockRedisUtil;
@@ -54,6 +55,9 @@ public class StockBaseImpl {
 
     @Autowired
     protected StockDealDayMapper stockDealDayMapper;
+
+    @Autowired
+    protected StockPriceDayMapper stockPriceDayMapper;
 
     @Autowired
     protected StockInfoMapper stockInfoMapper;

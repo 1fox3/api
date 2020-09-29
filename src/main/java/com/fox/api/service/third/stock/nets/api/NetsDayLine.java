@@ -12,15 +12,29 @@ import net.sf.json.JSONObject;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * 股票按天成交信息
+ * @author lusongsong
+ * @date 2020/3/5 18:13
+ */
 public class NetsDayLine extends NetsStockBaseApi {
-    //样例链接
+    /**
+     * 样例链接 http://img1.money.126.net/data/hs/kline/day/history/2020/0603383.json
+     */
     private static String demoUrl = "http://img1.money.126.net/data/" +
             "{stockMarketPY}/{rehabilitationType}/day/history/{year}/{stockCode}.json";
-    //复权类型
+    /**
+     * 复权类型
+     */
     private static List<String> rehabilitationTypeList = Arrays.asList(
-        "kline", //不复权
-        "klinederc" //复权
+            //不复权
+            "kline",
+            //复权
+            "klinederc"
     );
+    /**
+     * 默认复权类型
+     */
     private String rehabilitationType = "kline";
 
     /**
@@ -30,10 +44,10 @@ public class NetsDayLine extends NetsStockBaseApi {
      */
     public StockDayLinePo getDayLine(Map<String, String> netsCodeInfoMap, String startDateStr, String endDateStr) {
         String stockCode = netsCodeInfoMap.containsKey("netsStockCode") ?
-                (String)netsCodeInfoMap.get("netsStockCode") : "";
+                netsCodeInfoMap.get("netsStockCode") : "";
         String rehabilitationType = netsCodeInfoMap.containsKey("rehabilitationType") ?
-                (String)netsCodeInfoMap.get("rehabilitationType") : "";
-        rehabilitationType = this.rehabilitationTypeList.contains(rehabilitationType) ?
+                netsCodeInfoMap.get("rehabilitationType") : "";
+        rehabilitationType = rehabilitationTypeList.contains(rehabilitationType) ?
                 rehabilitationType : this.rehabilitationType;
         StockDayLinePo stockDayLineEntity = new StockDayLinePo();
         if (stockCode.equals("")) {
@@ -65,7 +79,7 @@ public class NetsDayLine extends NetsStockBaseApi {
 
         try {
             for (int i = startYear; i <= endYear; i++) {
-                String url = this.demoUrl.replace("{stockMarketPY}", netsCodeInfoMap.get("netsStockMarketPY"))
+                String url = demoUrl.replace("{stockMarketPY}", netsCodeInfoMap.get("netsStockMarketPY"))
                         .replace("{rehabilitationType}", rehabilitationType)
                         .replace("{year}", String.valueOf(i))
                         .replace("{stockCode}", stockCode);

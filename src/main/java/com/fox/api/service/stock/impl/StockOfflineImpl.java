@@ -2,6 +2,7 @@ package com.fox.api.service.stock.impl;
 
 import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.entity.StockPriceDayEntity;
 import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
 import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
@@ -35,14 +36,14 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
         stockDealDayLineDto.setStockName(stockEntity.getStockName());
         stockDealDayLineDto.setStockCode(stockEntity.getStockCode());
 
-        List<StockDealDayEntity> dealDayList = this.stockDealDayMapper.getByDate(
-                stockId, startDate, endDate, 0
+        List<StockPriceDayEntity> dealDayList = this.stockPriceDayMapper.getByDate(
+                0, stockId, startDate, endDate
         );
         List<StockDealDayDto> stockDealDayList = new LinkedList<>();
         if (null != dealDayList && 0 < dealDayList.size()) {
-            for (StockDealDayEntity stockDealDayEntity : dealDayList) {
+            for (StockPriceDayEntity stockPriceDayEntity : dealDayList) {
                 StockDealDayDto stockDealDayDto = new StockDealDayDto();
-                BeanUtils.copyProperties(stockDealDayEntity, stockDealDayDto);
+                BeanUtils.copyProperties(stockPriceDayEntity, stockDealDayDto);
                 stockDealDayList.add(stockDealDayDto);
             }
             stockDealDayLineDto.setLineNode(stockDealDayList);

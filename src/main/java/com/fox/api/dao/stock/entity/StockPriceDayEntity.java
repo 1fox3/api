@@ -6,43 +6,47 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 /**
- * 股票按天交易数据
+ * 股票按天价格数据
  * @author lusongsong 
- * @date 2020/09/24 20:15
+ * @date 2020/09/24 20:09
  */
 @Data
-public class StockDealDayEntity {
+public class StockPriceDayEntity {
     /**
      * 记录id
     */
-    Long id;
+    Integer id;
     /**
      * 股票id
     */
     Integer stockId;
+    /**
+     * 复权类型
+     */
+    Integer fqType = 0;
     /**
      * 交易日期
     */
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     String dt;
     /**
+     * 开盘价
+    */
+    BigDecimal openPrice;
+    /**
      * 收盘价
     */
     BigDecimal closePrice;
     /**
-     * 成交量
+     * 最高价
     */
-    Long dealNum;
+    BigDecimal highestPrice;
     /**
-     * 成交金额
+     * 最低价
     */
-    BigDecimal dealMoney;
+    BigDecimal lowestPrice;
     /**
-     * 流通股本数
+     * 上个交易日收盘价
     */
-    Long circEquity;
-    /**
-     * 总股本数
-    */
-    Long totalEquity;
+    BigDecimal preClosePrice;
 }

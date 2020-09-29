@@ -12,6 +12,9 @@
         <result column="stock_type" property="stockType" jdbcType="INTEGER" />
         <result column="stock_kind" property="stockKind" jdbcType="INTEGER" />
         <result column="stock_status" property="stockStatus" jdbcType="INTEGER" />
+        <result column="deal_date" property="dealDate" jdbcType="VARCHAR" />
+        <result column="deal_status" property="dealStatus" jdbcType="VARCHAR" />
+        <result column="unknown_info" property="unknownInfo" jdbcType="VARCHAR" />
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
@@ -27,7 +30,10 @@
             stock_market,
             stock_type,
             stock_kind,
-            stock_status
+            stock_status,
+            deal_date,
+            deal_status,
+            unknown_info
         )
         VALUES
             (
@@ -39,7 +45,10 @@
                 #{stockMarket},
                 #{stockType},
                 #{stockKind},
-                #{stockStatus}
+                #{stockStatus},
+                #{dealDate},
+                #{dealStatus},
+                #{unknownInfo}
             );
     </insert>
 
@@ -54,7 +63,10 @@
             stock_market = #{stockMarket},
             stock_type = #{stockType},
             stock_kind = #{stockKind},
-            stock_status = #{stockStatus}
+            stock_status = #{stockStatus},
+            deal_date = #{dealDate},
+            deal_status = #{dealStatus},
+            unknown_info = #{unknownInfo}
         WHERE
             id = #{id};
     </update>
@@ -107,6 +119,20 @@
                 #{item}
             </foreach>
         </if>
+        ORDER BY
+            id ASC
+        LIMIT ${limit}
+    </select>
+
+    <select id="getTotalByType" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock
+        WHERE
+            id > #{id}
+            AND
+            stock_type = #{stockType}
         ORDER BY
             id ASC
         LIMIT ${limit}

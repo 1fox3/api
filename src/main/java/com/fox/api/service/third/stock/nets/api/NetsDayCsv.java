@@ -1,45 +1,154 @@
 package com.fox.api.service.third.stock.nets.api;
 
-import java.util.Arrays;
+import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.entity.po.third.stock.StockDealDayPo;
+import com.fox.api.util.DateUtil;
+import com.fox.api.util.HttpUtil;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 股票按天成交信息
+ * @author lusongsong
+ * @date 2020/3/5 18:13
+ */
 public class NetsDayCsv extends NetsStockBaseApi {
-    //样例链接
+    /**
+     * 样例链接
+     * http://quotes.money.163.com/service/chddata.html?code=0603383&start=20200101&end=20200501&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP
+     */
     private static String demoUrl = "http://quotes.money.163.com/service/chddata.html";
-    //字段列表
-    private static List<String> fieldList = Arrays.asList(
-            "TCLOSE", //收盘价
-            "HIGH", //最高价
-            "LOW", //最低价
-            "TOPEN", //开盘价
-            "LCLOSE", //前收盘价
-            "CHG", //涨跌额
-            "PCHG", //涨跌幅
-            "TURNOVER", //换手率
-            "VOTURNOVER", //成交量
-            "VATURNOVER", //成交金额
-            "TCAP", //总市值
-            "MCAP"//流通市值
-    );
+    /**
+     * 字段列表
+     * TCLOSE:收盘价
+     * HIGH:最高价
+     * LOW:最低价
+     * TOPEN:开盘价
+     * LCLOSE:前收盘价
+     * CHG:涨跌额
+     * PCHG:涨跌幅
+     * TURNOVER:换手率
+     * VOTURNOVER:成交量
+     * VATURNOVER:成交金额
+     * TCAP:总市值
+     * MCAP:流通市值
+     */
+    private static String fieldList = "TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP";
 
-    public String getDealCsvUrl(Map<String, String> params) {
-        String stockCode = params.containsKey("stockCode") ? params.get("stockCode") : "";
+    /**
+     * 构建csv文件地址
+     * @param params
+     * @return
+     */
+    private String getDealCsvUrl(Map<String, String> params) {
+        String stockCode = params.containsKey("netsStockCode") ? params.get("netsStockCode") : "";
         String startDate = params.containsKey("startDate") ? params.get("startDate") : "";
+        startDate = DateUtil.dateStrFormatChange(
+                startDate, DateUtil.DATE_FORMAT_1, DateUtil.DATE_FORMAT_2
+        );
         String endDate = params.containsKey("endDate") ? params.get("endDate") : "";
-        return this.demoUrl + "?"
-                + "code=" + stockCode
-                + "&start=" + startDate
-                + "&end=" + endDate
-                + "&fields=" + this.getParamField();
+        endDate = DateUtil.dateStrFormatChange(
+                endDate, DateUtil.DATE_FORMAT_1, DateUtil.DATE_FORMAT_2
+        );
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(demoUrl);
+        stringBuffer.append("?fields=");
+        stringBuffer.append(fieldList);
+        stringBuffer.append("&code=");
+        stringBuffer.append(stockCode);
+        stringBuffer.append("&start=");
+        stringBuffer.append(startDate);
+        stringBuffer.append("&end=");
+        stringBuffer.append(endDate);
+        return stringBuffer.toString();
     }
 
-    private String getParamField() {
-        int filedSize = this.fieldList.size();
-        String filedStr = "";
-        for (int i = 0; i < filedSize; i++) {
-            filedStr += this.fieldList.get(i) + ",";
+    /**
+     * 获取交易信息
+     * @param params
+     * @return
+     */
+    public List<StockDealDayPo> getDealDayInfo(Map<String, String> params) {
+        List<StockDealDayPo> stockDealDayPoList = new ArrayList<>();
+        String csvFileUrl = getDealCsvUrl(params);
+        HttpUtil httpUtil = new HttpUtil();
+        httpUtil.setUrl(csvFileUrl).setOriCharset("GBK");
+        HttpResponseDto httpResponse = null;
+        try {
+            httpResponse = httpUtil.request();
+            String dealString = httpResponse.getContent();
+            if (null != dealString && dealString.length() > 0) {
+                String[] dealStringArr = dealString.split("\n");
+                for (int i = 1; i < dealStringArr.length; i++) {
+                    String[] dayDealStringArr = dealStringArr[i].split(",");
+                    StockDealDayPo stockDealDayPo = new StockDealDayPo();
+                    for (int j = 0; j < dayDealStringArr.length; j++) {
+                        String subStr = dayDealStringArr[j];
+                        if (null == subStr || subStr.length() == 0) {
+                            continue;
+                        }
+                        subStr = "None".equals(subStr) ? "0" : subStr;
+                        switch (j) {
+                            case 0:
+                                stockDealDayPo.setDt(subStr);
+                                break;
+                            case 1:
+                                stockDealDayPo.setStockCode(subStr.replace("'", ""));
+                                break;
+                            case 2:
+                                stockDealDayPo.setStockName(subStr);
+                                break;
+                            case 3:
+                                stockDealDayPo.setClosePrice(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 4:
+                                stockDealDayPo.setHighestPrice(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 5:
+                                stockDealDayPo.setLowestPrice(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 6:
+                                stockDealDayPo.setOpenPrice(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 7:
+                                stockDealDayPo.setPreClosePrice(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 8:
+                                stockDealDayPo.setUptickPrice(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 9:
+                                stockDealDayPo.setUptickRate(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 10:
+                                stockDealDayPo.setTurnoverRate(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 11:
+                                stockDealDayPo.setDealNum(Long.valueOf(subStr));
+                                break;
+                            case 12:
+                                stockDealDayPo.setDealMoney(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 13:
+                                stockDealDayPo.setTotalValue(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                            case 14:
+                                stockDealDayPo.setCircValue(BigDecimal.valueOf(Double.valueOf(subStr)));
+                                break;
+                        }
+                    }
+                    stockDealDayPoList.add(stockDealDayPo);
+                }
+            }
+            Collections.reverse(stockDealDayPoList);
+            return stockDealDayPoList;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return filedStr.length() > 1 ? filedStr.substring(0, filedStr.length() - 1) : "";
+        return stockDealDayPoList;
     }
 }

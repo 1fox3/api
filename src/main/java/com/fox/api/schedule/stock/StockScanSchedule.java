@@ -120,6 +120,16 @@ public class StockScanSchedule extends StockBaseSchedule {
                             0 : stockKindInfoEntity.getStockType());
                     stockEntity.setStockKind(null == stockKindInfoEntity.getStockKind() ?
                             0 : stockKindInfoEntity.getStockKind());
+                    stockEntity.setDealDate(
+                            null == stockRealtimeEntity.getCurrentDate() ? "1900-01-01" : stockRealtimeEntity.getCurrentDate()
+                    );
+                    stockEntity.setDealStatus(
+                            null == stockRealtimeEntity.getDealStatus() ? "" : stockRealtimeEntity.getDealStatus()
+                    );
+                    stockEntity.setUnknownInfo(
+                            null == stockRealtimeEntity.getUnknownKeyList()
+                                    ? "" : stockRealtimeEntity.getUnknownKeyList().toString()
+                    );
                     try {
                         if (null != stockEntity.getId()) {
                             stockMapper.update(stockEntity);

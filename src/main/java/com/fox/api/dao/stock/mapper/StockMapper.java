@@ -7,19 +7,62 @@ import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
+/**
+ * 股票信息
+ * @author lusongsong
+ * @date 2020/3/5 18:13
+ */
 @StockMapperConfig
 @CacheConfig(cacheNames = {"StockMapper"})
 public interface StockMapper {
+    /**
+     * 插入
+     * @param stockEntity
+     * @return
+     */
     Integer insert(StockEntity stockEntity);
 
+    /**
+     * 更新
+     * @param stockEntity
+     * @return
+     */
     Integer update(StockEntity stockEntity);
 
-    @Cacheable(key = "#id", cacheManager = "stockCacheManager")
+    /**
+     * 根据id查询单条记录
+     * @param id
+     * @return
+     */
+    @Cacheable(key = "#id", unless="#result == null", cacheManager = "stockCacheManager")
     StockEntity getById(int id);
 
+    /**
+     * 根据股票编码获取单条记录
+     * @param stockCode
+     * @param stockMarket
+     * @return
+     */
     StockEntity getByStockCode(String stockCode, int stockMarket);
 
+    /**
+     * 获取列表
+     * @param stockType
+     * @param id
+     * @param limit
+     * @param stockMarket
+     * @return
+     */
     List<StockEntity> getListByType(Integer stockType, Integer id, String limit, List<Integer> stockMarket);
+
+    /**
+     * 获取全部列表
+     * @param stockType
+     * @param id
+     * @param limit
+     * @return
+     */
+    List<StockEntity> getTotalByType(Integer stockType, Integer id, String limit);
 
     /**
      * 获取最后的id值
