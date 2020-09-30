@@ -121,4 +121,15 @@
             dt = #{dt}
         LIMIT 1;
     </select>
+
+    <select id="getTotalByStock" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_price_day
+        WHERE
+            fq_type = #{fqType}
+            AND
+            stock_id = #{stockId};
+    </select>
 </mapper>

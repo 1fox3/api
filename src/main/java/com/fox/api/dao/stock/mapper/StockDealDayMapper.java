@@ -57,4 +57,11 @@ public interface StockDealDayMapper {
      * @return
      */
     StockDealDayEntity getBySignalDate(StockDealDayEntity stockDealDayEntity);
+
+    /**
+     * 获取股票全部数据
+     * @param stockId
+     * @return
+     */
+    List<StockDealDayEntity> getTotalByStock(Integer stockId);
 }

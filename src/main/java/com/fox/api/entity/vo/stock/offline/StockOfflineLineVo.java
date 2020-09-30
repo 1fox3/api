@@ -6,6 +6,11 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
+/**
+ * 股票历史交易线图清请求参数
+ * @author lusongsong
+ * @date 2020/4/9 14:34
+ */
 @Data
 public class StockOfflineLineVo extends StockVo {
     @NotBlank(message = "起始日期不能为空")

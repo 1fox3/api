@@ -1,7 +1,6 @@
 package com.fox.api.dao.stock.mapper;
 
 import com.fox.api.annotation.mapper.StockMapperConfig;
-import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockPriceDayEntity;
 
 import java.util.List;
@@ -68,4 +67,12 @@ public interface StockPriceDayMapper {
      * @return
      */
     StockPriceDayEntity getBySignalDate(StockPriceDayEntity stockPriceDayEntity);
+
+    /**
+     * 获取股票全部数据
+     * @param fqType
+     * @param stockId
+     * @return
+     */
+    List<StockPriceDayEntity> getTotalByStock(Integer fqType, Integer stockId);
 }

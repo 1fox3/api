@@ -13,7 +13,12 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-@CrossOrigin(origins = "*")//处理跨域问题
+/**
+ * 股票历史交易信息
+ * @author lusongsong
+ * @date 2020/5/3 18:13
+ */
+@CrossOrigin(origins = "*")
 @RestController
 public class OfflineController {
     @Autowired
@@ -43,5 +48,11 @@ public class OfflineController {
             return ResultDto.fail(ReturnCode.FAIL);
         }
         return ResultDto.success(list);
+    }
+
+    @RequestMapping("/stock/offline/day")
+    public ResultDto day(Integer stockId, Integer fqType) {
+        fqType = null == fqType ? 0 : fqType;
+        return ResultDto.success(stockOfflineService.day(stockId, fqType));
     }
 }

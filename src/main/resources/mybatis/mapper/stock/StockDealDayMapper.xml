@@ -94,4 +94,13 @@
             dt = #{dt}
         LIMIT 1;
     </select>
+
+    <select id="getTotalByStock" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_day
+        WHERE
+            stock_id = #{stockId};
+    </select>
 </mapper>

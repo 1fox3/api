@@ -2,22 +2,43 @@ package com.fox.api.entity.dto.stock.offline;
 
 import lombok.Data;
 
+/**
+ * 股票按天交易信息
+ * @author lusongsong
+ * @date 2020/4/9 16:57
+ */
 @Data
 public class StockDealDayDto {
-    //交易日期
+    /**
+     * 交易日期
+     */
     private String dt;
-    //开盘价
+    /**
+     * 开盘价
+     */
     private Double openPrice;
-    //收盘价
+    /**
+     * 收盘价
+     */
     private Double closePrice;
-    //最高价
+    /**
+     * 最高价
+     */
     private Double highestPrice;
-    //最低价
+    /**
+     * 最低价
+     */
     private Double LowestPrice;
-    //成交数量
+    /**
+     * 成交数量
+     */
     private Long dealNum;
-    //成交金额
+    /**
+     * 成交金额
+     */
     private Double dealMoney = 0.0;
-    //增幅
+    /**
+     * 增幅
+     */
     private Double uptickRate;
 }

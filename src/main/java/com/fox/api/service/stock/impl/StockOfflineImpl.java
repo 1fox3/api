@@ -18,6 +18,11 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 股票历史交易信息
+ * @author lusongsong
+ * @date 2020/3/5 18:13
+ */
 @Service
 public class StockOfflineImpl extends StockBaseImpl implements StockOfflineService {
 
@@ -76,5 +81,45 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
     public List<StockDealNumPo> dealRatio(Integer stockId, String startDate, String endDate) {
         SinaDealRatio sinaDealRatio = new SinaDealRatio();
         return sinaDealRatio.getDealRatio(this.getSinaStockCode(stockId), startDate, endDate);
+    }
+
+    /**
+     * 股票单天交易数据
+     * @param stockId
+     * @return
+     */
+    @Override
+    public List<List<Object>> day(Integer stockId) {
+        return day(stockId, 0);
+    }
+
+    /**
+     * 股票单天交易数据
+     * @param stockId
+     * @param fqType
+     * @return
+     */
+    @Override
+    public List<List<Object>> day(Integer stockId, Integer fqType) {
+        List<List<Object>> dayList = new LinkedList<>();
+        List<StockPriceDayEntity> priceDayList = this.stockPriceDayMapper.getTotalByStock(fqType, stockId);
+        List<StockDealDayEntity> dealDayList = this.stockDealDayMapper.getTotalByStock(stockId);
+        for (int i = 0; i < priceDayList.size(); i++) {
+            List<Object> dayInfoList = new LinkedList<>();
+            StockPriceDayEntity stockPriceDayEntity = priceDayList.get(i);
+            StockDealDayEntity stockDealDayEntity = dealDayList.get(i);
+            dayInfoList.add(stockPriceDayEntity.getDt());
+            dayInfoList.add(stockPriceDayEntity.getOpenPrice());
+            dayInfoList.add(stockPriceDayEntity.getClosePrice());
+            dayInfoList.add(stockPriceDayEntity.getHighestPrice());
+            dayInfoList.add(stockPriceDayEntity.getLowestPrice());
+            dayInfoList.add(stockPriceDayEntity.getPreClosePrice());
+            dayInfoList.add(stockDealDayEntity.getDealNum());
+            dayInfoList.add(stockDealDayEntity.getDealMoney());
+            dayInfoList.add(stockDealDayEntity.getCircEquity());
+            dayInfoList.add(stockDealDayEntity.getTotalEquity());
+            dayList.add(dayInfoList);
+        }
+        return dayList;
     }
 }
