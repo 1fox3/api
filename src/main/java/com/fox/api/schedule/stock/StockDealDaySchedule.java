@@ -5,27 +5,28 @@ import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockPriceDayEntity;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
-import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.dao.stock.mapper.StockPriceDayMapper;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
 import com.fox.api.entity.po.third.stock.StockDealDayPo;
 import com.fox.api.entity.po.third.stock.StockDealPo;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.third.stock.nets.api.NetsDayCsv;
 import com.fox.api.service.third.stock.nets.api.NetsDayLine;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 股票按天交易
  * @author lusongsong
+ * @date 2020/4/7 14:22
  */
 @Component
 public class StockDealDaySchedule extends StockBaseSchedule {
@@ -254,7 +255,6 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                 if (null == stockEntity.getNetsStockCode() || 0 == stockEntity.getNetsStockCode().length()) {
                     continue;
                 }
-                stockId = stockEntity.getId();
                 this.syncPriceDay(stockEntity);
                 this.syncDealDay(stockEntity);
             }

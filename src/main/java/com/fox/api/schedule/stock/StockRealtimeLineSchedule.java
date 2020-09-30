@@ -4,10 +4,8 @@ import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.thread.stock.StockRealtimeLineThread;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,21 +13,18 @@ import java.util.List;
 /**
  * 批量获取股票的实时线图数据
  * @author lusongsong
+ * @date 2020/3/27 20:31
  */
 @Component
 public class StockRealtimeLineSchedule extends StockBaseSchedule {
     @Autowired
     private StockRealtimeService stockRealtimeService;
 
-    @LogShowTimeAnt
-//    @Scheduled(cron="0/5 * 9,10,11,13,14 * * 1-5")
     /**
-     * 每5秒钟启动一次,暂时不执行，时效性不好
+     * 获取实时交易线图信息
      */
+    @LogShowTimeAnt
     public void stockRealtimeLine() {
-        if (!this.isDealTime()) {
-            return;
-        }
         //需要开启的线程数量
         Integer threadNum = 50;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);

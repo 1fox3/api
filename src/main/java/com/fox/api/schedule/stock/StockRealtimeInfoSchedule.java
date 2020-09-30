@@ -14,19 +14,16 @@ import java.util.Map;
 /**
  * 批量获取股票的实时信息数据
  * @author lusongsong
+ * @date 2020/3/27 17:52
  */
 @Component
 public class StockRealtimeInfoSchedule extends StockBaseSchedule {
 
-    @LogShowTimeAnt
-//    @Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
     /**
-     * 获取实时信息
+     * 获取实时交易信息
      */
+    @LogShowTimeAnt
     public void stockRealtimeInfo() {
-        if (!this.isDealTime()) {
-            return;
-        }
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
         Map<String, StockRealtimePo> stockRealtimePoMap = new HashMap<>(onceLimit);

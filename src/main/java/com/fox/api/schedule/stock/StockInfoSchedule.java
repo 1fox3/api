@@ -8,7 +8,6 @@ import com.fox.api.service.stock.StockInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,6 +15,7 @@ import java.util.List;
 /**
  * 股票信息同步任务
  * @author lusongsong
+ * @date 2020/4/10 16:26
  */
 @Component
 public class StockInfoSchedule extends StockBaseSchedule {
@@ -27,23 +27,28 @@ public class StockInfoSchedule extends StockBaseSchedule {
     @Autowired
     private StockInfoService stockInfoService;
 
-    @LogShowTimeAnt
-//    @Scheduled(cron="0 0 5 * * 1-5")
     /**
      * 同步所有股票的信息
      */
+    @LogShowTimeAnt
     public void stockInfo() {
-        Integer onceLimit = 200;
         Integer stockId = 0;
-        Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
-        for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit) {
-            List<Object> stockEntityList = this.stockRedisUtil.lRange(this.redisStockList, i, i + onceLimit - 1);
-            if (null == stockEntityList || 0 >= stockEntityList.size()) {
-                continue;
+        Integer onceLimit = 100;
+        while (true) {
+            List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
+                    2,
+                    stockId,
+                    onceLimit.toString()
+            );
+            if (null == stockEntityList) {
+                break;
             }
-            for (Object object : stockEntityList) {
+            for (StockEntity stockEntity : stockEntityList) {
+                if (null == stockEntity) {
+                    continue;
+                }
+                stockId = null == stockEntity.getId() ? stockEntity.getId() : stockId + 1;
                 try{
-                    stockId = ((StockEntity)object).getId();
                     StockInfoEntity shStockInfoEntity = stockInfoService.getInfoFromStockExchange(stockId);
                     if (null == shStockInfoEntity.getStockOnDate() || "".equals(shStockInfoEntity.getStockOnDate())) {
                         continue;
@@ -60,6 +65,9 @@ public class StockInfoSchedule extends StockBaseSchedule {
                     logger.error(stockId.toString());
                     logger.error(e.getMessage());
                 }
+            }
+            if (stockEntityList.size() < onceLimit) {
+                break;
             }
         }
     }

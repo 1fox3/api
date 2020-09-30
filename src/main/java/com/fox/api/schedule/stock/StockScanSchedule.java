@@ -12,7 +12,6 @@ import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.service.third.stock.sina.api.SinaStockBaseApi;
 import com.fox.api.util.StockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -21,6 +20,7 @@ import java.util.*;
 /**
  * 股票代码扫描
  * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 public class StockScanSchedule extends StockBaseSchedule {
     @Autowired

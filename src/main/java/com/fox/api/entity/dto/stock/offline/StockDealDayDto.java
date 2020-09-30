@@ -2,6 +2,8 @@ package com.fox.api.entity.dto.stock.offline;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * 股票按天交易信息
  * @author lusongsong
@@ -12,33 +14,33 @@ public class StockDealDayDto {
     /**
      * 交易日期
      */
-    private String dt;
+    String dt;
     /**
      * 开盘价
      */
-    private Double openPrice;
+    BigDecimal openPrice;
     /**
      * 收盘价
      */
-    private Double closePrice;
+    BigDecimal closePrice;
     /**
      * 最高价
      */
-    private Double highestPrice;
+    BigDecimal highestPrice;
     /**
      * 最低价
      */
-    private Double LowestPrice;
+    BigDecimal LowestPrice;
     /**
      * 成交数量
      */
-    private Long dealNum;
+    Long dealNum;
     /**
      * 成交金额
      */
-    private Double dealMoney = 0.0;
+    BigDecimal dealMoney;
     /**
      * 增幅
      */
-    private Double uptickRate;
+    BigDecimal uptickRate;
 }

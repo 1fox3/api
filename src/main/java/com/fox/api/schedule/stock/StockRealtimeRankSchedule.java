@@ -3,15 +3,14 @@ package com.fox.api.schedule.stock;
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import org.springframework.data.redis.core.DefaultTypedTuple;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * 股票实时信息数据
  * @author lusongsong
+ * @date 2020/3/30 18:01
  */
 @Component
 public class StockRealtimeRankSchedule extends StockBaseSchedule {
@@ -20,11 +19,7 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
      * 每分钟执行一次
      */
     @LogShowTimeAnt
-    //@Scheduled(cron="0 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeRank() {
-        if (!this.isDealTime()) {
-            return;
-        }
         Long stockIdListSize = this.stockRedisUtil.lSize(this.redisStockIdList);
         int stopNum = 0;
         Long onceLimit = (long)600;
@@ -116,11 +111,7 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
      * 实时增幅统计
      */
     @LogShowTimeAnt
-    //@Scheduled(cron="*/2 * 9,10,11,13,14 * * 1-5")
     public void stockRealtimeUptickRateStatistics() {
-        if (!this.isDealTime()) {
-            return;
-        }
         Map<String, Integer> uptickRateStatisticsMap = new  LinkedHashMap<>();
         Map<String, List<Double>> scoreMap = new LinkedHashMap<String, List<Double>>(){{
             put("up", Arrays.asList(0.00001, 100.0));

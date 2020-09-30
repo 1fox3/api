@@ -53,13 +53,13 @@ public interface StockPriceDayMapper {
 
     /**
      * 根据日期获取数据
-     * @param faType
+     * @param fqType
      * @param stockId
      * @param startDate
      * @param endDate
      * @return
      */
-    List<StockPriceDayEntity> getByDate(Integer faType, Integer stockId, String startDate, String endDate);
+    List<StockPriceDayEntity> getByDate(Integer fqType, Integer stockId, String startDate, String endDate);
 
     /**
      * 获取单天记录

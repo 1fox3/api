@@ -2,7 +2,6 @@ package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -13,33 +12,26 @@ import java.util.Map;
 /**
  * 将需要频繁处理的股票信息放入缓存列表中，方便以后使用，不用在查询数据库
  * @author lusongsong
+ * @date 2020/3/27 13:57
  */
 @Component
 public class StockIntoListSchedule extends StockBaseSchedule {
-    @LogShowTimeAnt
-//    @Scheduled(cron="0 0 8 * * ?")
     /**
-     * 每天早晨8点中清除一次，并重新填充
+     * 清楚缓存中的股票信息，并重新填充
      */
+    @LogShowTimeAnt
     public void clearStockIntoList() {
-        if (!this.todayIsDealDate()) {
-            return;
-        }
         this.stockRedisUtil.delete(this.redisStockHash);
         this.stockRedisUtil.delete(this.redisStockList);
         this.stockRedisUtil.delete(this.redisStockIdList);
         this.stockIntoList();
     }
 
-    @LogShowTimeAnt
-//    @Scheduled(cron="0 0 9 * * ?")
     /**
-     * 每天早晨9点删除数据信息
+     * 删除数据信息
      */
+    @LogShowTimeAnt
     public void clearStockDealList() {
-        if (!this.todayIsDealDate()) {
-            return;
-        }
         this.stockRedisUtil.delete(this.redisRealtimeStockInfoHash);
         this.stockRedisUtil.delete(this.redisRealtimeStockLineHash);
         this.stockRedisUtil.delete(this.redisRealtimeRankPriceZSet);
@@ -51,12 +43,10 @@ public class StockIntoListSchedule extends StockBaseSchedule {
         this.stockIntoList();
     }
 
-
-    @LogShowTimeAnt
-//    @Scheduled(cron="0 */5 * * * 1-5")
     /**
      * 每5分钟检查一次,防止缓存失效或者重启导致的缓存数据丢失
      */
+    @LogShowTimeAnt
     public void stockIntoList() {
         int startId = 0;
         if (this.stockRedisUtil.hasKey(this.redisStockList)) {

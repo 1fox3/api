@@ -13,6 +13,7 @@ import java.util.Map;
 /**
  * 股票工具类任务，提供基本信息
  * @author lusongsong
+ * @date 2020/5/2 14:20
  */
 public class StockUtilSchedule extends StockBaseSchedule {
 
