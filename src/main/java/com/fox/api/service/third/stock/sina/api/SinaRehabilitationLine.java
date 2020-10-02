@@ -27,10 +27,10 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
     public Map<String, Float> getRehabilitationLine(String stockCode, String rehabilitationType, String date) {
         Map<String, Float> map = new HashMap<>();
         try {
-            if (!this.rehabilitationTypeList.contains(rehabilitationType)) {
+            if (!rehabilitationTypeList.contains(rehabilitationType)) {
                 return map;
             }
-            String url = this.demoUrl.replace("{stockCode}", stockCode)
+            String url = demoUrl.replace("{stockCode}", stockCode)
                     .replace("{rehabilitationType}", rehabilitationType)
                     .replace("{date}", date);
             HttpUtil httpUtil = new HttpUtil();

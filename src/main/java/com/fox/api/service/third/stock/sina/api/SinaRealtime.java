@@ -7,6 +7,7 @@ import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -129,11 +130,11 @@ public class SinaRealtime extends SinaStockBaseApi {
         if (null == responseArr || responseArr.length == 0) {
             return stockRealtimePo;
         }
-        Map<Float, Map<String, Float>> sellList = new LinkedHashMap<>(5);
-        List<Float> sellPriceList = new ArrayList<>();
-        Map<Float, Map<String, Float>> buyList = new LinkedHashMap<>(5);
-        List<Float> buyPriceList = new ArrayList<>();
-        Map<String, Float> temp = new LinkedHashMap<>();
+        Map<BigDecimal, Map<String, BigDecimal>> sellList = new LinkedHashMap<>(5);
+        List<BigDecimal> sellPriceList = new ArrayList<>();
+        Map<BigDecimal, Map<String, BigDecimal>> buyList = new LinkedHashMap<>(5);
+        List<BigDecimal> buyPriceList = new ArrayList<>();
+        Map<String, BigDecimal> temp = new LinkedHashMap<>();
         List<String> unknownList = new LinkedList<>();
         for (int i = 0; i < responseArr.length; i++) {
             if (responseArr[i].equals("")) {
@@ -143,37 +144,37 @@ public class SinaRealtime extends SinaStockBaseApi {
                 stockRealtimePo.setStockName(responseArr[i]);
             }
             if (1 == i) {
-                stockRealtimePo.setTodayOpenPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setOpenPrice(new BigDecimal(responseArr[i]));
             }
             if (2 == i) {
-                stockRealtimePo.setYesterdayClosePrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setPreClosePrice(new BigDecimal(responseArr[i]));
             }
             if (3 == i) {
-                stockRealtimePo.setCurrentPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setCurrentPrice(new BigDecimal(responseArr[i]));
             }
             if (4 == i) {
-                stockRealtimePo.setTodayHighestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setHighestPrice(new BigDecimal(responseArr[i]));
             }
             if (5 == i) {
-                stockRealtimePo.setTodayLowestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setLowestPrice(new BigDecimal(responseArr[i]));
             }
             if (6 == i) {
-                stockRealtimePo.setCompeteBuyPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setCompeteBuyPrice(new BigDecimal(responseArr[i]));
             }
             if (7 == i) {
-                stockRealtimePo.setCompeteSellPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setCompeteSellPrice(new BigDecimal(responseArr[i]));
             }
             if (8 == i) {
                 stockRealtimePo.setDealNum(Long.valueOf(responseArr[i]));
             }
             if (9 == i) {
-                stockRealtimePo.setDealMoney(Double.valueOf(responseArr[i]));
+                stockRealtimePo.setDealMoney(new BigDecimal(responseArr[i]));
             }
             if (10 <= i && 29 >= i) {
                 if (0 == i % 2) {
-                    temp.put("num", Float.valueOf(responseArr[i]));
+                    temp.put("num", new BigDecimal(responseArr[i]));
                 } else {
-                    temp.put("price", Float.valueOf(responseArr[i]));
+                    temp.put("price", new BigDecimal(responseArr[i]));
                     if (10 <= i && 19 >= i) {
                         buyList.put(temp.get("price"), temp);
                         buyPriceList.add(temp.get("price"));
@@ -199,16 +200,16 @@ public class SinaRealtime extends SinaStockBaseApi {
         }
         if (sellList.size() > 0) {
             Collections.reverse(sellPriceList);
-            List<Map<String, Float>> list = new LinkedList<>();
-            for(Float price : sellPriceList) {
+            List<Map<String, BigDecimal>> list = new LinkedList<>();
+            for(BigDecimal price : sellPriceList) {
                 list.add(sellList.get(price));
             }
             stockRealtimePo.setSellPriceList(list);
         }
         if (buyList.size() > 0) {
             Collections.sort(buyPriceList);
-            List<Map<String, Float>> list = new LinkedList<>();
-            for(Float price : buyPriceList) {
+            List<Map<String, BigDecimal>> list = new LinkedList<>();
+            for(BigDecimal price : buyPriceList) {
                 list.add(0, buyList.get(price));
             }
             stockRealtimePo.setBuyPriceList(list);
@@ -217,24 +218,25 @@ public class SinaRealtime extends SinaStockBaseApi {
             stockRealtimePo.setUnknownKeyList(unknownList);
         }
         //昨日收盘价
-        Float yesterdayClosePrice = stockRealtimePo.getYesterdayClosePrice();
+        BigDecimal preClosePrice = stockRealtimePo.getPreClosePrice();
         //当前价格
-        Float currentPrice = stockRealtimePo.getCurrentPrice();
+        BigDecimal currentPrice = stockRealtimePo.getCurrentPrice();
         //今日最高价
-        Float todayHighestPrice = stockRealtimePo.getTodayHighestPrice();
+        BigDecimal highestPrice = stockRealtimePo.getHighestPrice();
         //今日最低价
-        Float todayLowestPrice = stockRealtimePo.getTodayLowestPrice();
-        if (null == currentPrice || null == yesterdayClosePrice
-                || null == todayHighestPrice || null == todayLowestPrice
+        BigDecimal lowestPrice = stockRealtimePo.getLowestPrice();
+        if (null == currentPrice || null == preClosePrice
+                || null == highestPrice || null == lowestPrice
+                || 0 == preClosePrice.compareTo(BigDecimal.ZERO)
         ) {
             return stockRealtimePo;
         }
-        Float uptickPrice = currentPrice - yesterdayClosePrice;
+        BigDecimal uptickPrice = currentPrice.subtract(preClosePrice);
         stockRealtimePo.setUptickPrice(uptickPrice);
         //增幅
-        Float uptickRate = uptickPrice / yesterdayClosePrice;
+        BigDecimal uptickRate = uptickPrice.divide(preClosePrice);
         //波动
-        Float surgeRate = (todayHighestPrice - todayLowestPrice) / yesterdayClosePrice;
+        BigDecimal surgeRate = highestPrice.subtract(lowestPrice).divide(preClosePrice);
         stockRealtimePo.setUptickRate(uptickRate);
         stockRealtimePo.setSurgeRate(surgeRate);
         return stockRealtimePo;
@@ -262,34 +264,34 @@ public class SinaRealtime extends SinaStockBaseApi {
                 stockRealtimePo.setStockName(responseArr[i]);
             }
             if (2 == i) {
-                stockRealtimePo.setTodayOpenPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setOpenPrice(new BigDecimal(responseArr[i]));
             }
             if (3 == i) {
-                stockRealtimePo.setYesterdayClosePrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setPreClosePrice(new BigDecimal(responseArr[i]));
             }
             if (4 == i) {
-                stockRealtimePo.setTodayHighestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setHighestPrice(new BigDecimal(responseArr[i]));
             }
             if (5 == i) {
-                stockRealtimePo.setTodayLowestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setLowestPrice(new BigDecimal(responseArr[i]));
             }
             if (6 == i) {
-                stockRealtimePo.setCurrentPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setCurrentPrice(new BigDecimal(responseArr[i]));
             }
             if (7 == i) {
-                stockRealtimePo.setUptickPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setUptickPrice(new BigDecimal(responseArr[i]));
             }
             if (8 == i) {
-                stockRealtimePo.setUptickRate(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setUptickRate(new BigDecimal(responseArr[i]));
             }
             if (9 == i) {
-                stockRealtimePo.setMinuteLowestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setMinuteLowestPrice(new BigDecimal(responseArr[i]));
             }
             if (10 == i) {
-                stockRealtimePo.setMinuteHighestPrice(Float.valueOf(responseArr[i]));
+                stockRealtimePo.setMinuteHighestPrice(new BigDecimal(responseArr[i]));
             }
             if (11 == i) {
-                stockRealtimePo.setDealMoney(Double.valueOf(responseArr[i]));
+                stockRealtimePo.setDealMoney(new BigDecimal(responseArr[i]));
             }
             if (12 == i) {
                 stockRealtimePo.setDealNum(Long.valueOf(responseArr[i]));
@@ -308,25 +310,26 @@ public class SinaRealtime extends SinaStockBaseApi {
         if (unknownList.size() > 0) {
             stockRealtimePo.setUnknownKeyList(unknownList);
         }
-        //昨日收盘价
-        Float yesterdayClosePrice = stockRealtimePo.getYesterdayClosePrice();
+        //上个交易日收盘价
+        BigDecimal preClosePrice = stockRealtimePo.getPreClosePrice();
         //当前价格
-        Float currentPrice = stockRealtimePo.getCurrentPrice();
-        //今日最高价
-        Float todayHighestPrice = stockRealtimePo.getTodayHighestPrice();
-        //今日最低价
-        Float todayLowestPrice = stockRealtimePo.getTodayLowestPrice();
-        if (null == currentPrice || null == yesterdayClosePrice
-                || null == todayHighestPrice || null == todayLowestPrice
+        BigDecimal currentPrice = stockRealtimePo.getCurrentPrice();
+        //最高价
+        BigDecimal highestPrice = stockRealtimePo.getHighestPrice();
+        //最低价
+        BigDecimal lowestPrice = stockRealtimePo.getLowestPrice();
+        if (null == currentPrice || null == preClosePrice
+                || null == highestPrice || null == lowestPrice
+                || 0 == preClosePrice.compareTo(BigDecimal.ZERO)
         ) {
             return stockRealtimePo;
         }
-        Float uptickPrice = currentPrice - yesterdayClosePrice;
+        BigDecimal uptickPrice = currentPrice.subtract(preClosePrice);
         stockRealtimePo.setUptickPrice(uptickPrice);
         //增幅
-        Float uptickRate = uptickPrice / yesterdayClosePrice;
+        BigDecimal uptickRate = uptickPrice.divide(preClosePrice);
         //波动
-        Float surgeRate = (todayHighestPrice - todayLowestPrice) / yesterdayClosePrice;
+        BigDecimal surgeRate = highestPrice.subtract(lowestPrice).divide(preClosePrice);
         stockRealtimePo.setUptickRate(uptickRate);
         stockRealtimePo.setSurgeRate(surgeRate);
         return stockRealtimePo;

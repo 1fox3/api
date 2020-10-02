@@ -5,6 +5,7 @@ import com.fox.api.util.HttpUtil;
 import com.fox.api.entity.po.third.stock.StockDealNumPo;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -63,7 +64,7 @@ public class SinaDealRatio extends SinaStockBaseApi {
             String e = matcher.group(1);
             if (1 == i) {//匹配价格
                 stockDealNumEntity = new StockDealNumPo();
-                stockDealNumEntity.setPrice(Float.valueOf(e));
+                stockDealNumEntity.setPrice(new BigDecimal(e));
             }
             if (2 == i) {//匹配成交量
                 stockDealNumEntity.setDealNum(Long.valueOf(e));
@@ -71,7 +72,7 @@ public class SinaDealRatio extends SinaStockBaseApi {
             if (3 == i) {//匹配占比
                 //去掉占比的百分号
                 e = e.replace("%", "");
-                stockDealNumEntity.setRatio(Float.valueOf(e));
+                stockDealNumEntity.setRatio(new BigDecimal(e));
                 list.add(stockDealNumEntity);
                 i = 0;
             }

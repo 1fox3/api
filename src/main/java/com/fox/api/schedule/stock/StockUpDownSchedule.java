@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -53,27 +55,30 @@ public class StockUpDownSchedule extends StockBaseSchedule {
         StockUpDownEntity stockUpDownEntity = new StockUpDownEntity();
         stockUpDownEntity.setStockId(stockEntity.getId());
 
-        Double currentPrice , highestPrice, lowestPrice;
-        currentPrice = highestPrice = lowestPrice = 0.0;
+        BigDecimal currentPrice , highestPrice, lowestPrice;
+        currentPrice = highestPrice = lowestPrice = BigDecimal.ZERO;
 
         for (int j = 0; j<= limitLen; j++) {
             int pos = len - j - 1;
             if (pos >= 0) {
                 StockDealDayDto stockDealDayDto = stockDealDayDtoList.get(pos);
-                currentPrice = 0.0 == currentPrice ? stockDealDayDto.getClosePrice() : currentPrice;
+                currentPrice = 0 == currentPrice.compareTo(BigDecimal.ZERO) ? stockDealDayDto.getClosePrice() : currentPrice;
 
-                highestPrice = stockDealDayDto.getHighestPrice() > highestPrice ?
+                highestPrice = 1 == stockDealDayDto.getHighestPrice().compareTo(highestPrice) ?
                         stockDealDayDto.getHighestPrice() : highestPrice;
-                lowestPrice = 0.0 == lowestPrice || stockDealDayDto.getLowestPrice() < lowestPrice ?
-                        stockDealDayDto.getLowestPrice() : lowestPrice;
+                lowestPrice = 0 == lowestPrice.compareTo(BigDecimal.ZERO)
+                        || -1 == stockDealDayDto.getLowestPrice().compareTo(lowestPrice)
+                        ? stockDealDayDto.getLowestPrice() : lowestPrice;
             }
 
-            if (scopeList.contains(j) && currentPrice > 0 && lowestPrice > 0 && lowestPrice > 0) {
-                float up = (float)((currentPrice - lowestPrice) / lowestPrice);
-                float down = (float)((highestPrice - currentPrice) / highestPrice);
-                //保留4位小数
-                up = (float)Math.round(up * 10000) / 10000;
-                down = (float)Math.round(down * 10000) / 10000;
+            if (scopeList.contains(j) && 1 == currentPrice.compareTo(BigDecimal.ZERO)
+                    && 1 == highestPrice.compareTo(BigDecimal.ZERO)
+                    && 1 == lowestPrice.compareTo(BigDecimal.ZERO)
+            ) {
+                BigDecimal up = currentPrice.subtract(lowestPrice).divide(lowestPrice, 2, RoundingMode.HALF_UP);
+                BigDecimal down = highestPrice.subtract(currentPrice).divide(highestPrice, 2, RoundingMode.HALF_UP);
+                up.setScale(4, RoundingMode.HALF_UP);
+                down.setScale(5, RoundingMode.HALF_UP);
                 if (10 == j) {
                     stockUpDownEntity.setD10Up(up);
                     stockUpDownEntity.setD10Down(down);
@@ -108,15 +113,15 @@ public class StockUpDownSchedule extends StockBaseSchedule {
      * @param stockEntity
      * @param stockDealDayDtoList
      */
-    private void limitUpDown(StockEntity stockEntity, List<StockDealDayDto> stockDealDayDtoList, double limitRate) {
+    private void limitUpDown(StockEntity stockEntity, List<StockDealDayDto> stockDealDayDtoList, BigDecimal limitRate) {
         if (null == stockEntity || null == stockDealDayDtoList || 0 >= stockDealDayDtoList.size()) {
             return;
         }
         int len = stockDealDayDtoList.size();
         StockDealDayDto todayDealDto = null;
         StockDealDayDto yesterdayDealDto = null;
-        Double todayPrice = null;
-        Double yesterdayPrice = null;
+        BigDecimal todayPrice = null;
+        BigDecimal yesterdayPrice = null;
         StockLimitUpDownEntity stockLimitUpDownEntity = new StockLimitUpDownEntity();
         stockLimitUpDownEntity.setStockId(stockEntity.getId());
         for (int i = len - 1; i >= 0; i--) {
@@ -135,8 +140,8 @@ public class StockUpDownSchedule extends StockBaseSchedule {
 
             //type值说明 0-正常，1-涨停，2-跌停
             Integer type = 0;
-            if ((float)Math.abs((todayPrice - yesterdayPrice) * 100) / 100 == (float)Math.round(yesterdayPrice * limitRate * 100) / 100) {
-                type = todayPrice > yesterdayPrice ? 1 : 2;
+            if (-1 != todayPrice.subtract(yesterdayPrice).divide(yesterdayPrice).abs().compareTo(limitRate)) {
+                type = 1 == todayPrice.compareTo(yesterdayPrice) ? 1 : 2;
             }
             if (type.equals(0) ||
                     (null != stockLimitUpDownEntity.getType() && stockLimitUpDownEntity.getType().equals(type))) {
@@ -200,9 +205,9 @@ public class StockUpDownSchedule extends StockBaseSchedule {
                     }
                     this.upDown((StockEntity)stockEntity, stockDealDayDtoList);
                     if (stockDealDayLineDto.getStockName().contains("ST")) {
-                        this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, 0.05);
+                        this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, new BigDecimal(0.05));
                     } else {
-                        this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, 0.1);
+                        this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, new BigDecimal(0.1));
                     }
                 }
                 try{

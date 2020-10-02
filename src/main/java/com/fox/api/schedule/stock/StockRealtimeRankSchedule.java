@@ -5,6 +5,7 @@ import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -50,21 +51,22 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                 }
 
                 //今日开盘价
-                Float todayOpenPrice = stockRealtimePo.getTodayOpenPrice();
+                BigDecimal openPrice = stockRealtimePo.getOpenPrice();
                 //昨日收盘价
-                Float yesterdayClosePrice = stockRealtimePo.getYesterdayClosePrice();
-                if (0 == yesterdayClosePrice || 0 == todayOpenPrice) {
+                BigDecimal preClosePrice = stockRealtimePo.getPreClosePrice();
+                if (0 == openPrice.compareTo(BigDecimal.ZERO)
+                        || 0 == preClosePrice.compareTo(BigDecimal.ZERO)) {
                     continue;
                 }
                 //增幅
-                Double currentPrice = (double)stockRealtimePo.getCurrentPrice();
-                Double uptickRate = (double)stockRealtimePo.getUptickRate();
+                BigDecimal currentPrice = stockRealtimePo.getCurrentPrice();
+                BigDecimal uptickRate = stockRealtimePo.getUptickRate();
                 //波动
-                Double surgeRate = (double)stockRealtimePo.getSurgeRate();
-                //成交股数
-                Double dealNum = (double)stockRealtimePo.getDealNum();
+                BigDecimal surgeRate = stockRealtimePo.getSurgeRate();
+                //成交量
+                Long dealNum = stockRealtimePo.getDealNum();
                 //成交金额
-                Double dealMoney = stockRealtimePo.getDealMoney();
+                BigDecimal dealMoney = stockRealtimePo.getDealMoney();
                 //交易状态
                 String dealStatus = stockRealtimePo.getDealStatus();
                 //统计停牌数
@@ -73,19 +75,19 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                 }
 
                 if (null != currentPrice) {
-                    priceSet.add(new DefaultTypedTuple(stockId, currentPrice));
+                    priceSet.add(new DefaultTypedTuple(stockId, currentPrice.doubleValue()));
                 }
                 if (null != uptickRate) {
-                    uptickRateSet.add(new DefaultTypedTuple(stockId, uptickRate));
+                    uptickRateSet.add(new DefaultTypedTuple(stockId, uptickRate.doubleValue()));
                 }
                 if (null != surgeRate) {
-                    surgeRateSet.add(new DefaultTypedTuple(stockId, surgeRate));
+                    surgeRateSet.add(new DefaultTypedTuple(stockId, surgeRate.doubleValue()));
                 }
                 if (null != dealNum) {
-                    dealNumSet.add(new DefaultTypedTuple(stockId, dealNum));
+                    dealNumSet.add(new DefaultTypedTuple(stockId, dealNum.doubleValue()));
                 }
                 if (null != dealMoney) {
-                    dealMoneySet.add(new DefaultTypedTuple(stockId, dealMoney));
+                    dealMoneySet.add(new DefaultTypedTuple(stockId, dealMoney.doubleValue()));
                 }
             }
             if (0 < priceSet.size()) {

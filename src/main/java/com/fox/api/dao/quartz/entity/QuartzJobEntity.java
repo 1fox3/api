@@ -3,62 +3,61 @@ package com.fox.api.dao.quartz.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import javax.persistence.Id;
-
 /**
  * 计划任务管理对象
  * @author lusongsong
+ * @date 2020/4/24 15:48
  */
 @Data
 public class QuartzJobEntity {
     /**
      * 记录id
      */
-    private Integer id;
+    Integer id;
     /**
      * 任务id
      */
-    private String jobKey;
+    String jobKey;
     /**
      * 任务名
      */
-    private String jobName;
+    String jobName;
     /**
      * 任务状态
      */
-    private String jobStatus;
+    String jobStatus;
     /**
      * 任务分组
      */
-    private String jobGroup;
+    String jobGroup;
     /**
      * 任务执行时间
      */
-    private String cronExpr;
+    String cronExpr;
     /**
      * 任务描述
      */
-    private String note;
+    String note;
     /**
      * bean名称
      */
-    private String beanName;
+    String beanName;
     /**
      * 方法名
      */
-    private String methodName;
+    String methodName;
     /**
      * 是否使用锁
      */
-    private Integer useLock;
+    Integer useLock;
     /**
      * 更新时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private String updateTime;
+    String updateTime;
     /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private String createTime;
+    String createTime;
 }

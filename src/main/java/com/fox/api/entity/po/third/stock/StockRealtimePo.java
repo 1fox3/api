@@ -2,6 +2,7 @@ package com.fox.api.entity.po.third.stock;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -9,102 +10,103 @@ import java.util.Map;
 /**
  * 股票实时交易信息
  * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 public class StockRealtimePo {
     /**
      * 股票id
      */
-    private Integer stockId;
+    Integer stockId;
     /**
      * 股票代码
      */
-    private String stockCode;
+    String stockCode;
     /**
      * 股票名称
      */
-    private String stockName;
+    String stockName;
     /**
      * 股票英文名
      */
-    private String stockNameEn;
-    /**
-     * 今日开盘价
-     */
-    private Float todayOpenPrice;
-    /**
-     * 昨日收盘价
-     */
-    private Float yesterdayClosePrice;
+    String stockNameEn;
     /**
      * 当前价格
      */
-    private Float currentPrice;
+    BigDecimal currentPrice;
+    /**
+     * 今日开盘价
+     */
+    BigDecimal openPrice;
     /**
      * 今日最高价
      */
-    private Float todayHighestPrice;
+    BigDecimal highestPrice;
     /**
      * 今日最低价
      */
-    private Float todayLowestPrice;
+    BigDecimal lowestPrice;
+    /**
+     * 昨日收盘价
+     */
+    BigDecimal preClosePrice;
     /**
      * 价格涨幅
      */
-    private Float uptickPrice;
+    BigDecimal uptickPrice;
     /**
      * 增长率
      */
-    private Float uptickRate;
+    BigDecimal uptickRate;
     /**
      * 波动
      */
-    private Float surgeRate;
+    BigDecimal surgeRate;
     /**
      * 竞买价
      */
-    private Float competeBuyPrice;
+    BigDecimal competeBuyPrice;
     /**
      * 竞卖价
      */
-    private Float competeSellPrice;
+    BigDecimal competeSellPrice;
     /**
      * 当前分钟最高价
      */
-    private Float minuteHighestPrice;
+    BigDecimal minuteHighestPrice;
     /**
      * 当前分钟最低价
      */
-    private Float minuteLowestPrice;
+    BigDecimal minuteLowestPrice;
     /**
      * 成交股数
      */
-    private Long dealNum;
+    Long dealNum;
     /**
      * 成交金额
      */
-    private Double dealMoney;
+    BigDecimal dealMoney;
     /**
      * 排名靠前的5个买方报价
      */
-    private List<Map<String, Float>> buyPriceList;
+    List<Map<String, BigDecimal>> buyPriceList;
     /**
      * 排名靠前的5个卖方报价
      */
-    private List<Map<String, Float>> sellPriceList;
+    List<Map<String, BigDecimal>> sellPriceList;
     /**
      * 当前日期
      */
-    private String currentDate;
+    String currentDate;
     /**
      * 当前时间
      */
-    private String currentTime;
+    String currentTime;
     /**
      * 交易状态
      */
-    private String dealStatus;
+    String dealStatus;
     /**
      * 未知的数据列表
      */
-    private List<String> unknownKeyList;
+    List<String> unknownKeyList;
 }

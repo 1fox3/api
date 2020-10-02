@@ -2,42 +2,45 @@ package com.fox.api.entity.dto.stock.realtime.rank;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * 股票实时排行信息
  * @author lusongsong
+ * @date 2020/3/31 17:45
  */
 @Data
 public class StockRealtimeRankInfoDto {
     /**
      * 股票id
      */
-    private Integer stockId;
+    Integer stockId;
     /**
      * 股票代码
      */
-    private String stockCode;
+    String stockCode;
     /**
      * 股票名称
      */
-    private String stockName;
+    String stockName;
     /**
      * 当前价格
      */
-    private Double price;
+    BigDecimal currentPrice;
     /**
      * 涨幅
      */
-    private Double uptickRate;
+    BigDecimal uptickRate;
     /**
      * 波动
      */
-    private Double surgeRate;
+    BigDecimal surgeRate;
     /**
      * 成交量
      */
-    private Double dealNum;
+    Long dealNum;
     /**
      * 成交金额
      */
-    private Double dealMoney;
+    BigDecimal dealMoney;
 }

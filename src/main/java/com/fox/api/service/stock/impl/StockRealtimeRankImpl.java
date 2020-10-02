@@ -100,11 +100,11 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
             stockRealtimeRankInfoDto.setStockId(stockRealtimePo.getStockId());
             stockRealtimeRankInfoDto.setStockCode(stockRealtimePo.getStockCode());
             stockRealtimeRankInfoDto.setStockName(stockRealtimePo.getStockName());
-            stockRealtimeRankInfoDto.setPrice((double)stockRealtimePo.getCurrentPrice());
-            stockRealtimeRankInfoDto.setUptickRate((double)stockRealtimePo.getUptickRate());
-            stockRealtimeRankInfoDto.setSurgeRate((double)stockRealtimePo.getSurgeRate());
-            stockRealtimeRankInfoDto.setDealNum((double)stockRealtimePo.getDealNum());
-            stockRealtimeRankInfoDto.setDealMoney((double)stockRealtimePo.getDealMoney());
+            stockRealtimeRankInfoDto.setCurrentPrice(stockRealtimePo.getCurrentPrice());
+            stockRealtimeRankInfoDto.setUptickRate(stockRealtimePo.getUptickRate());
+            stockRealtimeRankInfoDto.setSurgeRate(stockRealtimePo.getSurgeRate());
+            stockRealtimeRankInfoDto.setDealNum(stockRealtimePo.getDealNum());
+            stockRealtimeRankInfoDto.setDealMoney(stockRealtimePo.getDealMoney());
             list.add(stockRealtimeRankInfoDto);
         }
 

@@ -5,44 +5,45 @@ import lombok.Data;
 
 /**
  * 信号
- * @author lusongsong 
+ * @author lusongsong
+ * @date 2020/6/15 16:34
  */
 @Data
 public class SignalEntity {
     /**
      * 记录id
     */
-    private Integer id;
+    Integer id;
     /**
      * 信号
     */
-    private String signal;
+    String signal;
     /**
      * 信号值
     */
-    private String signalValue;
+    String signalValue;
     /**
      * 开始处理时间
     */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private String startHandleTime;
+    String startHandleTime;
     /**
      * 处理结束时间
     */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private String endHandleTime;
+    String endHandleTime;
     /**
      * 处理状态
     */
-    private String handleStatus;
+    String handleStatus;
     /**
      * 记录创建时间
     */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private String createTime;
+    String createTime;
     /**
      * 记录更新时间
     */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private String updateTime;
+    String updateTime;
 }

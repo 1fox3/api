@@ -10,6 +10,7 @@ import net.sf.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,13 +67,13 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
                 stockRealtimeLineEntity.setStockName(responseObject.getString("name"));
             }
             if (responseObject.containsKey("yestclose")) {
-                stockRealtimeLineEntity.setYesterdayClosePrice(responseObject.getDouble("yestclose"));
+                stockRealtimeLineEntity.setPreClosePrice(new BigDecimal(responseObject.getDouble("yestclose")));
             }
             if (responseObject.containsKey("lastVolume")) {
                 stockRealtimeLineEntity.setDealNum(responseObject.getLong("lastVolume"));
             }
             if (responseObject.containsKey("date")) {
-                stockRealtimeLineEntity.setDate(
+                stockRealtimeLineEntity.setDt(
                         DateUtil.dateStrFormatChange(
                                 responseObject.getString("date"),
                                 DateUtil.DATE_FORMAT_2,
@@ -90,8 +91,8 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
                         StockRealtimeNodePo stockRealtimeNodeEntity = new StockRealtimeNodePo();
                         String timeStr = noteArr.getString(0);
                         stockRealtimeNodeEntity.setTime(timeStr.substring(0, 2) + ":" + timeStr.substring(2, 4));
-                        stockRealtimeNodeEntity.setPrice(noteArr.getDouble(1));
-                        stockRealtimeNodeEntity.setAvgPrice(noteArr.getDouble(2));
+                        stockRealtimeNodeEntity.setPrice(new BigDecimal(noteArr.getDouble(1)));
+                        stockRealtimeNodeEntity.setAvgPrice(new BigDecimal(noteArr.getDouble(2)));
                         stockRealtimeNodeEntity.setDealNum(noteArr.getLong(3));
                         nodeList.add(stockRealtimeNodeEntity);
                     }

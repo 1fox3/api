@@ -35,8 +35,8 @@ public class SinaKLineImage extends SinaStockBaseApi {
      */
     public String getKLineImageUrl(String stockCode, String dateType) {
         dateType = dateType.toUpperCase();
-        if (this.dateTypeMap.containsKey(dateType)) {
-            return this.demoUrl.replace("{dateType}", this.dateTypeMap.get(dateType)).replace("{stockCode}", stockCode);
+        if (dateTypeMap.containsKey(dateType)) {
+            return demoUrl.replace("{dateType}", dateTypeMap.get(dateType)).replace("{stockCode}", stockCode);
         }
         return "";
     }

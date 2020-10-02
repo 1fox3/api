@@ -110,12 +110,12 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                         stockPriceDayEntity.setStockId(stockEntity.getId());
                         stockPriceDayEntity.setDt(stockDealPo.getDateTime());
                         stockPriceDayEntity.setFqType(fqTypeMap.get(fqType));
-                        stockPriceDayEntity.setOpenPrice(BigDecimal.valueOf(stockDealPo.getOpenPrice()));
-                        stockPriceDayEntity.setClosePrice(BigDecimal.valueOf(stockDealPo.getClosePrice()));
-                        stockPriceDayEntity.setHighestPrice(BigDecimal.valueOf(stockDealPo.getHighestPrice()));
-                        stockPriceDayEntity.setLowestPrice(BigDecimal.valueOf(stockDealPo.getLowestPrice()));
+                        stockPriceDayEntity.setOpenPrice(stockDealPo.getOpenPrice());
+                        stockPriceDayEntity.setClosePrice(stockDealPo.getClosePrice());
+                        stockPriceDayEntity.setHighestPrice(stockDealPo.getHighestPrice());
+                        stockPriceDayEntity.setLowestPrice(stockDealPo.getLowestPrice());
                         stockPriceDayEntity.setPreClosePrice(preClosePrice);
-                        preClosePrice = BigDecimal.valueOf(stockDealPo.getClosePrice());
+                        preClosePrice = stockDealPo.getClosePrice();
                         if (syncTotal) {
                             list.add(stockPriceDayEntity);
                         } else {

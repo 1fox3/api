@@ -10,6 +10,7 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -142,12 +143,12 @@ public class NetsDayLine extends NetsStockBaseApi {
                                         singleArr.getString(0), DateUtil.DATE_FORMAT_2, DateUtil.DATE_FORMAT_1
                                 )
                         );
-                        stockDayNodeEntity.setOpenPrice(singleArr.getDouble(1));
-                        stockDayNodeEntity.setClosePrice(singleArr.getDouble(2));
-                        stockDayNodeEntity.setHighestPrice(singleArr.getDouble(3));
-                        stockDayNodeEntity.setLowestPrice(singleArr.getDouble(4));
+                        stockDayNodeEntity.setOpenPrice(new BigDecimal(singleArr.getDouble(1)));
+                        stockDayNodeEntity.setClosePrice(new BigDecimal(singleArr.getDouble(2)));
+                        stockDayNodeEntity.setHighestPrice(new BigDecimal(singleArr.getDouble(3)));
+                        stockDayNodeEntity.setLowestPrice(new BigDecimal(singleArr.getDouble(4)));
                         stockDayNodeEntity.setDealNum(singleArr.getLong(5));
-                        stockDayNodeEntity.setUptickRate(singleArr.getDouble(6));
+                        stockDayNodeEntity.setUptickRate(new BigDecimal(singleArr.getDouble(6)));
                         nodeList.add(stockDayNodeEntity);
                     }
                 }

@@ -11,15 +11,39 @@ import java.util.Map;
 /**
  * 请求响应结果
  * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 @Data
 public class HttpResponseDto {
-    private int code;
-    private String msg;
-    private Map<String, List<String>> headers;
-    private String requestUrl;
-    private String content;
+    /**
+     * 错误码
+     */
+    Integer code;
+    /**
+     * 错误信息
+     */
+    String msg;
+    /**
+     * 请求响应头
+     */
+    Map<String, List<String>> headers;
+    /**
+     * 请求地址
+     */
+    String requestUrl;
+    /**
+     * 接口返回
+     */
+    String content;
 
+    /**
+     * 构造函数
+     * @param code
+     * @param msg
+     * @param headers
+     * @param requestUrl
+     * @param content
+     */
     public HttpResponseDto(int code, String msg, Map<String, List<String>> headers, String requestUrl, String content) {
         this.code = code;
         this.msg = msg;
@@ -28,6 +52,13 @@ public class HttpResponseDto {
         this.content = content;
     }
 
+    /**
+     * 接口返回转对象
+     * @param clz
+     * @param <T>
+     * @return
+     * @throws IOException
+     */
     public <T> T getContent(Class<T> clz) throws IOException {
         if (StringUtils.isNotBlank(content)) {
             return new ObjectMapper().readValue(content, clz);

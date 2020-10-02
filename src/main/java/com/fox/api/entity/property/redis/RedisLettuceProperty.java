@@ -5,7 +5,15 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * redis连接配置
+ * @author lusongsong
+ * @date 2020/3/25 17:23
+ */
 @Data
 public class RedisLettuceProperty implements Serializable {
-    private RedisLettucePoolProperty pool;
+    /**
+     * redis连接池配置
+     */
+    RedisLettucePoolProperty pool;
 }

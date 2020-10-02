@@ -8,6 +8,7 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,10 +71,10 @@ public class SinaDeal extends SinaStockBaseApi {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 StockDealPo stockDealEntity = new StockDealPo();
                 stockDealEntity.setDateTime(jsonObject.get("day").toString());
-                stockDealEntity.setOpenPrice(jsonObject.getDouble("open"));
-                stockDealEntity.setHighestPrice(jsonObject.getDouble("high"));
-                stockDealEntity.setLowestPrice(jsonObject.getDouble("low"));
-                stockDealEntity.setClosePrice(jsonObject.getDouble("close"));
+                stockDealEntity.setOpenPrice(new BigDecimal(jsonObject.getDouble("open")));
+                stockDealEntity.setHighestPrice(new BigDecimal(jsonObject.getDouble("high")));
+                stockDealEntity.setLowestPrice(new BigDecimal(jsonObject.getDouble("low")));
+                stockDealEntity.setClosePrice(new BigDecimal(jsonObject.getDouble("close")));
                 stockDealEntity.setDealNum(jsonObject.getLong("volume"));
                 list.add(stockDealEntity);
             }

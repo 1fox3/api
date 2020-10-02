@@ -14,7 +14,7 @@ public class NetsDealExcel extends NetsStockBaseApi {
      * @return
      */
     public String getDealExcelUrl(String stockCode, String date) {
-        return this.demoUrl.replace("{stockCode}", stockCode)
+        return demoUrl.replace("{stockCode}", stockCode)
                 .replace("{year}", date.substring(0, 4))
                 .replace("{date}", date);
     }

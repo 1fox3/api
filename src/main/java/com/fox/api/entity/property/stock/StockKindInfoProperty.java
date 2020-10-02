@@ -4,11 +4,16 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * 股票划分配置
+ * @author lusongsong
+ * @date 2020/3/10 19:43
+ */
 @Data
 public class StockKindInfoProperty {
-    private String stockKindName;
-    private Integer stockMarket;
-    private Integer stockType;
-    private Integer stockKind;
-    private List<String> perCode;
+    String stockKindName;
+    Integer stockMarket;
+    Integer stockType;
+    Integer stockKind;
+    List<String> perCode;
 }

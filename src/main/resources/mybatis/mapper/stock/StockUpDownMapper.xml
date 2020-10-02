@@ -4,18 +4,18 @@
     <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockUpDownEntity">
         <id column="id" property="id" jdbcType="INTEGER" />
         <result column="stock_id" property="stockId" jdbcType="INTEGER" />
-        <result column="d10_up" property="d10Up" jdbcType="FLOAT" />
-        <result column="d10_down" property="d10Down" jdbcType="FLOAT" />
-        <result column="d30_up" property="d30Up" jdbcType="FLOAT" />
-        <result column="d30_down" property="d30Down" jdbcType="FLOAT" />
-        <result column="d50_up" property="d50Up" jdbcType="FLOAT" />
-        <result column="d50_down" property="d50Down" jdbcType="FLOAT" />
-        <result column="d100_up" property="d100Up" jdbcType="FLOAT" />
-        <result column="d100_down" property="d100Down" jdbcType="FLOAT" />
-        <result column="d200_up" property="d200Up" jdbcType="FLOAT" />
-        <result column="d200_down" property="d200Down" jdbcType="FLOAT" />
-        <result column="d300_up" property="d300Up" jdbcType="FLOAT" />
-        <result column="d300_down" property="d300Down" jdbcType="FLOAT" />
+        <result column="d10_up" property="d10Up" jdbcType="DECIMAL" />
+        <result column="d10_down" property="d10Down" jdbcType="DECIMAL" />
+        <result column="d30_up" property="d30Up" jdbcType="DECIMAL" />
+        <result column="d30_down" property="d30Down" jdbcType="DECIMAL" />
+        <result column="d50_up" property="d50Up" jdbcType="DECIMAL" />
+        <result column="d50_down" property="d50Down" jdbcType="DECIMAL" />
+        <result column="d100_up" property="d100Up" jdbcType="DECIMAL" />
+        <result column="d100_down" property="d100Down" jdbcType="DECIMAL" />
+        <result column="d200_up" property="d200Up" jdbcType="DECIMAL" />
+        <result column="d200_down" property="d200Down" jdbcType="DECIMAL" />
+        <result column="d300_up" property="d300Up" jdbcType="DECIMAL" />
+        <result column="d300_down" property="d300Down" jdbcType="DECIMAL" />
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>

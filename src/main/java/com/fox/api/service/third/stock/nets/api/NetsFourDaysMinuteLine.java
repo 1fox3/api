@@ -8,6 +8,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -71,13 +72,13 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
                     stockRealtimeLineEntity.setNodeCount(dataObject.getInt("count"));
                 }
                 if (dataObject.containsKey("yestclose")) {
-                    stockRealtimeLineEntity.setYesterdayClosePrice(dataObject.getDouble("yestclose"));
+                    stockRealtimeLineEntity.setPreClosePrice(new BigDecimal(dataObject.getDouble("yestclose")));
                 }
                 if (dataObject.containsKey("lastVolume")) {
                     stockRealtimeLineEntity.setDealNum(dataObject.getLong("lastVolume"));
                 }
                 if (dataObject.containsKey("date")) {
-                    stockRealtimeLineEntity.setDate(dataObject.getString("lastVolume"));
+                    stockRealtimeLineEntity.setDt(dataObject.getString("lastVolume"));
                 }
                 if (dataObject.containsKey("data")) {
                     JSONArray dataArr = (JSONArray)dataObject.get("data");
@@ -88,8 +89,8 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
                         if (4 == noteArr.size()) {
                             StockRealtimeNodePo stockRealtimeNodeEntity = new StockRealtimeNodePo();
                             stockRealtimeNodeEntity.setTime(noteArr.getString(0));
-                            stockRealtimeNodeEntity.setPrice(noteArr.getDouble(1));
-                            stockRealtimeNodeEntity.setAvgPrice(noteArr.getDouble(2));
+                            stockRealtimeNodeEntity.setPrice(new BigDecimal(noteArr.getDouble(1)));
+                            stockRealtimeNodeEntity.setAvgPrice(new BigDecimal(noteArr.getDouble(2)));
                             stockRealtimeNodeEntity.setDealNum(noteArr.getLong(3));
                             nodeList.add(stockRealtimeNodeEntity);
                         }
