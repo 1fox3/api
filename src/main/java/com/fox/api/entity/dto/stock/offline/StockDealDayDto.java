@@ -30,7 +30,7 @@ public class StockDealDayDto {
     /**
      * 最低价
      */
-    BigDecimal LowestPrice;
+    BigDecimal lowestPrice;
     /**
      * 成交数量
      */

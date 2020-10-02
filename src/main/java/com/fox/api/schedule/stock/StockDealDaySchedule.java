@@ -37,6 +37,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     private static int startYear = 1990;
     private int endYear = Integer.valueOf(DateUtil.getCurrentYear());
     private String currentDate = DateUtil.getCurrentDate();
+    private String preDate = DateUtil.getRelateDate(0, -1, 0, DateUtil.DATE_FORMAT_1);
     private NetsDayLine netsDayLine = new NetsDayLine();
     private NetsDayCsv netsDayCsv = new NetsDayCsv();
     /**
@@ -95,7 +96,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                 String startDate = "";
                 String endDate = "";
                 try {
-                    startDate = syncTotal ? year + "-01-01" : currentDate;
+                    startDate = syncTotal ? year + "-01-01" : preDate;
                     endDate = syncTotal ? year + "-12-31" : currentDate;
                     Map<String, String> netsParams = StockUtil.getNetsStockInfoMap(stockEntity);
                     netsParams.put("rehabilitationType", fqType);
@@ -118,12 +119,14 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                         if (syncTotal) {
                             list.add(stockPriceDayEntity);
                         } else {
-                            StockPriceDayEntity dbStockPriceDayEntity = stockPriceDayMapper.getBySignalDate(stockPriceDayEntity);
-                            if (null == dbStockPriceDayEntity) {
-                                stockPriceDayMapper.insert(stockPriceDayEntity);
-                            } else {
-                                stockPriceDayEntity.setId(dbStockPriceDayEntity.getId());
-                                stockPriceDayMapper.update(stockPriceDayEntity);
+                            if (currentDate.equals(stockDealPo.getDateTime())) {
+                                StockPriceDayEntity dbStockPriceDayEntity = stockPriceDayMapper.getBySignalDate(stockPriceDayEntity);
+                                if (null == dbStockPriceDayEntity) {
+                                    stockPriceDayMapper.insert(stockPriceDayEntity);
+                                } else {
+                                    stockPriceDayEntity.setId(dbStockPriceDayEntity.getId());
+                                    stockPriceDayMapper.update(stockPriceDayEntity);
+                                }
                             }
                         }
                     }
@@ -150,7 +153,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
             String startDate = "";
             String endDate = "";
             try {
-                startDate = syncTotal ? year + "-01-01" : currentDate;
+                startDate = syncTotal ? year + "-01-01" : preDate;
                 endDate = syncTotal ? year + "-12-31" : currentDate;
                 Map<String, String> netsParams = StockUtil.getNetsStockInfoMap(stockEntity);
                 netsParams.put("startDate", startDate);
@@ -175,12 +178,14 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                     if (syncTotal) {
                         stockPriceDayEntityList.add(stockPriceDayEntity);
                     } else {
-                        StockPriceDayEntity dbStockPriceDayEntity = stockPriceDayMapper.getBySignalDate(stockPriceDayEntity);
-                        if (null == dbStockPriceDayEntity) {
-                            stockPriceDayMapper.insert(stockPriceDayEntity);
-                        } else {
-                            stockPriceDayEntity.setId(dbStockPriceDayEntity.getId());
-                            stockPriceDayMapper.update(stockPriceDayEntity);
+                        if (currentDate.equals(stockDealDayPo.getDt())) {
+                            StockPriceDayEntity dbStockPriceDayEntity = stockPriceDayMapper.getBySignalDate(stockPriceDayEntity);
+                            if (null == dbStockPriceDayEntity) {
+                                stockPriceDayMapper.insert(stockPriceDayEntity);
+                            } else {
+                                stockPriceDayEntity.setId(dbStockPriceDayEntity.getId());
+                                stockPriceDayMapper.update(stockPriceDayEntity);
+                            }
                         }
                     }
 
@@ -201,12 +206,14 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                     if (syncTotal) {
                         stockDealDayEntityList.add(stockDealDayEntity);
                     } else {
-                        StockDealDayEntity dbStockDealDayEntity = stockDealDayMapper.getBySignalDate(stockDealDayEntity);
-                        if (null == dbStockDealDayEntity) {
-                            stockDealDayMapper.insert(stockDealDayEntity);
-                        } else {
-                            stockDealDayEntity.setId(dbStockDealDayEntity.getId());
-                            stockDealDayMapper.update(stockDealDayEntity);
+                        if (currentDate.equals(stockDealDayPo.getDt())) {
+                            StockDealDayEntity dbStockDealDayEntity = stockDealDayMapper.getBySignalDate(stockDealDayEntity);
+                            if (null == dbStockDealDayEntity) {
+                                stockDealDayMapper.insert(stockDealDayEntity);
+                            } else {
+                                stockDealDayEntity.setId(dbStockDealDayEntity.getId());
+                                stockDealDayMapper.update(stockDealDayEntity);
+                            }
                         }
                     }
                 }
