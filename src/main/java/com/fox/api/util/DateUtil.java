@@ -3,14 +3,17 @@ package com.fox.api.util;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 日期时间工具
  * @author lusongsong
  */
 public class DateUtil {
+    private static final List weekList = Arrays.asList("星期日","星期一","星期二","星期三","星期四","星期五","星期六");
     /**
      * 年期格式
      */
@@ -27,6 +30,11 @@ public class DateUtil {
      */
     public static final String TIME_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
     public static final String TIME_FORMAT_2 = "HH:mm:ss";
+
+    /**
+     * 星期格式
+     */
+    public static final String WEEK_FORMAT_1 = "EEEE";
 
     /**
      * 格式类
@@ -203,5 +211,30 @@ public class DateUtil {
         firstDate = simpleDateFormat.parse(first);
         secondDate = simpleDateFormat.parse(second);
         return firstDate.before(secondDate);
+    }
+
+    /**
+     * 获取星期的字符串
+     * @param dateStr
+     * @param format
+     * @return
+     * @throws ParseException
+     */
+    public static String getDayInWeekStr(String dateStr, String format) throws ParseException {
+        simpleDateFormat.applyPattern(format);
+        Date date = simpleDateFormat.parse(dateStr);
+        SimpleDateFormat sdf = new SimpleDateFormat(WEEK_FORMAT_1);
+        return sdf.format(date);
+    }
+
+    /**
+     * 获取星期的序号
+     * @param dateStr
+     * @param format
+     * @return
+     * @throws ParseException
+     */
+    public static Integer getDayInWeekNum(String dateStr, String format) throws ParseException {
+        return weekList.indexOf(getDayInWeekStr(dateStr, format));
     }
 }

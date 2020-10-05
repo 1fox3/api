@@ -24,6 +24,7 @@ public class ServiceExceptionAspect {
         } catch (ServiceException se) {
             throw se;
         } catch (Throwable throwable) {
+            throwable.printStackTrace();
             throw new ServiceException(1, throwable.getMessage());
         }
     }

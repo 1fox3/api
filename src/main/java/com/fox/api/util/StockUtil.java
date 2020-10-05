@@ -16,6 +16,14 @@ public class StockUtil {
      * 最新交易日期缓存key
      */
     private static String stockMarketLastDealDateCacheKey = "stockMarketLastDealDate";
+    /**
+     * 上个交易日缓存key
+     */
+    private static String stockMarketPreDealDateCacheKey = "stockMarketPreDealDate";
+    /**
+     * 下个交易日缓存key
+     */
+    private static String stockMarketNextDealDateCacheKey = "stockMarketNextDealDate";
 
     /**
      * 沪
@@ -78,6 +86,20 @@ public class StockUtil {
     }
 
     /**
+     * 股票专用缓存
+     * @param key
+     * @return
+     */
+    private static String redisGet(String key) {
+        String info = "";
+        StockRedisUtil stockRedisUtil = (StockRedisUtil)ApplicationContextUtil.getBean("stockRedisUtil");
+        if (stockRedisUtil.hasKey(key)) {
+            info = (String)stockRedisUtil.get(key);
+        }
+        return null == info ? "" : info;
+    }
+
+    /**
      * 获取最新交易日的缓存key
      * @param stockMarket
      * @return
@@ -93,15 +115,45 @@ public class StockUtil {
      */
     public static String getLastDealDate(String stockMarket) {
         String cacheKey = StockUtil.getLastDealDateCacheKey(stockMarket);
-        String lastDealDate = "";
-        StockRedisUtil stockRedisUtil = (StockRedisUtil)ApplicationContextUtil.getBean("stockRedisUtil");
-        if (stockRedisUtil.hasKey(cacheKey)) {
-            lastDealDate = (String)stockRedisUtil.get(cacheKey);
-            if (!lastDealDate.equals("")) {
-                return lastDealDate;
-            }
-        }
-        return "";
+        return redisGet(cacheKey);
+    }
+
+    /**
+     * 获取上个交易日的缓存key
+     * @param stockMarket
+     * @return
+     */
+    public static String getPreDealDateCacheKey(String stockMarket) {
+        return stockMarketPreDealDateCacheKey + ":" + stockMarket;
+    }
+
+    /**
+     * 获取股市的最新交易日
+     * @param stockMarket
+     * @return
+     */
+    public static String getPreDealDate(String stockMarket) {
+        String cacheKey = StockUtil.getPreDealDateCacheKey(stockMarket);
+        return redisGet(cacheKey);
+    }
+
+    /**
+     * 获取下个交易日的缓存key
+     * @param stockMarket
+     * @return
+     */
+    public static String getNextDealDateCacheKey(String stockMarket) {
+        return stockMarketNextDealDateCacheKey + ":" + stockMarket;
+    }
+
+    /**
+     * 获取股市的下个交易日
+     * @param stockMarket
+     * @return
+     */
+    public static String getNextDealDate(String stockMarket) {
+        String cacheKey = StockUtil.getNextDealDateCacheKey(stockMarket);
+        return redisGet(cacheKey);
     }
 
     /**
