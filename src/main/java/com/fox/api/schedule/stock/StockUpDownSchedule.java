@@ -5,21 +5,18 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockLimitUpDownEntity;
 import com.fox.api.dao.stock.entity.StockUpDownEntity;
 import com.fox.api.dao.stock.mapper.StockLimitUpDownMapper;
-import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.dao.stock.mapper.StockUpDownMapper;
 import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
 import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.stock.StockOfflineService;
-import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 股票增幅统计
@@ -193,26 +190,28 @@ public class StockUpDownSchedule extends StockBaseSchedule {
 
             for (Object stockEntity : stockEntityList) {
                 Integer stockId = ((StockEntity)stockEntity).getId();
-                if (stockId > 0) {
-                    StockDealDayLineDto stockDealDayLineDto = stockOfflineService.line(stockId, DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1));
-                    List<StockDealDayDto> stockDealDayDtoList = stockDealDayLineDto.getLineNode();
-                    if (null == stockDealDayDtoList) {
-                        continue;
-                    }
-                    int len = stockDealDayDtoList.size();
-                    if (0 >= len) {
-                        continue;
-                    }
-                    this.upDown((StockEntity)stockEntity, stockDealDayDtoList);
-                    if (stockDealDayLineDto.getStockName().contains("ST")) {
-                        this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, new BigDecimal(0.05));
-                    } else {
-                        this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, new BigDecimal(0.1));
-                    }
-                }
                 try{
+                    if (stockId > 0) {
+                        StockDealDayLineDto stockDealDayLineDto = stockOfflineService.line(stockId, DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1));
+                        List<StockDealDayDto> stockDealDayDtoList = stockDealDayLineDto.getLineNode();
+                        if (null == stockDealDayDtoList) {
+                            continue;
+                        }
+                        int len = stockDealDayDtoList.size();
+                        if (0 >= len) {
+                            continue;
+                        }
+                        this.upDown((StockEntity)stockEntity, stockDealDayDtoList);
+                        if (stockDealDayLineDto.getStockName().contains("ST")) {
+                            this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, new BigDecimal(0.05));
+                        } else {
+                            this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, new BigDecimal(0.1));
+                        }
+                    }
                     Thread.sleep(200);
-                } catch (InterruptedException e){}
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         }
     }

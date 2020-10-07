@@ -15,8 +15,10 @@ import com.fox.api.util.DateUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 股票历史交易信息
@@ -41,14 +43,30 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
         stockDealDayLineDto.setStockName(stockEntity.getStockName());
         stockDealDayLineDto.setStockCode(stockEntity.getStockCode());
 
-        List<StockPriceDayEntity> dealDayList = this.stockPriceDayMapper.getByDate(
+        List<StockPriceDayEntity> priceDayList = this.stockPriceDayMapper.getByDate(
                 0, stockId, startDate, endDate
         );
         List<StockDealDayDto> stockDealDayList = new LinkedList<>();
-        if (null != dealDayList && 0 < dealDayList.size()) {
-            for (StockPriceDayEntity stockPriceDayEntity : dealDayList) {
+        if (null != priceDayList && 0 < priceDayList.size()) {
+            List<StockDealDayEntity> dealDayList = this.stockDealDayMapper.getByDate(
+                    stockId, startDate, endDate
+            );
+            Map<String, StockDealDayEntity> stockDealDayMap = new HashMap<>(priceDayList.size());
+            if (null != dealDayList && 0 < dealDayList.size()) {
+                for (StockDealDayEntity stockDealDayEntity : dealDayList) {
+                    stockDealDayMap.put(stockDealDayEntity.getDt(), stockDealDayEntity);
+                }
+            }
+
+            for (StockPriceDayEntity stockPriceDayEntity : priceDayList) {
                 StockDealDayDto stockDealDayDto = new StockDealDayDto();
                 BeanUtils.copyProperties(stockPriceDayEntity, stockDealDayDto);
+                if (stockDealDayMap.containsKey(stockPriceDayEntity.getDt())) {
+                    StockDealDayEntity stockDealDayEntity = stockDealDayMap.get(stockPriceDayEntity.getDt());
+                    if (null != stockDealDayEntity) {
+                        BeanUtils.copyProperties(stockDealDayEntity, stockDealDayDto);
+                    }
+                }
                 stockDealDayList.add(stockDealDayDto);
             }
             stockDealDayLineDto.setLineNode(stockDealDayList);

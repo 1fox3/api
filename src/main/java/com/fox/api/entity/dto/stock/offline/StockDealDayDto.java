@@ -32,6 +32,10 @@ public class StockDealDayDto {
      */
     BigDecimal lowestPrice;
     /**
+     * 上个交易日收盘价
+     */
+    BigDecimal preClosePrice;
+    /**
      * 成交数量
      */
     Long dealNum;
@@ -39,8 +43,4 @@ public class StockDealDayDto {
      * 成交金额
      */
     BigDecimal dealMoney;
-    /**
-     * 增幅
-     */
-    BigDecimal uptickRate;
 }

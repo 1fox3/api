@@ -103,4 +103,19 @@
         WHERE
             stock_id = #{stockId};
     </select>
+
+    <select id="getByDate" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_day
+        WHERE
+            stock_id = #{stockId}
+            AND
+            dt >= #{startDate}
+            AND
+            dt &lt;= #{endDate}
+        ORDER BY
+            dt ASC;
+    </select>
 </mapper>
