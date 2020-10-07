@@ -36,7 +36,7 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
     public List<StockRealtimeLinePo> getFourDaysMinuteLine(String stockCode) {
         List<StockRealtimeLinePo> list = new LinkedList<>();
         try {
-            String url = this.demoUrl.replace("{stockMarketPY}", this.stockMarketPY)
+            String url = demoUrl.replace("{stockMarketPY}", this.stockMarketPY)
                     .replace("{stockCode}", stockCode);
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(url).setOriCharset("GBK");

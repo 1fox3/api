@@ -11,6 +11,8 @@ import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.service.third.stock.sina.api.SinaStockBaseApi;
 import com.fox.api.util.StockUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,7 @@ import java.util.*;
  * @date 2020/3/5 18:13
  */
 public class StockScanSchedule extends StockBaseSchedule {
+    private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private SinaRealtime sinaRealtime;
     @Autowired
@@ -137,8 +140,8 @@ public class StockScanSchedule extends StockBaseSchedule {
                             stockMapper.insert(stockEntity);
                         }
                     } catch (Exception e) {
-                        System.out.println(stockEntity);
-                        e.printStackTrace();
+                        logger.error(stockEntity.toString());
+                        logger.error(e.getMessage());
                     }
                 }
             }
@@ -170,11 +173,11 @@ public class StockScanSchedule extends StockBaseSchedule {
 
             stockCodeList.add(sinaStockCode);
 
-            if (stockCodeList.size() >= 500 || maxLimit.equals(i)) {
+            if (stockCodeList.size() >= 100 || maxLimit.equals(i)) {
                 try {
                     this.scanStockCodeList(stockMarket, stockCodeList);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error(e.getMessage());
                 }
             }
         }

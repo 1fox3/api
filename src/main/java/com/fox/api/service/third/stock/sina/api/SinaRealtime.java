@@ -1,13 +1,16 @@
 package com.fox.api.service.third.stock.sina.api;
 
 import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StringUtil;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -16,6 +19,7 @@ import java.util.*;
  */
 @Component
 public class SinaRealtime extends SinaStockBaseApi {
+    private Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * 接口链接,例：http://hq.sinajs.cn/list=sh603383,sh601519
      */
@@ -100,7 +104,7 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param response
      * @return
      */
-    private static StockRealtimePo getStockRealtimeEntity(String response) {
+    private StockRealtimePo getStockRealtimeEntity(String response) {
         StockRealtimePo stockRealtimePo = new StockRealtimePo();
         String stockCode = getStockCode(response);
         int startIndex = response.indexOf("\"");
@@ -125,120 +129,125 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param responseArr
      * @return
      */
-    private static StockRealtimePo buildCnStockRealtimeEntity(String[] responseArr) {
+    private StockRealtimePo buildCnStockRealtimeEntity(String[] responseArr) {
         StockRealtimePo stockRealtimePo = new StockRealtimePo();
-        if (null == responseArr || responseArr.length == 0) {
-            return stockRealtimePo;
-        }
-        Map<BigDecimal, Map<String, BigDecimal>> sellList = new LinkedHashMap<>(5);
-        List<BigDecimal> sellPriceList = new ArrayList<>();
-        Map<BigDecimal, Map<String, BigDecimal>> buyList = new LinkedHashMap<>(5);
-        List<BigDecimal> buyPriceList = new ArrayList<>();
-        Map<String, BigDecimal> temp = new LinkedHashMap<>();
-        List<String> unknownList = new LinkedList<>();
-        for (int i = 0; i < responseArr.length; i++) {
-            if (responseArr[i].equals("")) {
-                continue;
+        try {
+            if (null == responseArr || responseArr.length == 0) {
+                return stockRealtimePo;
             }
-            if (0 == i) {
-                stockRealtimePo.setStockName(responseArr[i]);
-            }
-            if (1 == i) {
-                stockRealtimePo.setOpenPrice(new BigDecimal(responseArr[i]));
-            }
-            if (2 == i) {
-                stockRealtimePo.setPreClosePrice(new BigDecimal(responseArr[i]));
-            }
-            if (3 == i) {
-                stockRealtimePo.setCurrentPrice(new BigDecimal(responseArr[i]));
-            }
-            if (4 == i) {
-                stockRealtimePo.setHighestPrice(new BigDecimal(responseArr[i]));
-            }
-            if (5 == i) {
-                stockRealtimePo.setLowestPrice(new BigDecimal(responseArr[i]));
-            }
-            if (6 == i) {
-                stockRealtimePo.setCompeteBuyPrice(new BigDecimal(responseArr[i]));
-            }
-            if (7 == i) {
-                stockRealtimePo.setCompeteSellPrice(new BigDecimal(responseArr[i]));
-            }
-            if (8 == i) {
-                stockRealtimePo.setDealNum(Long.valueOf(responseArr[i]));
-            }
-            if (9 == i) {
-                stockRealtimePo.setDealMoney(new BigDecimal(responseArr[i]));
-            }
-            if (10 <= i && 29 >= i) {
-                if (0 == i % 2) {
-                    temp.put("num", new BigDecimal(responseArr[i]));
-                } else {
-                    temp.put("price", new BigDecimal(responseArr[i]));
-                    if (10 <= i && 19 >= i) {
-                        buyList.put(temp.get("price"), temp);
-                        buyPriceList.add(temp.get("price"));
+            Map<BigDecimal, Map<String, BigDecimal>> sellList = new LinkedHashMap<>(5);
+            List<BigDecimal> sellPriceList = new ArrayList<>();
+            Map<BigDecimal, Map<String, BigDecimal>> buyList = new LinkedHashMap<>(5);
+            List<BigDecimal> buyPriceList = new ArrayList<>();
+            Map<String, BigDecimal> temp = new LinkedHashMap<>();
+            List<String> unknownList = new LinkedList<>();
+            for (int i = 0; i < responseArr.length; i++) {
+                if (responseArr[i].equals("")) {
+                    continue;
+                }
+                if (0 == i) {
+                    stockRealtimePo.setStockName(responseArr[i]);
+                }
+                if (1 == i) {
+                    stockRealtimePo.setOpenPrice(new BigDecimal(responseArr[i]));
+                }
+                if (2 == i) {
+                    stockRealtimePo.setPreClosePrice(new BigDecimal(responseArr[i]));
+                }
+                if (3 == i) {
+                    stockRealtimePo.setCurrentPrice(new BigDecimal(responseArr[i]));
+                }
+                if (4 == i) {
+                    stockRealtimePo.setHighestPrice(new BigDecimal(responseArr[i]));
+                }
+                if (5 == i) {
+                    stockRealtimePo.setLowestPrice(new BigDecimal(responseArr[i]));
+                }
+                if (6 == i) {
+                    stockRealtimePo.setCompeteBuyPrice(new BigDecimal(responseArr[i]));
+                }
+                if (7 == i) {
+                    stockRealtimePo.setCompeteSellPrice(new BigDecimal(responseArr[i]));
+                }
+                if (8 == i) {
+                    stockRealtimePo.setDealNum(Long.valueOf(responseArr[i]));
+                }
+                if (9 == i) {
+                    stockRealtimePo.setDealMoney(new BigDecimal(responseArr[i]));
+                }
+                if (10 <= i && 29 >= i) {
+                    if (0 == i % 2) {
+                        temp.put("num", new BigDecimal(responseArr[i]));
                     } else {
-                        sellList.put(temp.get("price"), temp);
-                        sellPriceList.add(temp.get("price"));
+                        temp.put("price", new BigDecimal(responseArr[i]));
+                        if (10 <= i && 19 >= i) {
+                            buyList.put(temp.get("price"), temp);
+                            buyPriceList.add(temp.get("price"));
+                        } else {
+                            sellList.put(temp.get("price"), temp);
+                            sellPriceList.add(temp.get("price"));
+                        }
+                        temp = new LinkedHashMap<>();
                     }
-                    temp = new LinkedHashMap<>();
+                }
+                if (30 == i) {
+                    stockRealtimePo.setCurrentDate(responseArr[i]);
+                }
+                if (31 == i) {
+                    stockRealtimePo.setCurrentTime(responseArr[i]);
+                }
+                if (32 == i) {
+                    stockRealtimePo.setDealStatus(responseArr[i]);
+                }
+                if (33 <= i) {
+                    unknownList.add(responseArr[i]);
                 }
             }
-            if (30 == i) {
-                stockRealtimePo.setCurrentDate(responseArr[i]);
+            if (sellList.size() > 0) {
+                Collections.reverse(sellPriceList);
+                List<Map<String, BigDecimal>> list = new LinkedList<>();
+                for(BigDecimal price : sellPriceList) {
+                    list.add(sellList.get(price));
+                }
+                stockRealtimePo.setSellPriceList(list);
             }
-            if (31 == i) {
-                stockRealtimePo.setCurrentTime(responseArr[i]);
+            if (buyList.size() > 0) {
+                Collections.sort(buyPriceList);
+                List<Map<String, BigDecimal>> list = new LinkedList<>();
+                for(BigDecimal price : buyPriceList) {
+                    list.add(0, buyList.get(price));
+                }
+                stockRealtimePo.setBuyPriceList(list);
             }
-            if (32 == i) {
-                stockRealtimePo.setDealStatus(responseArr[i]);
+            if (unknownList.size() > 0) {
+                stockRealtimePo.setUnknownKeyList(unknownList);
             }
-            if (33 <= i) {
-                unknownList.add(responseArr[i]);
+            //昨日收盘价
+            BigDecimal preClosePrice = stockRealtimePo.getPreClosePrice();
+            //当前价格
+            BigDecimal currentPrice = stockRealtimePo.getCurrentPrice();
+            //今日最高价
+            BigDecimal highestPrice = stockRealtimePo.getHighestPrice();
+            //今日最低价
+            BigDecimal lowestPrice = stockRealtimePo.getLowestPrice();
+            if (null == currentPrice || null == preClosePrice
+                    || null == highestPrice || null == lowestPrice
+                    || 0 == preClosePrice.compareTo(BigDecimal.ZERO)
+            ) {
+                return stockRealtimePo;
             }
+            BigDecimal uptickPrice = currentPrice.subtract(preClosePrice);
+            stockRealtimePo.setUptickPrice(uptickPrice);
+            //增幅
+            BigDecimal uptickRate = uptickPrice.divide(preClosePrice, 4, RoundingMode.HALF_UP);
+            //波动
+            BigDecimal surgeRate = highestPrice.subtract(lowestPrice).divide(preClosePrice, 4, RoundingMode.HALF_UP);
+            stockRealtimePo.setUptickRate(uptickRate);
+            stockRealtimePo.setSurgeRate(surgeRate);
+        } catch (Exception e) {
+            logger.error(responseArr.toString());
+            logger.error(e.getMessage());
         }
-        if (sellList.size() > 0) {
-            Collections.reverse(sellPriceList);
-            List<Map<String, BigDecimal>> list = new LinkedList<>();
-            for(BigDecimal price : sellPriceList) {
-                list.add(sellList.get(price));
-            }
-            stockRealtimePo.setSellPriceList(list);
-        }
-        if (buyList.size() > 0) {
-            Collections.sort(buyPriceList);
-            List<Map<String, BigDecimal>> list = new LinkedList<>();
-            for(BigDecimal price : buyPriceList) {
-                list.add(0, buyList.get(price));
-            }
-            stockRealtimePo.setBuyPriceList(list);
-        }
-        if (unknownList.size() > 0) {
-            stockRealtimePo.setUnknownKeyList(unknownList);
-        }
-        //昨日收盘价
-        BigDecimal preClosePrice = stockRealtimePo.getPreClosePrice();
-        //当前价格
-        BigDecimal currentPrice = stockRealtimePo.getCurrentPrice();
-        //今日最高价
-        BigDecimal highestPrice = stockRealtimePo.getHighestPrice();
-        //今日最低价
-        BigDecimal lowestPrice = stockRealtimePo.getLowestPrice();
-        if (null == currentPrice || null == preClosePrice
-                || null == highestPrice || null == lowestPrice
-                || 0 == preClosePrice.compareTo(BigDecimal.ZERO)
-        ) {
-            return stockRealtimePo;
-        }
-        BigDecimal uptickPrice = currentPrice.subtract(preClosePrice);
-        stockRealtimePo.setUptickPrice(uptickPrice);
-        //增幅
-        BigDecimal uptickRate = uptickPrice.divide(preClosePrice);
-        //波动
-        BigDecimal surgeRate = highestPrice.subtract(lowestPrice).divide(preClosePrice);
-        stockRealtimePo.setUptickRate(uptickRate);
-        stockRealtimePo.setSurgeRate(surgeRate);
         return stockRealtimePo;
     }
 
@@ -247,91 +256,96 @@ public class SinaRealtime extends SinaStockBaseApi {
      * @param responseArr
      * @return
      */
-    private static StockRealtimePo buildHkStockRealtimeEntity(String[] responseArr) {
+    private StockRealtimePo buildHkStockRealtimeEntity(String[] responseArr) {
         StockRealtimePo stockRealtimePo = new StockRealtimePo();
-        if (null == responseArr || responseArr.length == 0) {
-            return stockRealtimePo;
+        try {
+            if (null == responseArr || responseArr.length == 0) {
+                return stockRealtimePo;
+            }
+            List<String> unknownList = new LinkedList<>();
+            for (int i = 0; i < responseArr.length; i++) {
+                if (responseArr[i].equals("")) {
+                    continue;
+                }
+                if (0 == i) {
+                    stockRealtimePo.setStockNameEn(responseArr[i]);
+                }
+                if (1 == i) {
+                    stockRealtimePo.setStockName(responseArr[i]);
+                }
+                if (2 == i) {
+                    stockRealtimePo.setOpenPrice(new BigDecimal(responseArr[i]));
+                }
+                if (3 == i) {
+                    stockRealtimePo.setPreClosePrice(new BigDecimal(responseArr[i]));
+                }
+                if (4 == i) {
+                    stockRealtimePo.setHighestPrice(new BigDecimal(responseArr[i]));
+                }
+                if (5 == i) {
+                    stockRealtimePo.setLowestPrice(new BigDecimal(responseArr[i]));
+                }
+                if (6 == i) {
+                    stockRealtimePo.setCurrentPrice(new BigDecimal(responseArr[i]));
+                }
+                if (7 == i) {
+                    stockRealtimePo.setUptickPrice(new BigDecimal(responseArr[i]));
+                }
+                if (8 == i) {
+                    stockRealtimePo.setUptickRate(new BigDecimal(responseArr[i]));
+                }
+                if (9 == i) {
+                    stockRealtimePo.setMinuteLowestPrice(new BigDecimal(responseArr[i]));
+                }
+                if (10 == i) {
+                    stockRealtimePo.setMinuteHighestPrice(new BigDecimal(responseArr[i]));
+                }
+                if (11 == i) {
+                    stockRealtimePo.setDealMoney(new BigDecimal(responseArr[i]));
+                }
+                if (12 == i) {
+                    stockRealtimePo.setDealNum(Long.valueOf(responseArr[i]));
+                }
+                if (13 <= i && 16 >= i) {
+                    //i==15或16时，近期的最高，底价，时间范围不定，暂时观察至少是近一年的
+                    unknownList.add(responseArr[i]);
+                }
+                if (17 == i) {
+                    stockRealtimePo.setCurrentDate(responseArr[i].replace("/", "-"));
+                }
+                if (18 == i) {
+                    stockRealtimePo.setCurrentTime(responseArr[i] + ":00");
+                }
+            }
+            if (unknownList.size() > 0) {
+                stockRealtimePo.setUnknownKeyList(unknownList);
+            }
+            //上个交易日收盘价
+            BigDecimal preClosePrice = stockRealtimePo.getPreClosePrice();
+            //当前价格
+            BigDecimal currentPrice = stockRealtimePo.getCurrentPrice();
+            //最高价
+            BigDecimal highestPrice = stockRealtimePo.getHighestPrice();
+            //最低价
+            BigDecimal lowestPrice = stockRealtimePo.getLowestPrice();
+            if (null == currentPrice || null == preClosePrice
+                    || null == highestPrice || null == lowestPrice
+                    || 0 == preClosePrice.compareTo(BigDecimal.ZERO)
+            ) {
+                return stockRealtimePo;
+            }
+            BigDecimal uptickPrice = currentPrice.subtract(preClosePrice);
+            stockRealtimePo.setUptickPrice(uptickPrice);
+            //增幅
+            BigDecimal uptickRate = uptickPrice.divide(preClosePrice, 4, RoundingMode.HALF_UP);
+            //波动
+            BigDecimal surgeRate = highestPrice.subtract(lowestPrice).divide(preClosePrice, 4, RoundingMode.HALF_UP);
+            stockRealtimePo.setUptickRate(uptickRate);
+            stockRealtimePo.setSurgeRate(surgeRate);
+        } catch (Exception e) {
+            logger.error(responseArr.toString());
+            logger.error(e.getMessage());
         }
-        List<String> unknownList = new LinkedList<>();
-        for (int i = 0; i < responseArr.length; i++) {
-            if (responseArr[i].equals("")) {
-                continue;
-            }
-            if (0 == i) {
-                stockRealtimePo.setStockNameEn(responseArr[i]);
-            }
-            if (1 == i) {
-                stockRealtimePo.setStockName(responseArr[i]);
-            }
-            if (2 == i) {
-                stockRealtimePo.setOpenPrice(new BigDecimal(responseArr[i]));
-            }
-            if (3 == i) {
-                stockRealtimePo.setPreClosePrice(new BigDecimal(responseArr[i]));
-            }
-            if (4 == i) {
-                stockRealtimePo.setHighestPrice(new BigDecimal(responseArr[i]));
-            }
-            if (5 == i) {
-                stockRealtimePo.setLowestPrice(new BigDecimal(responseArr[i]));
-            }
-            if (6 == i) {
-                stockRealtimePo.setCurrentPrice(new BigDecimal(responseArr[i]));
-            }
-            if (7 == i) {
-                stockRealtimePo.setUptickPrice(new BigDecimal(responseArr[i]));
-            }
-            if (8 == i) {
-                stockRealtimePo.setUptickRate(new BigDecimal(responseArr[i]));
-            }
-            if (9 == i) {
-                stockRealtimePo.setMinuteLowestPrice(new BigDecimal(responseArr[i]));
-            }
-            if (10 == i) {
-                stockRealtimePo.setMinuteHighestPrice(new BigDecimal(responseArr[i]));
-            }
-            if (11 == i) {
-                stockRealtimePo.setDealMoney(new BigDecimal(responseArr[i]));
-            }
-            if (12 == i) {
-                stockRealtimePo.setDealNum(Long.valueOf(responseArr[i]));
-            }
-            if (13 <= i && 16 >= i) {
-                //i==15或16时，近期的最高，底价，时间范围不定，暂时观察至少是近一年的
-                unknownList.add(responseArr[i]);
-            }
-            if (17 == i) {
-                stockRealtimePo.setCurrentDate(responseArr[i].replace("/", "-"));
-            }
-            if (18 == i) {
-                stockRealtimePo.setCurrentTime(responseArr[i] + ":00");
-            }
-        }
-        if (unknownList.size() > 0) {
-            stockRealtimePo.setUnknownKeyList(unknownList);
-        }
-        //上个交易日收盘价
-        BigDecimal preClosePrice = stockRealtimePo.getPreClosePrice();
-        //当前价格
-        BigDecimal currentPrice = stockRealtimePo.getCurrentPrice();
-        //最高价
-        BigDecimal highestPrice = stockRealtimePo.getHighestPrice();
-        //最低价
-        BigDecimal lowestPrice = stockRealtimePo.getLowestPrice();
-        if (null == currentPrice || null == preClosePrice
-                || null == highestPrice || null == lowestPrice
-                || 0 == preClosePrice.compareTo(BigDecimal.ZERO)
-        ) {
-            return stockRealtimePo;
-        }
-        BigDecimal uptickPrice = currentPrice.subtract(preClosePrice);
-        stockRealtimePo.setUptickPrice(uptickPrice);
-        //增幅
-        BigDecimal uptickRate = uptickPrice.divide(preClosePrice);
-        //波动
-        BigDecimal surgeRate = highestPrice.subtract(lowestPrice).divide(preClosePrice);
-        stockRealtimePo.setUptickRate(uptickRate);
-        stockRealtimePo.setSurgeRate(surgeRate);
         return stockRealtimePo;
     }
 }

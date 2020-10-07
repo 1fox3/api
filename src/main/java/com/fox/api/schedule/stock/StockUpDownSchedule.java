@@ -140,7 +140,7 @@ public class StockUpDownSchedule extends StockBaseSchedule {
 
             //type值说明 0-正常，1-涨停，2-跌停
             Integer type = 0;
-            if (-1 != todayPrice.subtract(yesterdayPrice).divide(yesterdayPrice).abs().compareTo(limitRate)) {
+            if (-1 != todayPrice.subtract(yesterdayPrice).divide(yesterdayPrice, 4, RoundingMode.HALF_UP).abs().compareTo(limitRate)) {
                 type = 1 == todayPrice.compareTo(yesterdayPrice) ? 1 : 2;
             }
             if (type.equals(0) ||
