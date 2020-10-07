@@ -238,7 +238,6 @@ public class StockDealDaySchedule extends StockBaseSchedule {
         List<Integer> topIndexList = this.stockProperty.getTopIndex();
         for (Integer id : topIndexList) {
             StockEntity stockEntity = this.stockMapper.getById(id);
-            System.out.println(stockEntity);
             this.syncPriceDay(stockEntity);
             this.syncDealDay(stockEntity);
         }
@@ -258,7 +257,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                 if (null == stockEntity) {
                     continue;
                 }
-                stockId = null == stockEntity.getId() ? stockEntity.getId() : stockId + 1;
+                stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
                 if (null == stockEntity.getNetsStockCode() || 0 == stockEntity.getNetsStockCode().length()) {
                     continue;
                 }

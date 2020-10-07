@@ -20,6 +20,16 @@ public class InfoController {
     StockInfoService stockInfoService;
 
     /**
+     * 从证券中心获取股票基本信息
+     * @param stockVo
+     * @return
+     */
+    @RequestMapping("/stock/info/exchange")
+    public ResultDto getInfoFromStockExchange(@Valid StockVo stockVo) {
+        return ResultDto.success(stockInfoService.getInfoFromStockExchange(stockVo.getStockId()));
+    }
+
+    /**
      * 获取股票基本信息
      * @param stockVo
      * @return

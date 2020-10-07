@@ -209,7 +209,83 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
     }
 
     /**
-     * 重交易所网站获取股票信息
+     * 获取香港证券交易所股票信息
+     * 股票列表页面:https://sc.hkex.com.hk/TuniS/www.hkex.com.hk/Market-Data/Futures-and-Options-Prices/Single-Stock/All?sc_lang=zh-CN#&sttype=all
+     * 详细信息页面:https://sc.hkex.com.hk/TuniS/www.hkex.com.hk/Market-Data/Securities-Prices/Equities/Equities-Quote?sym=700&sc_lang=zh-cn
+     * 数据请求链接:https://www1.hkex.com.hk/hkexwidget/data/getequityquote?sym=700&token=evLtsLsBNAUVTPxtGqVeGze1PKjLBaJY%2bA5L7HCZx%2fI2lFgRJe68dzfQEagfRsdt&lang=chn&qid=1601974258969&callback=jQuery351036336353960645607_1601974242276
+     * @param stockEntity
+     * @return
+     */
+    private StockInfoEntity getHKStockInfo(StockEntity stockEntity) {
+        StockInfoEntity stockInfoEntity = new StockInfoEntity();
+        stockInfoEntity.setStockId(stockEntity.getId());
+        stockInfoEntity.setStockMarket(stockEntity.getStockMarket());
+        stockInfoEntity.setStockCode(stockEntity.getStockCode());
+        stockInfoEntity.setStockName(stockEntity.getStockName());
+        stockInfoEntity.setStockNameEn(stockEntity.getStockNameEn());
+        try {
+            HttpUtil httpUtil = new HttpUtil();
+            httpUtil.setUrl("https://www1.hkex.com.hk/hkexwidget/data/getequityquote");
+            httpUtil.setParam("sym", Integer.valueOf(stockEntity.getStockCode()).toString());
+            httpUtil.setParam("token", "evLtsLsBNAUVTPxtGqVeGze1PKjLBaJY%2bA5L7HCZx%2fI2lFgRJe68dzfQEagfRsdt");
+            httpUtil.setParam("lang", "chn");
+            httpUtil.setParam("qid", "1601974258969");
+            httpUtil.setParam("callback", "jQuery351036336353960645607_1601974242276");
+            HttpResponseDto httpResponse = httpUtil.request();
+            String responseContent = httpResponse.getContent();
+            int startPos = responseContent.indexOf('(');
+            int endPos = responseContent.indexOf(')');
+            responseContent = responseContent.substring(startPos + 1, endPos);
+            if (null != responseContent && !responseContent.equals("")) {
+                JSONObject baseObject = JSONObject.fromObject(responseContent);
+                if (!baseObject.isNullObject() && baseObject.containsKey("data")) {
+                    JSONObject dataObject = baseObject.getJSONObject("data");
+                    if (!dataObject.isNullObject() && dataObject.containsKey("quote")) {
+                        dataObject = dataObject.getJSONObject("quote");
+                    }
+                    if (null != dataObject) {
+                        if (dataObject.containsKey("chairman")) {
+                            stockInfoEntity.setStockLegal(dataObject.getString("chairman"));
+                        }
+                        if (dataObject.containsKey("amt_os")) {
+                            stockInfoEntity.setStockTotalEquity(
+                                    Double.valueOf(
+                                            dataObject.getString("amt_os").replace(",","")
+                                    ) / 10000
+                            );
+                        }
+                        if (dataObject.containsKey("issuer_name")) {
+                            stockInfoEntity.setStockFullName(dataObject.getString("issuer_name"));
+                        }
+                        if (dataObject.containsKey("incorpin")) {
+                            stockInfoEntity.setStockRegisterAddress(dataObject.getString("incorpin"));
+                        }
+                        if (dataObject.containsKey("office_address")) {
+                            stockInfoEntity.setStockConnectAddress(dataObject.getString("office_address").replace("<br/>", ""));
+                        }
+                        if (dataObject.containsKey("hsic_ind_classification")) {
+                            stockInfoEntity.setStockCarc(dataObject.getString("hsic_ind_classification").replace(" ", ""));
+                        }
+                        if (dataObject.containsKey("hsic_sub_sector_classification")) {
+                            stockInfoEntity.setStockIndustry(dataObject.getString("hsic_sub_sector_classification").replace(" ", ""));
+                        }
+                        if (dataObject.containsKey("listing_date")) {
+                            stockInfoEntity.setStockOnDate(
+                                    dataObject.getString("listing_date")
+                                            .replace("年", "-")
+                                            .replace("月", "-")
+                                            .replace("日", "")
+                            );
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {}
+        return stockInfoEntity;
+    }
+
+    /**
+     * 从交易所网站获取股票信息
      * @param stockId
      * @return
      */
@@ -218,14 +294,16 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
         StockInfoEntity stockInfoEntity = new StockInfoEntity();
         StockEntity stockEntity = this.getStockEntity(stockId);
         Integer stockMarket = stockEntity.getStockMarket();
-        if (1 == stockMarket) {
-            return this.getSHStockInfo(stockEntity);
+        switch (stockMarket) {
+            case 1:
+                return this.getSHStockInfo(stockEntity);
+            case 2:
+                return this.getSZStockInfo(stockEntity);
+            case 3:
+                return this.getHKStockInfo(stockEntity);
+            default:
+                return stockInfoEntity;
         }
-
-        if (2 == stockMarket) {
-            return this.getSZStockInfo(stockEntity);
-        }
-        return stockInfoEntity;
     }
 
     /**

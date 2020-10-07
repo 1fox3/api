@@ -47,7 +47,7 @@ public class StockInfoSchedule extends StockBaseSchedule {
                 if (null == stockEntity) {
                     continue;
                 }
-                stockId = null == stockEntity.getId() ? stockEntity.getId() : stockId + 1;
+                stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
                 try{
                     StockInfoEntity shStockInfoEntity = stockInfoService.getInfoFromStockExchange(stockId);
                     if (null == shStockInfoEntity.getStockOnDate() || "".equals(shStockInfoEntity.getStockOnDate())) {
