@@ -9,6 +9,7 @@ import com.fox.api.dao.stock.mapper.StockPriceDayMapper;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
 import com.fox.api.entity.po.third.stock.StockDealDayPo;
 import com.fox.api.entity.po.third.stock.StockDealPo;
+import com.fox.api.entity.property.stock.StockCodeProperty;
 import com.fox.api.service.third.stock.nets.api.NetsDayCsv;
 import com.fox.api.service.third.stock.nets.api.NetsDayLine;
 import com.fox.api.util.DateUtil;
@@ -235,9 +236,12 @@ public class StockDealDaySchedule extends StockBaseSchedule {
      */
     private void stockScanSync() {
         //同步重点指标
-        List<Integer> topIndexList = this.stockProperty.getTopIndex();
-        for (Integer id : topIndexList) {
-            StockEntity stockEntity = this.stockMapper.getById(id);
+        List<StockCodeProperty> topIndexList = this.stockProperty.getTopIndex();
+        for (StockCodeProperty stockCodeProperty : topIndexList) {
+            StockEntity stockEntity = this.stockMapper.getByStockCode(
+                    stockCodeProperty.getStockCode(),
+                    stockCodeProperty.getStockMarket()
+            );
             this.syncPriceDay(stockEntity);
             this.syncDealDay(stockEntity);
         }

@@ -14,12 +14,12 @@ import java.text.ParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Component
 /**
  * 股票工具类任务，提供基本信息
  * @author lusongsong
  * @date 2020/5/2 14:20
  */
+@Component
 public class StockUtilSchedule extends StockBaseSchedule {
     @Autowired
     DateType dateType;

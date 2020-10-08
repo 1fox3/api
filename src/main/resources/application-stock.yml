@@ -278,6 +278,12 @@ stock:
         - "5"
         - "6"
   top-index:
-    - 1 #上证指数
-    - 34027 #深证成指
-    - 34032 #创业板指
+    - {stock-market: 1, stock-code: "000001"} #上证指数
+    - {stock-market: 2, stock-code: "399001"} #深证成指
+    - {stock-market: 2, stock-code: "399006"} #创业板指
+    - {stock-market: 3, stock-code: "HSI"} #恒生指数
+    - {stock-market: 3, stock-code: "HSCEI"} #国企指数
+  demo-index:
+    - {stock-market: 1, stock-code: "000001"} #上证指数
+    - {stock-market: 2, stock-code: "399001"} #深证成指
+    - {stock-market: 3, stock-code: "HSI"} #恒生指数

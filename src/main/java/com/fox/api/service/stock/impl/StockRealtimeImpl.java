@@ -1,6 +1,8 @@
 package com.fox.api.service.stock.impl;
 
+import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.realtime.StockRealtimeInfoDto;
+import com.fox.api.entity.property.stock.StockCodeProperty;
 import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
@@ -59,13 +61,21 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
     @Override
     public List<StockRealtimeInfoDto> topIndex() {
         List<StockRealtimeInfoDto> list = new LinkedList<>();
-        List<Integer> topIndexList = this.stockProperty.getTopIndex();
-        for (Integer stockId : topIndexList) {
-            StockRealtimePo stockRealtimePo = this.info(stockId);
-            StockRealtimeInfoDto stockRealtimeInfoDto = new StockRealtimeInfoDto();
-            BeanUtils.copyProperties(stockRealtimePo, stockRealtimeInfoDto);
-            stockRealtimeInfoDto.setStockId(stockId);
-            list.add(stockRealtimeInfoDto);
+        List<StockCodeProperty> topIndexList = this.stockProperty.getTopIndex();
+        for (StockCodeProperty stockCodeProperty : topIndexList) {
+            StockEntity stockEntity = this.stockMapper.getByStockCode(
+                    stockCodeProperty.getStockCode(),
+                    stockCodeProperty.getStockMarket()
+            );
+            if (null != stockEntity && null != stockEntity.getId()) {
+                Integer stockId = stockEntity.getId();
+                StockRealtimePo stockRealtimePo = this.info(stockId);
+                StockRealtimeInfoDto stockRealtimeInfoDto = new StockRealtimeInfoDto();
+                BeanUtils.copyProperties(stockRealtimePo, stockRealtimeInfoDto);
+                stockRealtimeInfoDto.setStockId(stockId);
+                list.add(stockRealtimeInfoDto);
+            }
+
         }
         return list;
     }

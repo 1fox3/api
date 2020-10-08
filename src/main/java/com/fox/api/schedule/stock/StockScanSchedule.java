@@ -183,11 +183,11 @@ public class StockScanSchedule extends StockBaseSchedule {
         }
     }
 
-    @LogShowTimeAnt
     /**
      * 扫描股票代码
      * 对应新浪和网易的股票代码
      */
+    @LogShowTimeAnt
     public void stockCodeScan() {
         for (String stockMarket : StockScanSchedule.stockScanScopeConfig.keySet()) {
             this.scanStockMarket(stockMarket, StockScanSchedule.stockScanScopeConfig.get(stockMarket));
