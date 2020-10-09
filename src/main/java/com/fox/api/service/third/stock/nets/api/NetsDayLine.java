@@ -50,9 +50,9 @@ public class NetsDayLine extends NetsStockBaseApi {
                 netsCodeInfoMap.get("rehabilitationType") : "";
         rehabilitationType = rehabilitationTypeList.contains(rehabilitationType) ?
                 rehabilitationType : this.rehabilitationType;
-        StockDayLinePo stockDayLineEntity = new StockDayLinePo();
+        StockDayLinePo stockDayLinePo = new StockDayLinePo();
         if (stockCode.equals("")) {
-            return stockDayLineEntity;
+            return stockDayLinePo;
         }
 
         Date startDate = DateUtil.getDateFromStr(startDateStr);
@@ -99,20 +99,20 @@ public class NetsDayLine extends NetsStockBaseApi {
                     }
                     currentStockDayLineEntity.setLineNode(filterList);
                 }
-                if (stockDayLineEntity.getStockCode() == null) {
-                    stockDayLineEntity = currentStockDayLineEntity;
+                if (null == stockDayLinePo.getStockCode()) {
+                    stockDayLinePo = currentStockDayLineEntity;
                 } else {
-                    List<StockDealPo> allList = stockDayLineEntity.getLineNode();
+                    List<StockDealPo> allList = stockDayLinePo.getLineNode();
                     if (null != currentStockDayLineEntity.getLineNode()) {
                         allList.addAll(currentStockDayLineEntity.getLineNode());
                     }
-                    stockDayLineEntity.setLineNode(allList);
+                    stockDayLinePo.setLineNode(allList);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return stockDayLineEntity;
+        return stockDayLinePo;
     }
 
     /**
@@ -121,14 +121,14 @@ public class NetsDayLine extends NetsStockBaseApi {
      * @return
      */
     private StockDayLinePo handleResponse(String response) {
-        StockDayLinePo stockDayLineEntity = new StockDayLinePo();
+        StockDayLinePo stockDayLinePo = new StockDayLinePo();
         try {
             JSONObject responseObj = (JSONObject)JSONObject.fromObject(response);
             if (responseObj.containsKey("symbol")) {
-                stockDayLineEntity.setStockCode(responseObj.getString("symbol"));
+                stockDayLinePo.setStockCode(responseObj.getString("symbol"));
             }
             if (responseObj.containsKey("name")) {
-                stockDayLineEntity.setStockName(responseObj.getString("name"));
+                stockDayLinePo.setStockName(responseObj.getString("name"));
             }
             if (responseObj.containsKey("data")) {
                 JSONArray dataArr = (JSONArray)responseObj.get("data");
@@ -153,10 +153,12 @@ public class NetsDayLine extends NetsStockBaseApi {
                     }
                 }
                 if (0 < nodeList.size()) {
-                    stockDayLineEntity.setLineNode(nodeList);
+                    stockDayLinePo.setLineNode(nodeList);
                 }
             }
-        } catch (JSONException e) {}
-        return stockDayLineEntity;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return stockDayLinePo;
     }
 }

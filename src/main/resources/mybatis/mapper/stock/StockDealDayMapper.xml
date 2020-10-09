@@ -68,11 +68,11 @@
         </foreach >
     </insert>
 
-    <update id="createShadowTable">
+    <update id="createShadow">
         CREATE TABLE IF NOT EXISTS t_stock_deal_day_shadow LIKE t_stock_deal_day;
     </update>
 
-    <update id="shadowTableConvert">
+    <update id="shadowConvert">
         RENAME TABLE
             t_stock_deal_day TO t_stock_deal_day_temp,
             t_stock_deal_day_shadow TO t_stock_deal_day,

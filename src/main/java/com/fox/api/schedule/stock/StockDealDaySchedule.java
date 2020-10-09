@@ -1,6 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
+import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockPriceDayEntity;
@@ -39,7 +40,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     private static int startYear = 1990;
     private int endYear = Integer.valueOf(DateUtil.getCurrentYear());
     private String currentDate = DateUtil.getCurrentDate();
-    private String preDate = DateUtil.getRelateDate(0, -1, 0, DateUtil.DATE_FORMAT_1);
+    private String preDate;
     private NetsDayLine netsDayLine = new NetsDayLine();
     private NetsDayCsv netsDayCsv = new NetsDayCsv();
     /**
@@ -57,23 +58,23 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     /**
      * 创建影子表
      */
-    private void createShadowTable() {
-        stockPriceDayMapper.createShadowTable();
-        stockDealDayMapper.createShadowTable();
+    private void createShadow() {
+        stockPriceDayMapper.createShadow();
+        stockDealDayMapper.createShadow();
     }
 
     /**
      * 数据表重命名
      */
-    private void shadowTableConvert() {
-        stockPriceDayMapper.shadowTableConvert();
-        stockDealDayMapper.shadowTableConvert();
+    private void shadowConvert() {
+        stockPriceDayMapper.shadowConvert();
+        stockDealDayMapper.shadowConvert();
     }
 
     /**
      * 删除影子表
      */
-    private void dropShadowTable() {
+    private void dropShadow() {
         try {
             stockPriceDayMapper.dropShadow();
         } catch (Exception e) {
@@ -100,9 +101,9 @@ public class StockDealDaySchedule extends StockBaseSchedule {
      */
     private void syncPriceDay(StockEntity stockEntity) {
         BigDecimal preClosePrice = new BigDecimal(0);
-        int scanStartYear = syncTotal ? startYear : endYear;
+        int scanEndYear = syncTotal ? startYear : endYear;
         for (String fqType : fqTypeMap.keySet()) {
-            for (int year = scanStartYear; year <= endYear; year += 1) {
+            for (int year = startYear; year >= scanEndYear; year -= 1) {
                 String startDate = "";
                 String endDate = "";
                 try {
@@ -111,8 +112,8 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                     Map<String, String> netsParams = NetsStockBaseApi.getNetsStockInfoMap(stockEntity);
                     netsParams.put("rehabilitationType", fqType);
                     StockDayLinePo stockDayLinePo = netsDayLine.getDayLine(netsParams, startDate, endDate);
-                    if (null == stockDayLinePo.getLineNode()) {
-                        continue;
+                    if (null == stockDayLinePo.getLineNode() || stockDayLinePo.getLineNode().isEmpty()) {
+                        break;
                     }
                     List<StockPriceDayEntity> list = new LinkedList<>();
                     for (StockDealPo stockDealPo : stockDayLinePo.getLineNode()) {
@@ -158,8 +159,8 @@ public class StockDealDaySchedule extends StockBaseSchedule {
      */
     private void syncDealDay(StockEntity stockEntity) {
         BigDecimal preClosePrice = new BigDecimal(0);
-        int scanStartYear = syncTotal ? startYear : endYear;
-        for (int year = scanStartYear; year <= endYear; year += 1) {
+        int scanEndYear = syncTotal ? startYear : endYear;
+        for (int year = startYear; year >= scanEndYear; year -= 1) {
             String startDate = "";
             String endDate = "";
             try {
@@ -170,7 +171,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                 netsParams.put("endDate", endDate);
                 List<StockDealDayPo> stockDealDayPoList = netsDayCsv.getDealDayInfo(netsParams);
                 if (null == stockDealDayPoList || stockDealDayPoList.size() == 0) {
-                    continue;
+                    break;
                 }
                 List<StockPriceDayEntity> stockPriceDayEntityList = new LinkedList<>();
                 List<StockDealDayEntity> stockDealDayEntityList = new LinkedList<>();
@@ -243,16 +244,22 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     /**
      * 遍历所有需同步的股票列表
      */
-    private void stockScanSync() {
+    private void stockScanSync(Integer stockMarket) {
+        //设置上个交易日
+        preDate = StockUtil.getPreDealDate(stockMarket);
+        preDate = null == preDate || preDate.isEmpty() ?
+                DateUtil.getRelateDate(0, -1, 0, DateUtil.DATE_FORMAT_1) : preDate;
         //同步重点指标
         List<StockCodeProperty> topIndexList = this.stockProperty.getTopIndex();
         for (StockCodeProperty stockCodeProperty : topIndexList) {
-            StockEntity stockEntity = this.stockMapper.getByStockCode(
-                    stockCodeProperty.getStockCode(),
-                    stockCodeProperty.getStockMarket()
-            );
-            this.syncPriceDay(stockEntity);
-            this.syncDealDay(stockEntity);
+            if (stockMarket.equals(stockCodeProperty.getStockMarket())) {
+                StockEntity stockEntity = this.stockMapper.getByStockCode(
+                        stockCodeProperty.getStockCode(),
+                        stockCodeProperty.getStockMarket()
+                );
+                this.syncPriceDay(stockEntity);
+                this.syncDealDay(stockEntity);
+            }
         }
         //同步股票
         int stockId = 0;
@@ -261,6 +268,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
             List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
                     2,
                     stockId,
+                    stockMarket,
                     onceLimit.toString()
             );
             if (null == stockEntityList) {
@@ -290,11 +298,13 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     public void syncTotalDealDayInfo() {
         syncTotal = true;
         try {
-            this.dropShadowTable();
-            this.createShadowTable();
-            this.stockScanSync();
-            this.shadowTableConvert();
-            this.dropShadowTable();
+            this.dropShadow();
+            this.createShadow();
+            for (Integer stockMarket : StockConst.SM_A_LIST) {
+                this.stockScanSync(stockMarket);
+            }
+            this.shadowConvert();
+            this.dropShadow();
             this.optimizeTable();
         } catch (Exception e) {
             e.printStackTrace();
@@ -308,7 +318,11 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     public void syncCurrentDealDayInfo() {
         syncTotal = false;
         try {
-            this.stockScanSync();
+            if (StockUtil.todayIsDealDate(StockConst.SM_A)) {
+                for (Integer stockMarket : StockConst.SM_A_LIST) {
+                    this.stockScanSync(stockMarket);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

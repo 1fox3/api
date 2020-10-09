@@ -30,6 +30,10 @@ public class StockConst {
      */
     public static final Integer SM_HK = 3;
     /**
+     * 全部列表
+     */
+    public static final List<Integer> SM_ALL = Arrays.asList(SM_SH, SM_SZ, SM_HK);
+    /**
      * A股列表
      */
     public static final List<Integer> SM_A_LIST = Arrays.asList(SM_SH, SM_SZ);

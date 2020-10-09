@@ -22,7 +22,7 @@
 
     <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockUpDownEntity" keyColumn="id"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO t_stock_up_down (
+        INSERT INTO t_stock_up_down_shadow (
             stock_id,
             d10_up,
             d10_down,
@@ -55,25 +55,6 @@
             );
     </insert>
 
-    <insert id="updateById" parameterType="com.fox.api.dao.stock.entity.StockUpDownEntity">
-        UPDATE t_stock_up_down
-        SET
-            d10_up = #{d10Up},
-            d10_down = #{d10Down},
-            d30_up = #{d30Up},
-            d30_down = #{d30Down},
-            d50_up = #{d50Up},
-            d50_down = #{d50Down},
-            d100_up = #{d100Up},
-            d100_down = #{d100Down},
-            d200_up = #{d200Up},
-            d200_down = #{d200Down},
-            d300_up = #{d300Up},
-            d300_down = #{d300Down}
-        WHERE
-            id = #{id};
-    </insert>
-
     <select id="getList" resultMap="BasicResultMap">
         SELECT
             *
@@ -84,25 +65,22 @@
         LIMIT ${limit};
     </select>
 
-    <select id="getByStockId" resultMap="BasicResultMap">
-        SELECT
-            *
-        FROM
-            t_stock_up_down
-        WHERE
-            stock_id = ${stockId}
-        LIMIT 1;
-    </select>
+    <update id="createShadow">
+        CREATE TABLE IF NOT EXISTS t_stock_up_down_shadow LIKE t_stock_up_down;
+    </update>
 
-    <delete id="deleteById">
-        DELETE
-        FROM
-            t_stock_up_down
-        WHERE
-            id = #{id};
-    </delete>
+    <update id="shadowConvert">
+        RENAME TABLE
+            t_stock_up_down TO t_stock_up_down_temp,
+            t_stock_up_down_shadow TO t_stock_up_down,
+            t_stock_up_down_temp TO t_stock_up_down_shadow;
+    </update>
+
+    <update id="dropShadow">
+        DROP TABLE IF EXISTS t_stock_up_down_shadow
+    </update>
 
     <update id="optimize">
-        OPTIMIZE TABLE t_stock_deal_day;
+        OPTIMIZE TABLE t_stock_up_down;
     </update>
 </mapper>

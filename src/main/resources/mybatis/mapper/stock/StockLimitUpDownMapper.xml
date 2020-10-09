@@ -16,7 +16,7 @@
 
     <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockLimitUpDownEntity" keyColumn="id"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO t_stock_limit_up_down (
+        INSERT INTO t_stock_limit_up_down_shadow (
             stock_id,
             `type`,
             num,
@@ -37,19 +37,6 @@
             );
     </insert>
 
-    <insert id="updateById" parameterType="com.fox.api.dao.stock.entity.StockLimitUpDownEntity">
-        UPDATE t_stock_limit_up_down
-        SET
-            `type` = #{type},
-            num = #{num},
-            start_price = #{startPrice},
-            current_price = #{currentPrice},
-            start_date = #{startDate},
-            `current_date` = #{currentDate}
-        WHERE
-            id = #{id};
-    </insert>
-
     <select id="getList" resultMap="BasicResultMap">
         SELECT
             *
@@ -63,16 +50,6 @@
         LIMIT ${limit};
     </select>
 
-    <select id="getByStockId" resultMap="BasicResultMap">
-        SELECT
-            *
-        FROM
-            t_stock_limit_up_down
-        WHERE
-            stock_id = #{stockId}
-        LIMIT 1;
-    </select>
-
     <select id="countByType" resultType="INTEGER">
         SELECT
             count(*) as c
@@ -82,15 +59,22 @@
             `type` = #{type};
     </select>
 
-    <delete id="deleteById">
-        DELETE
-        FROM
-            t_stock_limit_up_down
-        WHERE
-            id = #{id};
-    </delete>
+    <update id="createShadow">
+        CREATE TABLE IF NOT EXISTS t_stock_limit_up_down_shadow LIKE t_stock_limit_up_down;
+    </update>
 
+    <update id="shadowConvert">
+        RENAME TABLE
+            t_stock_limit_up_down TO t_stock_limit_up_down_temp,
+            t_stock_limit_up_down_shadow TO t_stock_limit_up_down,
+            t_stock_limit_up_down_temp TO t_stock_limit_up_down_shadow;
+    </update>
+
+    <update id="dropShadow">
+        DROP TABLE IF EXISTS t_stock_limit_up_down_shadow
+    </update>
+    
     <update id="optimize">
-        OPTIMIZE TABLE t_stock_deal_day;
+        OPTIMIZE TABLE t_stock_limit_up_down;
     </update>
 </mapper>

@@ -28,6 +28,24 @@ public interface StockUpDownMapper {
     Integer insert(StockUpDownEntity stockUpDownEntity);
 
     /**
+     * 创建影子表
+     * @return
+     */
+    Boolean createShadow();
+
+    /**
+     * 影子表转换
+     * @return
+     */
+    Boolean shadowConvert();
+
+    /**
+     * 删除影子表
+     * @return
+     */
+    Boolean dropShadow();
+
+    /**
      * 优化表
      * @return
      */

@@ -38,13 +38,13 @@ public interface StockDealDayMapper {
      * 创建影子表
      * @return
      */
-    Boolean createShadowTable();
+    Boolean createShadow();
 
     /**
      * 影子表转换
      * @return
      */
-    Boolean shadowTableConvert();
+    Boolean shadowConvert();
 
     /**
      * 删除影子表

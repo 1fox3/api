@@ -1,6 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
+import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.property.stock.StockCodeProperty;
@@ -34,16 +35,18 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
             if (null == stockEntityList || 0 >= stockEntityList.size()) {
                 continue;
             }
-            //3个重要指数也更新
+            //重要指数也更新
             if (0 == i) {
                 List<StockCodeProperty> topIndexList = this.stockProperty.getTopIndex();
                 for (StockCodeProperty stockCodeProperty : topIndexList) {
-                    StockEntity stockEntity = this.stockMapper.getByStockCode(
-                            stockCodeProperty.getStockCode(),
-                            stockCodeProperty.getStockMarket()
-                    );
-                    if (null != stockEntity && null != stockEntity.getId()) {
-                        stockEntityList.add(stockEntity);
+                    if (StockConst.SM_A_LIST.contains(stockCodeProperty.getStockMarket())) {
+                        StockEntity stockEntity = this.stockMapper.getByStockCode(
+                                stockCodeProperty.getStockCode(),
+                                stockCodeProperty.getStockMarket()
+                        );
+                        if (null != stockEntity && null != stockEntity.getId()) {
+                            stockEntityList.add(stockEntity);
+                        }
                     }
                 }
             }

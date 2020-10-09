@@ -26,11 +26,6 @@ import java.util.List;
 public class StockUtilSchedule extends StockBaseSchedule {
     private Logger logger = LoggerFactory.getLogger(getClass());
     /**
-     * 日期类型
-     */
-    @Autowired
-    DateTypeService dateTypeService;
-    /**
      * 寻找最近交易日的日期扫描范围
      */
     private static final Integer DATE_SCAN = 30;
@@ -113,27 +108,14 @@ public class StockUtilSchedule extends StockBaseSchedule {
      * @return
      */
     private String getCloselyDealDate(String dealDate, Integer stockMarket, Boolean isFuture) {
-        int dayInWeekNum = 0;
         String currentDate = "";
-        Integer dateType;
         for (int i = 1; i < DATE_SCAN; i++) {
             try {
                 currentDate = DateUtil.getRelateDate(
                         dealDate, 0, 0, isFuture ? i : -i, DateUtil.DATE_FORMAT_1
                 );
-                dayInWeekNum = DateUtil.getDayInWeekNum(currentDate, DateUtil.DATE_FORMAT_1);
-                if (1 <= dayInWeekNum && 5 >= dayInWeekNum) {
-                    dateType = dateTypeService.getByDate(currentDate);
-                    if (stockMarket.equals(StockConst.SM_HK)) {
-                        if (DateTypeService.DATE_TYPE_WORKDAY.equals(dateType)
-                                || DateTypeService.DATE_TYPE_WEEKEND.equals(dateType)) {
-                            break;
-                        }
-                    } else {
-                        if (DateTypeService.DATE_TYPE_WORKDAY.equals(dateType)) {
-                            break;
-                        }
-                    }
+                if (isDealDate(stockMarket, currentDate)) {
+                    break;
                 }
             } catch (ParseException e) {
                 e.printStackTrace();

@@ -1,6 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
+import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockInfoEntity;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
@@ -32,42 +33,45 @@ public class StockInfoSchedule extends StockBaseSchedule {
      */
     @LogShowTimeAnt
     public void stockInfo() {
-        Integer stockId = 0;
-        Integer onceLimit = 100;
-        while (true) {
-            List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
-                    2,
-                    stockId,
-                    onceLimit.toString()
-            );
-            if (null == stockEntityList) {
-                break;
-            }
-            for (StockEntity stockEntity : stockEntityList) {
-                if (null == stockEntity) {
-                    continue;
+        for (Integer stockMarket : StockConst.SM_ALL) {
+            Integer stockId = 0;
+            Integer onceLimit = 100;
+            while (true) {
+                List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
+                        2,
+                        stockId,
+                        stockMarket,
+                        onceLimit.toString()
+                );
+                if (null == stockEntityList) {
+                    break;
                 }
-                stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
-                try{
-                    StockInfoEntity shStockInfoEntity = stockInfoService.getInfoFromStockExchange(stockId);
-                    if (null == shStockInfoEntity.getStockOnDate() || "".equals(shStockInfoEntity.getStockOnDate())) {
+                for (StockEntity stockEntity : stockEntityList) {
+                    if (null == stockEntity) {
                         continue;
                     }
-                    StockInfoEntity dbSHStockInfoEntity = stockInfoMapper.getByStockId(stockId);
-                    if (null != dbSHStockInfoEntity && null != dbSHStockInfoEntity.getId()) {
-                        shStockInfoEntity.setId(dbSHStockInfoEntity.getId());
-                        stockInfoMapper.update(shStockInfoEntity);
-                    } else {
-                        stockInfoMapper.insert(shStockInfoEntity);
+                    stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
+                    try{
+                        StockInfoEntity shStockInfoEntity = stockInfoService.getInfoFromStockExchange(stockId);
+                        if (null == shStockInfoEntity.getStockOnDate() || "".equals(shStockInfoEntity.getStockOnDate())) {
+                            continue;
+                        }
+                        StockInfoEntity dbSHStockInfoEntity = stockInfoMapper.getByStockId(stockId);
+                        if (null != dbSHStockInfoEntity && null != dbSHStockInfoEntity.getId()) {
+                            shStockInfoEntity.setId(dbSHStockInfoEntity.getId());
+                            stockInfoMapper.update(shStockInfoEntity);
+                        } else {
+                            stockInfoMapper.insert(shStockInfoEntity);
+                        }
+                        Thread.sleep(2000);
+                    } catch (Exception e) {
+                        logger.error(stockId.toString());
+                        logger.error(e.getMessage());
                     }
-                    Thread.sleep(2000);
-                } catch (Exception e) {
-                    logger.error(stockId.toString());
-                    logger.error(e.getMessage());
                 }
-            }
-            if (stockEntityList.size() < onceLimit) {
-                break;
+                if (stockEntityList.size() < onceLimit) {
+                    break;
+                }
             }
         }
     }

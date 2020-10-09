@@ -36,10 +36,22 @@ public interface StockLimitUpDownMapper {
     Integer countByType(Integer type);
 
     /**
-     * 截断表
+     * 创建影子表
      * @return
      */
-    Boolean truncate();
+    Boolean createShadow();
+
+    /**
+     * 影子表转换
+     * @return
+     */
+    Boolean shadowConvert();
+
+    /**
+     * 删除影子表
+     * @return
+     */
+    Boolean dropShadow();
 
     /**
      * 优化表

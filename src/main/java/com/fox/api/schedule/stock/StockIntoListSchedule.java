@@ -1,6 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
+import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class StockIntoListSchedule extends StockBaseSchedule {
      * 清楚缓存中的股票信息，并重新填充
      */
     @LogShowTimeAnt
-    public void clearStockIntoList() {
+    public void clearStockCacheInfo() {
         this.stockRedisUtil.delete(this.redisStockHash);
         this.stockRedisUtil.delete(this.redisStockList);
         this.stockRedisUtil.delete(this.redisStockIdList);
@@ -31,7 +32,7 @@ public class StockIntoListSchedule extends StockBaseSchedule {
      * 删除数据信息
      */
     @LogShowTimeAnt
-    public void clearStockDealList() {
+    public void clearStockCacheData() {
         this.stockRedisUtil.delete(this.redisRealtimeStockInfoHash);
         this.stockRedisUtil.delete(this.redisRealtimeStockLineHash);
         this.stockRedisUtil.delete(this.redisRealtimeRankPriceZSet);
@@ -49,36 +50,31 @@ public class StockIntoListSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     public void stockIntoList() {
         int startId = 0;
-        if (this.stockRedisUtil.hasKey(this.redisStockList)) {
-            Long listSize = this.stockRedisUtil.lSize(this.redisStockList);
-            StockEntity stockEntity = (StockEntity)this.stockRedisUtil.lIndex(
-                    this.redisStockList, listSize - Long.valueOf(1));
-            if (null != stockEntity) {
-                startId = stockEntity.getId();
-            }
+        if (this.stockRedisUtil.hasKey(this.redisStockList) && 0 != this.stockRedisUtil.lSize(this.redisStockList)) {
+            return;
         }
         List<StockEntity> stockEntityList;
         String limit = "500";
-        List<Integer> stockMarketList = new LinkedList<>();
-        stockMarketList.add(this.shStockMarket);
-        stockMarketList.add(this.szStockMarket);
         List<Integer> idList = new LinkedList<>();
         Map<String, StockEntity> stockEntityMap = new LinkedHashMap<>();
-        while (true) {
-            stockEntityList = stockMapper.getListByType(this.stockType, startId, limit, stockMarketList);
-            if (null == stockEntityList || 0 == stockEntityList.size()) {
-                break;
+        for (Integer stockMarket : StockConst.SM_A_LIST) {
+            while (true) {
+                stockEntityList = stockMapper.getListByType(this.stockType, startId, stockMarket, limit);
+                if (null == stockEntityList || 0 == stockEntityList.size()) {
+                    break;
+                }
+                startId = stockEntityList.get(stockEntityList.size() - 1).getId();
+                this.stockRedisUtil.lPushAll(this.redisStockList, stockEntityList);
+                idList.clear();
+                stockEntityMap.clear();
+                for (StockEntity stockEntity : stockEntityList) {
+                    idList.add(stockEntity.getId());
+                    stockEntityMap.put(String.valueOf(stockEntity.getId()), stockEntity);
+                }
+                this.stockRedisUtil.hPutAll(this.redisStockHash, stockEntityMap);
+                this.stockRedisUtil.lPushAll(this.redisStockIdList, idList);
             }
-            startId = stockEntityList.get(stockEntityList.size() - 1).getId();
-            this.stockRedisUtil.lPushAll(this.redisStockList, stockEntityList);
-            idList.clear();
-            stockEntityMap.clear();
-            for (StockEntity stockEntity : stockEntityList) {
-                idList.add(stockEntity.getId());
-                stockEntityMap.put(String.valueOf(stockEntity.getId()), stockEntity);
-            }
-            this.stockRedisUtil.hPutAll(this.redisStockHash, stockEntityMap);
-            this.stockRedisUtil.lPushAll(this.redisStockIdList, idList);
         }
+
     }
 }

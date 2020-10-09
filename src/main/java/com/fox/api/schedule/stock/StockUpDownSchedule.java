@@ -38,6 +38,38 @@ public class StockUpDownSchedule extends StockBaseSchedule {
     List<Integer> scopeList = Arrays.asList(10, 30, 50, 100, 200, 300);
 
     /**
+     * 删除影子表
+     */
+    private void dropShadowTable() {
+        stockUpDownMapper.dropShadow();
+        stockLimitUpDownMapper.dropShadow();
+    }
+
+    /**
+     * 创建影子表
+     */
+    private void createShadowTable() {
+        stockUpDownMapper.createShadow();
+        stockLimitUpDownMapper.createShadow();
+    }
+
+    /**
+     * 名称转换
+     */
+    private void shadowTableConvert() {
+        stockUpDownMapper.shadowConvert();
+        stockLimitUpDownMapper.shadowConvert();
+    }
+
+    /**
+     * 优化表
+     */
+    private void optimizeTable() {
+        stockUpDownMapper.optimize();
+        stockLimitUpDownMapper.optimize();
+    }
+
+    /**
      * 股票增幅统计
      * @param stockEntity
      * @param stockDealDayDtoList
@@ -176,7 +208,8 @@ public class StockUpDownSchedule extends StockBaseSchedule {
             return;
         }
         //将涨幅的统计表进行是删除
-        stockLimitUpDownMapper.truncate();
+        this.dropShadowTable();
+        this.createShadowTable();
 
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);
@@ -207,11 +240,13 @@ public class StockUpDownSchedule extends StockBaseSchedule {
                             this.limitUpDown((StockEntity)stockEntity, stockDealDayDtoList, new BigDecimal(0.1));
                         }
                     }
-                    Thread.sleep(200);
                 } catch (Exception e){
                     e.printStackTrace();
                 }
             }
         }
+        this.shadowTableConvert();
+        this.dropShadowTable();
+        this.optimizeTable();
     }
 }
