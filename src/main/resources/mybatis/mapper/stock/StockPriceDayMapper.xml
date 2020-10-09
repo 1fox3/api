@@ -132,4 +132,8 @@
             AND
             stock_id = #{stockId};
     </select>
+
+    <update id="optimize">
+        OPTIMIZE TABLE t_stock_deal_day;
+    </update>
 </mapper>

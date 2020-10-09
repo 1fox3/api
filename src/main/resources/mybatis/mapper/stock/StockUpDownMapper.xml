@@ -102,7 +102,7 @@
             id = #{id};
     </delete>
 
-    <update id="truncate">
-        TRUNCATE TABLE t_stock_up_down;
+    <update id="optimize">
+        OPTIMIZE TABLE t_stock_deal_day;
     </update>
 </mapper>

@@ -1,6 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
+import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockLimitUpDownEntity;
 import com.fox.api.dao.stock.entity.StockUpDownEntity;
@@ -10,6 +11,7 @@ import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
 import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
 import com.fox.api.service.stock.StockOfflineService;
 import com.fox.api.util.DateUtil;
+import com.fox.api.util.StockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -169,14 +171,11 @@ public class StockUpDownSchedule extends StockBaseSchedule {
      * 执行时间请设置在股市结束之后，因为接口会反回当天数据，影响涨跌停的判断
      */
     @LogShowTimeAnt
-    //@Scheduled(cron="0 5 15 * * 1-5")
     public void stockUpDown() {
-        if (!this.todayIsDealDate()) {
+        if (!StockUtil.todayIsDealDate(StockConst.SM_A)) {
             return;
         }
-
         //将涨幅的统计表进行是删除
-        stockUpDownMapper.truncate();
         stockLimitUpDownMapper.truncate();
 
         Integer onceLimit = 200;

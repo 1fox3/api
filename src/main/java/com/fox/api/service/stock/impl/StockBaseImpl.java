@@ -6,6 +6,7 @@ import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.dao.stock.mapper.StockPriceDayMapper;
 import com.fox.api.property.stock.StockProperty;
+import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.util.StockUtil;
 import com.fox.api.util.redis.StockRedisUtil;
 import net.bytebuddy.asm.Advice;
@@ -88,6 +89,6 @@ public class StockBaseImpl {
      */
     protected Map<String, String> getNetsStockInfoMap(int stockId) {
         StockEntity stockEntity = this.getStockEntity(stockId);
-        return StockUtil.getNetsStockInfoMap(stockEntity);
+        return NetsStockBaseApi.getNetsStockInfoMap(stockEntity);
     }
 }

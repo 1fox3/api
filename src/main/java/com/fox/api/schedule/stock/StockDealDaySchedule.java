@@ -12,6 +12,7 @@ import com.fox.api.entity.po.third.stock.StockDealPo;
 import com.fox.api.entity.property.stock.StockCodeProperty;
 import com.fox.api.service.third.stock.nets.api.NetsDayCsv;
 import com.fox.api.service.third.stock.nets.api.NetsDayLine;
+import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,14 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     }
 
     /**
+     * 数据表重命名
+     */
+    private void optimizeTable() {
+        stockPriceDayMapper.optimize();
+        stockDealDayMapper.optimize();
+    }
+
+    /**
      * 同步价格信息
      * @param stockEntity
      */
@@ -99,7 +108,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
                 try {
                     startDate = syncTotal ? year + "-01-01" : preDate;
                     endDate = syncTotal ? year + "-12-31" : currentDate;
-                    Map<String, String> netsParams = StockUtil.getNetsStockInfoMap(stockEntity);
+                    Map<String, String> netsParams = NetsStockBaseApi.getNetsStockInfoMap(stockEntity);
                     netsParams.put("rehabilitationType", fqType);
                     StockDayLinePo stockDayLinePo = netsDayLine.getDayLine(netsParams, startDate, endDate);
                     if (null == stockDayLinePo.getLineNode()) {
@@ -156,7 +165,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
             try {
                 startDate = syncTotal ? year + "-01-01" : preDate;
                 endDate = syncTotal ? year + "-12-31" : currentDate;
-                Map<String, String> netsParams = StockUtil.getNetsStockInfoMap(stockEntity);
+                Map<String, String> netsParams = NetsStockBaseApi.getNetsStockInfoMap(stockEntity);
                 netsParams.put("startDate", startDate);
                 netsParams.put("endDate", endDate);
                 List<StockDealDayPo> stockDealDayPoList = netsDayCsv.getDealDayInfo(netsParams);
@@ -286,6 +295,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
             this.stockScanSync();
             this.shadowTableConvert();
             this.dropShadowTable();
+            this.optimizeTable();
         } catch (Exception e) {
             e.printStackTrace();
         }

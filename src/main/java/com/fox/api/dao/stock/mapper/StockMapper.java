@@ -65,8 +65,8 @@ public interface StockMapper {
     List<StockEntity> getTotalByType(Integer stockType, Integer id, String limit);
 
     /**
-     * 获取最后的id值
+     * 优化表
      * @return
      */
-    int getLastId();
+    Boolean optimize();
 }

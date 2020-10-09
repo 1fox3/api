@@ -29,7 +29,7 @@ public class ApiApplication {
         SpringApplication.run(ApiApplication.class, args);
 
         //加载所有计划任务
-//        ApiApplication.loadTotalQuartzJob();
+        ApiApplication.loadTotalQuartzJob();
     }
 
 }

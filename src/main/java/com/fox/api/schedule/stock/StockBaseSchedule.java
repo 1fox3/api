@@ -8,6 +8,8 @@ import com.fox.api.util.redis.StockRedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.List;
+
 /**
  * 计划任务基类
  * @author lusongsong
@@ -72,32 +74,4 @@ public class StockBaseSchedule {
 
     @Autowired
     protected StockProperty stockConfig;
-
-    /**
-     * 主要处理的信息股市，沪，深，已沪为例
-     */
-    protected String mainStockMarket = "sh";
-
-    /**
-     * 主要处理的信息股市id
-     */
-    protected Integer mainStockMarketId = 1;
-
-    /**
-     * 今天是否为交易日
-     * @return
-     */
-    protected Boolean todayIsDealDate()
-    {
-        return StockUtil.todayIsDealDate(mainStockMarket);
-    }
-
-    /**
-     * 判定当前是否为交易时间
-     * @return
-     */
-    protected Boolean isDealTime()
-    {
-        return StockUtil.isDealTime(mainStockMarket);
-    }
 }

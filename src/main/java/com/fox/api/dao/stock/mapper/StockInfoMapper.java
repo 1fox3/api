@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * 股票信息
  * @author lusongsong
+ * @date 2020/4/10 13:52
  */
 public interface StockInfoMapper {
     /**
@@ -39,4 +40,10 @@ public interface StockInfoMapper {
      * @return
      */
     List<StockInfoEntity> search(String search, String key);
+
+    /**
+     * 优化表
+     * @return
+     */
+    Boolean optimize();
 }

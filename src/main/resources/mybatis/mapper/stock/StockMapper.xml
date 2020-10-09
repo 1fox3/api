@@ -137,4 +137,8 @@
             id ASC
         LIMIT ${limit}
     </select>
+
+    <update id="optimize">
+        OPTIMIZE TABLE t_stock;
+    </update>
 </mapper>

@@ -1,7 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.constant.Stock;
+import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.property.stock.StockCodeProperty;
@@ -34,7 +34,6 @@ public class StockUtilSchedule extends StockBaseSchedule {
      * 寻找最近交易日的日期扫描范围
      */
     private static final Integer DATE_SCAN = 30;
-
 
     /**
      * 获取最新交易日,当发现交易日发生变化时，更新上个交易日
@@ -125,7 +124,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
                 dayInWeekNum = DateUtil.getDayInWeekNum(currentDate, DateUtil.DATE_FORMAT_1);
                 if (1 <= dayInWeekNum && 5 >= dayInWeekNum) {
                     dateType = dateTypeService.getByDate(currentDate);
-                    if (stockMarket.equals(Stock.SM_HK)) {
+                    if (stockMarket.equals(StockConst.SM_HK)) {
                         if (DateTypeService.DATE_TYPE_WORKDAY.equals(dateType)
                                 || DateTypeService.DATE_TYPE_WEEKEND.equals(dateType)) {
                             break;

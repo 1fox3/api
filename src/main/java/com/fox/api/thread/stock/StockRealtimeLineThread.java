@@ -4,6 +4,7 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
+import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.util.StockUtil;
 import com.fox.api.util.redis.StockRedisUtil;
 
@@ -69,7 +70,7 @@ public class StockRealtimeLineThread extends Thread {
                     Integer stockId = ((StockEntity)stockEntity).getId();
                     StockRealtimeLinePo stockRealtimeLinePo =
                             netsMinuteRealtime.getRealtimeData(
-                                    StockUtil.getNetsStockInfoMap((StockEntity)stockEntity)
+                                    NetsStockBaseApi.getNetsStockInfoMap((StockEntity)stockEntity)
                             );
                     if (null != stockId && null != stockRealtimeLinePo) {
                         lineMap.put(String.valueOf(stockId), stockRealtimeLinePo);

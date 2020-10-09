@@ -75,4 +75,10 @@ public interface StockPriceDayMapper {
      * @return
      */
     List<StockPriceDayEntity> getTotalByStock(Integer fqType, Integer stockId);
+
+    /**
+     * 优化表
+     * @return
+     */
+    Boolean optimize();
 }

@@ -75,4 +75,9 @@ public interface StockDealDayMapper {
      */
     List<StockDealDayEntity> getByDate(Integer stockId, String startDate, String endDate);
 
+    /**
+     * 优化表
+     * @return
+     */
+    Boolean optimize();
 }

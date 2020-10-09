@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * 连续涨停统计
  * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 public interface StockLimitUpDownMapper {
 
@@ -21,25 +22,11 @@ public interface StockLimitUpDownMapper {
     List<StockLimitUpDownEntity> getList(Integer type, String limit);
 
     /**
-     * 根据股票id查询
-     * @param stockId
-     * @return
-     */
-    StockLimitUpDownEntity getByStockId(Integer stockId);
-
-    /**
      * 插入
      * @param stockLimitUpDownEntity
      * @return
      */
     Integer insert(StockLimitUpDownEntity stockLimitUpDownEntity);
-
-    /**
-     * 更新
-     * @param stockLimitUpDownEntity
-     * @return
-     */
-    Integer updateById(StockLimitUpDownEntity stockLimitUpDownEntity);
 
     /**
      * 根据涨跌进行统计
@@ -49,15 +36,14 @@ public interface StockLimitUpDownMapper {
     Integer countByType(Integer type);
 
     /**
-     * 根据id进行删除
-     * @param id
-     * @return
-     */
-    Boolean deleteById(Integer id);
-
-    /**
      * 截断表
      * @return
      */
     Boolean truncate();
+
+    /**
+     * 优化表
+     * @return
+     */
+    Boolean optimize();
 }
