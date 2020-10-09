@@ -3,41 +3,22 @@ package com.fox.api.service.admin.impl;
 import com.fox.api.dao.admin.entity.DateTypeEntity;
 import com.fox.api.dao.admin.mapper.DateTypeMapper;
 import com.fox.api.entity.dto.http.HttpResponseDto;
-import com.fox.api.service.admin.DateType;
+import com.fox.api.service.admin.DateTypeService;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.HttpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * 日期类型
+ * 假期中需支付工资的日期类型为假期(DATE_TYPE_HOLIDAY),无需支付工资可调休的类型为周末(DATE_TYPE_WEEKEND)
  * @author lusongsong
  * @date 2020/10/5 16:53
  */
 @Service
-public class DateTypeImpl implements DateType {
+public class DateTypeServiceImpl implements DateTypeService {
     @Autowired
     DateTypeMapper dateTypeMapper;
-
-    /**
-     * 未知
-     */
-    public static final Integer DATE_TYPE_UNKNOWN = 0;
-    /**
-     * 工作日
-     */
-    public static final Integer DATE_TYPE_WORKDAY = 1;
-    /**
-     * 周末
-     */
-    public static final Integer DATE_TYPE_WEEKEND = 2;
-    /**
-     * 假期
-     */
-    public static final Integer DATE_TYPE_HOLIDAY = 3;
-    /**
-     * 调班
-     */
-    public static final Integer DATE_TYPE_TRANSFER = 4;
 
     /**
      * 请求外部地址获取日期类型
