@@ -83,6 +83,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
                     stockDealDayList.add(stockDealDayDto);
                 }
             }
+            stockDealDayLineDto.setLineNode(stockDealDayList);
         }
 
         return stockDealDayLineDto;

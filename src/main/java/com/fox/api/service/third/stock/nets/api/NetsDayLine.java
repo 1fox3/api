@@ -8,6 +8,8 @@ import com.fox.api.entity.po.third.stock.StockDealPo;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -19,6 +21,7 @@ import java.util.*;
  * @date 2020/3/5 18:13
  */
 public class NetsDayLine extends NetsStockBaseApi {
+    private Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * 样例链接 http://img1.money.126.net/data/hs/kline/day/history/2020/0603383.json
      */
@@ -78,15 +81,17 @@ public class NetsDayLine extends NetsStockBaseApi {
                 )
         );
 
+        String url = "";
+        HttpResponseDto httpResponse;
         try {
             for (int i = startYear; i <= endYear; i++) {
-                String url = demoUrl.replace("{stockMarketPY}", netsCodeInfoMap.get("netsStockMarketPY"))
+                url = demoUrl.replace("{stockMarketPY}", netsCodeInfoMap.get("netsStockMarketPY"))
                         .replace("{rehabilitationType}", rehabilitationType)
                         .replace("{year}", String.valueOf(i))
                         .replace("{stockCode}", stockCode);
                 HttpUtil httpUtil = new HttpUtil();
                 httpUtil.setUrl(url).setOriCharset("GBK");
-                HttpResponseDto httpResponse = httpUtil.request();
+                httpResponse = httpUtil.request();
                 StockDayLinePo currentStockDayLineEntity = this.handleResponse(httpResponse.getContent());
                 List<StockDealPo> list = currentStockDayLineEntity.getLineNode();
                 List<StockDealPo> filterList = new LinkedList<>();
@@ -110,7 +115,8 @@ public class NetsDayLine extends NetsStockBaseApi {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(url);
+            logger.error(e.getMessage());
         }
         return stockDayLinePo;
     }
@@ -122,6 +128,9 @@ public class NetsDayLine extends NetsStockBaseApi {
      */
     private StockDayLinePo handleResponse(String response) {
         StockDayLinePo stockDayLinePo = new StockDayLinePo();
+        if (null == response || response.isEmpty()) {
+            return stockDayLinePo;
+        }
         try {
             JSONObject responseObj = (JSONObject)JSONObject.fromObject(response);
             if (responseObj.containsKey("symbol")) {
@@ -157,7 +166,8 @@ public class NetsDayLine extends NetsStockBaseApi {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            logger.error(response);
+            logger.error(e.getMessage());
         }
         return stockDayLinePo;
     }

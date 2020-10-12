@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.quartz.mapper.JobRunLogMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.quartz.entity.JobRunLogEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="bean_name" property="beanName" jdbcType="VARCHAR" />
+        <result column="method_name" property="methodName" jdbcType="VARCHAR" />
+        <result column="log_time" property="logTime" jdbcType="TIMESTAMP" />
+        <result column="info" property="info" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.dao.quartz.entity.JobRunLogEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_job_run_log (
+            bean_name,
+            method_name,
+            log_time,
+            info
+        ) VALUES (
+            #{beanName},
+            #{methodName},
+            #{logTime},
+            #{info}
+        );
+    </insert>
+</mapper>

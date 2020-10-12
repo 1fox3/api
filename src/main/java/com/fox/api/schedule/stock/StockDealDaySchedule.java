@@ -103,7 +103,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
         BigDecimal preClosePrice = new BigDecimal(0);
         int scanEndYear = syncTotal ? startYear : endYear;
         for (String fqType : fqTypeMap.keySet()) {
-            for (int year = startYear; year >= scanEndYear; year -= 1) {
+            for (int year = endYear; year >= scanEndYear; year -= 1) {
                 String startDate = "";
                 String endDate = "";
                 try {
@@ -160,7 +160,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
     private void syncDealDay(StockEntity stockEntity) {
         BigDecimal preClosePrice = new BigDecimal(0);
         int scanEndYear = syncTotal ? startYear : endYear;
-        for (int year = startYear; year >= scanEndYear; year -= 1) {
+        for (int year = endYear; year >= scanEndYear; year -= 1) {
             String startDate = "";
             String endDate = "";
             try {

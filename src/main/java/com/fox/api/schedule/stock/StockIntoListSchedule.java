@@ -3,6 +3,9 @@ package com.fox.api.schedule.stock;
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.util.DateUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -17,15 +20,22 @@ import java.util.Map;
  */
 @Component
 public class StockIntoListSchedule extends StockBaseSchedule {
+    private Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * 清楚缓存中的股票信息，并重新填充
      */
     @LogShowTimeAnt
     public void clearStockCacheInfo() {
-        this.stockRedisUtil.delete(this.redisStockHash);
-        this.stockRedisUtil.delete(this.redisStockList);
-        this.stockRedisUtil.delete(this.redisStockIdList);
-        this.stockIntoList();
+        try {
+            if (isDealDate(StockConst.SM_A, DateUtil.getCurrentDate())) {
+                this.stockRedisUtil.delete(this.redisStockHash);
+                this.stockRedisUtil.delete(this.redisStockList);
+                this.stockRedisUtil.delete(this.redisStockIdList);
+                this.stockIntoList();
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
     }
 
     /**
@@ -33,15 +43,21 @@ public class StockIntoListSchedule extends StockBaseSchedule {
      */
     @LogShowTimeAnt
     public void clearStockCacheData() {
-        this.stockRedisUtil.delete(this.redisRealtimeStockInfoHash);
-        this.stockRedisUtil.delete(this.redisRealtimeStockLineHash);
-        this.stockRedisUtil.delete(this.redisRealtimeRankPriceZSet);
-        this.stockRedisUtil.delete(this.redisRealtimeRankUptickRateZSet);
-        this.stockRedisUtil.delete(this.redisRealtimeRankSurgeRateZSet);
-        this.stockRedisUtil.delete(this.redisRealtimeRankDealNumZSet);
-        this.stockRedisUtil.delete(this.redisRealtimeRankDealMoneyZSet);
-        this.stockRedisUtil.delete(this.stockRealtimeStockUptickRateStatistics);
-        this.stockIntoList();
+        try {
+            if (isDealDate(StockConst.SM_A, DateUtil.getCurrentDate())) {
+                this.stockRedisUtil.delete(this.redisRealtimeStockInfoHash);
+                this.stockRedisUtil.delete(this.redisRealtimeStockLineHash);
+                this.stockRedisUtil.delete(this.redisRealtimeRankPriceZSet);
+                this.stockRedisUtil.delete(this.redisRealtimeRankUptickRateZSet);
+                this.stockRedisUtil.delete(this.redisRealtimeRankSurgeRateZSet);
+                this.stockRedisUtil.delete(this.redisRealtimeRankDealNumZSet);
+                this.stockRedisUtil.delete(this.redisRealtimeRankDealMoneyZSet);
+                this.stockRedisUtil.delete(this.stockRealtimeStockUptickRateStatistics);
+                this.stockIntoList();
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
     }
 
     /**

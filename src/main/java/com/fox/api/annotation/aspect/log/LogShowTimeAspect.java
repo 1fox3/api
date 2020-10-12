@@ -1,16 +1,20 @@
 package com.fox.api.annotation.aspect.log;
 
+import com.fox.api.dao.quartz.entity.JobRunLogEntity;
+import com.fox.api.dao.quartz.mapper.JobRunLogMapper;
+import com.fox.api.util.DateUtil;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Aspect
 @Component
@@ -18,6 +22,8 @@ import java.text.SimpleDateFormat;
  * @author lusongsong
  */
 public class LogShowTimeAspect {
+    @Autowired
+    JobRunLogMapper jobRunLogMapper;
 
     @Pointcut("@annotation(com.fox.api.annotation.aspect.log.LogShowTimeAnt)")
     public void logShowTimePointcut() {}
@@ -30,8 +36,12 @@ public class LogShowTimeAspect {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String className = joinPoint.getTarget().getClass().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
-        Logger logger = LoggerFactory.getLogger(className);
-        logger.info(className + ":" + methodName + ":" + breakpoint + ":" + df.format(System.currentTimeMillis()));
+        JobRunLogEntity jobRunLogEntity = new JobRunLogEntity();
+        jobRunLogEntity.setBeanName(className);
+        jobRunLogEntity.setMethodName(methodName);
+        jobRunLogEntity.setLogTime(DateUtil.getCurrentTime());
+        jobRunLogEntity.setInfo(breakpoint);
+        jobRunLogMapper.insert(jobRunLogEntity);
     }
 
     @Before("logShowTimePointcut()")
