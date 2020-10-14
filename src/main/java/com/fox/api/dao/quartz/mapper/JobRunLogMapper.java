@@ -15,4 +15,17 @@ public interface JobRunLogMapper {
      * @return
     */
     Integer insert(JobRunLogEntity jobRunLogEntity);
+
+    /**
+     * 根据创建时间删除记录
+     * @param createTime
+     * @return
+     */
+    Boolean delete(String createTime);
+
+    /**
+     * 优化表空间
+     * @return
+     */
+    Boolean optimize();
 }

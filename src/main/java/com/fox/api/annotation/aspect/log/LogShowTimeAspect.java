@@ -4,23 +4,19 @@ import com.fox.api.dao.quartz.entity.JobRunLogEntity;
 import com.fox.api.dao.quartz.mapper.JobRunLogMapper;
 import com.fox.api.util.DateUtil;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.aspectj.lang.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
+/**
+ * 记录执行时间
+ * @author lusongsong
+ * @date 2020/04/14 13:53
+ */
 @Aspect
 @Component
-/**
- * @author lusongsong
- */
 public class LogShowTimeAspect {
     @Autowired
     JobRunLogMapper jobRunLogMapper;
@@ -52,5 +48,10 @@ public class LogShowTimeAspect {
     @After("logShowTimePointcut()")
     public void after(JoinPoint joinPoint) {
         this.showTime(joinPoint, "end");
+    }
+
+    @AfterThrowing(value = "logShowTimePointcut()", throwing = "ex")
+    public void afterThrowing(JoinPoint joinPoint, Exception ex) {
+        this.showTime(joinPoint, ex.getMessage());
     }
 }

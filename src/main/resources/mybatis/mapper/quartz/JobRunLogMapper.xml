@@ -22,4 +22,16 @@
             #{info}
         );
     </insert>
+
+    <delete id="delete">
+        DELETE
+        FROM
+            t_job_run_log
+        WHERE
+            create_time &lt;= #{createTime}
+    </delete>
+
+    <update id="optimize">
+        OPTIMIZE TABLE t_job_run_log;
+    </update>
 </mapper>

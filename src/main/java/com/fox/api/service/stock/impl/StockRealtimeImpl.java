@@ -1,5 +1,6 @@
 package com.fox.api.service.stock.impl;
 
+import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.realtime.StockRealtimeInfoDto;
 import com.fox.api.entity.property.stock.StockCodeProperty;
@@ -63,6 +64,9 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
         List<StockRealtimeInfoDto> list = new LinkedList<>();
         List<StockCodeProperty> topIndexList = this.stockProperty.getTopIndex();
         for (StockCodeProperty stockCodeProperty : topIndexList) {
+            if (!StockConst.SM_A_LIST.contains(stockCodeProperty.getStockMarket())) {
+                continue;
+            }
             StockEntity stockEntity = this.stockMapper.getByStockCode(
                     stockCodeProperty.getStockCode(),
                     stockCodeProperty.getStockMarket()
