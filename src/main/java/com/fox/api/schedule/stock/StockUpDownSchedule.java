@@ -106,10 +106,8 @@ public class StockUpDownSchedule extends StockBaseSchedule {
                     && 1 == highestPrice.compareTo(BigDecimal.ZERO)
                     && 1 == lowestPrice.compareTo(BigDecimal.ZERO)
             ) {
-                BigDecimal up = currentPrice.subtract(lowestPrice).divide(lowestPrice, 2, RoundingMode.HALF_UP);
-                BigDecimal down = highestPrice.subtract(currentPrice).divide(highestPrice, 2, RoundingMode.HALF_UP);
-                up.setScale(4, RoundingMode.HALF_UP);
-                down.setScale(5, RoundingMode.HALF_UP);
+                BigDecimal up = currentPrice.subtract(lowestPrice).divide(lowestPrice, 4, RoundingMode.HALF_UP);
+                BigDecimal down = highestPrice.subtract(currentPrice).divide(highestPrice, 4, RoundingMode.HALF_UP);
                 if (10 == j) {
                     stockUpDownEntity.setD10Up(up);
                     stockUpDownEntity.setD10Down(down);

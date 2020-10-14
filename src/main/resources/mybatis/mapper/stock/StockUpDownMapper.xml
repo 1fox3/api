@@ -16,7 +16,6 @@
         <result column="d200_down" property="d200Down" jdbcType="DECIMAL" />
         <result column="d300_up" property="d300Up" jdbcType="DECIMAL" />
         <result column="d300_down" property="d300Down" jdbcType="DECIMAL" />
-        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
