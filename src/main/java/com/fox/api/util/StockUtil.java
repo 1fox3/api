@@ -1,16 +1,12 @@
 package com.fox.api.util;
 
 import com.fox.api.constant.StockConst;
-import com.fox.api.dao.stock.entity.StockEntity;
-import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.util.redis.StockRedisUtil;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 股票工具类
  * @author lusongsong
+ * @date 2020/3/30 11:26
  */
 public class StockUtil {
     /**
@@ -109,25 +105,6 @@ public class StockUtil {
      */
     public static String getNextDealDate(Integer stockMarket) {
         String cacheKey = StockUtil.getNextDealDateCacheKey(stockMarket);
-        return redisGet(cacheKey);
-    }
-
-    /**
-     * 获取最新交易日的缓存key
-     * @param stockMarket
-     * @return
-     */
-    public static String getLastDealDateCacheKey(String stockMarket) {
-        return stockMarketLastDealDateCacheKey + ":" + stockMarket;
-    }
-
-    /**
-     * 获取股市的最新交易日
-     * @param stockMarket
-     * @return
-     */
-    public static String getLastDealDate(String stockMarket) {
-        String cacheKey = StockUtil.getLastDealDateCacheKey(stockMarket);
         return redisGet(cacheKey);
     }
 

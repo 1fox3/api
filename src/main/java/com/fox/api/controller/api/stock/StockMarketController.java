@@ -1,5 +1,6 @@
 package com.fox.api.controller.api.stock;
 
+import com.fox.api.constant.StockConst;
 import com.fox.api.entity.dto.result.ResultDto;
 import com.fox.api.util.StockUtil;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,6 +23,6 @@ public class StockMarketController {
      */
     @RequestMapping("lastDealDate")
     public ResultDto lastDealDate() {
-        return ResultDto.success(StockUtil.getLastDealDate("sh"));
+        return ResultDto.success(StockUtil.getLastDealDate(StockConst.SM_A));
     }
 }
