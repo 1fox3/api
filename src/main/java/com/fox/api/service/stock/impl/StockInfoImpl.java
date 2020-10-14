@@ -5,6 +5,7 @@ import com.fox.api.dao.stock.entity.StockInfoEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.service.stock.StockInfoService;
 import com.fox.api.util.HttpUtil;
+import com.fox.api.util.StockUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.cache.annotation.CacheConfig;
@@ -108,12 +109,12 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
             }
         }
         //股本信息
-        HttpUtil equityHttpUtila = new HttpUtil();
-        equityHttpUtila.setUrl("http://query.sse.com.cn/commonQuery.do");
-        equityHttpUtila.setParam("sqlId", "COMMON_SSE_CP_GPLB_GPGK_GBJG_C");
-        equityHttpUtila.setParam("companyCode", stockEntity.getStockCode());
-        equityHttpUtila.setHeader("Referer", headerReferer);
-        JSONObject equityInfoObject = this.handleSHStockInfoHttpResponse(equityHttpUtila);
+        HttpUtil equityHttpUtil = new HttpUtil();
+        equityHttpUtil.setUrl("http://query.sse.com.cn/commonQuery.do");
+        equityHttpUtil.setParam("sqlId", "COMMON_SSE_CP_GPLB_GPGK_GBJG_C");
+        equityHttpUtil.setParam("companyCode", stockEntity.getStockCode());
+        equityHttpUtil.setHeader("Referer", headerReferer);
+        JSONObject equityInfoObject = this.handleSHStockInfoHttpResponse(equityHttpUtil);
         if (null != equityInfoObject) {
             if (equityInfoObject.containsKey("DOMESTIC_SHARES")) {
                 stockInfoEntity.setStockTotalEquity(equityInfoObject.getDouble("DOMESTIC_SHARES"));
@@ -123,12 +124,12 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
             }
         }
         //上市日期
-        HttpUtil onDateHttpUtila = new HttpUtil();
-        onDateHttpUtila.setUrl("http://query.sse.com.cn/commonQuery.do");
-        onDateHttpUtila.setParam("sqlId", "COMMON_SSE_ZQPZ_GP_GPLB_AGSSR_C");
-        onDateHttpUtila.setParam("productid", stockEntity.getStockCode());
-        onDateHttpUtila.setHeader("Referer", headerReferer);
-        JSONObject onDateObject = this.handleSHStockInfoHttpResponse(onDateHttpUtila);
+        HttpUtil onDateHttpUtil = new HttpUtil();
+        onDateHttpUtil.setUrl("http://query.sse.com.cn/commonQuery.do");
+        onDateHttpUtil.setParam("sqlId", "COMMON_SSE_ZQPZ_GP_GPLB_AGSSR_C");
+        onDateHttpUtil.setParam("productid", stockEntity.getStockCode());
+        onDateHttpUtil.setHeader("Referer", headerReferer);
+        JSONObject onDateObject = this.handleSHStockInfoHttpResponse(onDateHttpUtil);
         if (null != onDateObject) {
             if (onDateObject.containsKey("LISTINGDATEA")) {
                 stockInfoEntity.setStockOnDate(onDateObject.getString("LISTINGDATEA"));
@@ -227,7 +228,7 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl("https://www1.hkex.com.hk/hkexwidget/data/getequityquote");
             httpUtil.setParam("sym", Integer.valueOf(stockEntity.getStockCode()).toString());
-            httpUtil.setParam("token", "evLtsLsBNAUVTPxtGqVeGze1PKjLBaJY%2bA5L7HCZx%2fI2lFgRJe68dzfQEagfRsdt");
+            httpUtil.setParam("token", StockUtil.hkStockMarketToken());
             httpUtil.setParam("lang", "chn");
             httpUtil.setParam("qid", "1601974258969");
             httpUtil.setParam("callback", "jQuery351036336353960645607_1601974242276");

@@ -28,7 +28,7 @@
         FROM
             t_job_run_log
         WHERE
-            create_time &lt;= #{createTime}
+            log_time &lt;= #{logTime}
     </delete>
 
     <update id="optimize">

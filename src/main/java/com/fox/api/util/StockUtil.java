@@ -10,6 +10,10 @@ import com.fox.api.util.redis.StockRedisUtil;
  */
 public class StockUtil {
     /**
+     * 香港交易所token缓存key
+     */
+    public static String HK_STOCK_MARKET_TOKEN = "hkStockMarketToken";
+    /**
      * 最新交易日期缓存key
      */
     private static String stockMarketLastDealDateCacheKey = "stockMarketLastDealDate";
@@ -157,5 +161,13 @@ public class StockUtil {
         }
 
         return false;
+    }
+
+    /**
+     * 获取香港交易所token
+     * @return
+     */
+    public static String hkStockMarketToken() {
+        return redisGet(StockUtil.HK_STOCK_MARKET_TOKEN);
     }
 }

@@ -18,10 +18,10 @@ public interface JobRunLogMapper {
 
     /**
      * 根据创建时间删除记录
-     * @param createTime
+     * @param logTime
      * @return
      */
-    Boolean delete(String createTime);
+    Boolean delete(String logTime);
 
     /**
      * 优化表空间

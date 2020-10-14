@@ -3,11 +3,13 @@ package com.fox.api.schedule.stock;
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.property.stock.StockCodeProperty;
 import com.fox.api.service.admin.DateTypeService;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.util.DateUtil;
+import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StockUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 股票工具类任务，提供基本信息
@@ -25,6 +29,10 @@ import java.util.List;
 @Component
 public class StockUtilSchedule extends StockBaseSchedule {
     private Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * 香港交易所token匹配正则
+     */
+    Pattern hkStockMarketTokenPattern = Pattern.compile("^return \"(.*)\";$");
     /**
      * 寻找最近交易日的日期扫描范围
      */
@@ -122,5 +130,29 @@ public class StockUtilSchedule extends StockBaseSchedule {
             }
         }
         return currentDate;
+    }
+
+    /**
+     * 刷新香港交易所token
+     */
+    @LogShowTimeAnt
+    public void hkStockMarketToken() {
+        try {
+            HttpUtil httpUtil = new HttpUtil();
+            httpUtil.setUrl("https://sc.hkex.com.hk/TuniS/www.hkex.com.hk/Market-Data/Securities-Prices/Equities/Equities-Quote?sym=700&sc_lang=zh-cn");
+            HttpResponseDto httpResponse = httpUtil.request();
+            String[] strings = httpResponse.getContent().split("\n");
+            for (String string : strings) {
+                string = string.trim();
+                // 现在创建 matcher 对象
+                Matcher matcher = hkStockMarketTokenPattern.matcher(string);
+                if (matcher.find() && !matcher.group(1).equals("chn")) {
+                    stockRedisUtil.set(StockUtil.HK_STOCK_MARKET_TOKEN, matcher.group(1));
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+
     }
 }
