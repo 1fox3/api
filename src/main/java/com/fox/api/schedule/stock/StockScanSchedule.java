@@ -6,7 +6,6 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.property.stock.StockKindInfoProperty;
-import com.fox.api.entity.property.stock.StockMarketInfoProperty;
 import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
 import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
@@ -223,7 +222,7 @@ public class StockScanSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     public void stockCodeScan() {
         for (Integer stockMarket : StockScanSchedule.stockScanScopeConfig.keySet()) {
-            lastDealDate = StockUtil.getLastDealDate(stockMarket);
+            lastDealDate = StockUtil.lastDealDate(stockMarket);
             sinaStockMarketPY = SinaStockBaseApi.getSinaStockMarketPY(stockMarket);
             netsStockMarketPY = NetsStockBaseApi.getNetsStockMarketPY(stockMarket);
             this.scanStockMarket(stockMarket, StockScanSchedule.stockScanScopeConfig.get(stockMarket));

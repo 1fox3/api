@@ -3,6 +3,8 @@ package com.fox.api.dao.stock.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * 连续涨跌停股票
  * @author lusongsong
@@ -29,11 +31,11 @@ public class StockLimitUpDownEntity {
     /**
      * 开始价格
      */
-    Float startPrice;
+    BigDecimal startPrice;
     /**
      * 当前价格
      */
-    Float currentPrice;
+    BigDecimal currentPrice;
     /**
      * 开始日期
      */

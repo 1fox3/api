@@ -246,7 +246,7 @@ public class StockDealDaySchedule extends StockBaseSchedule {
      */
     private void stockScanSync(Integer stockMarket) {
         //设置上个交易日
-        preDate = StockUtil.getPreDealDate(stockMarket);
+        preDate = StockUtil.preDealDate(stockMarket);
         preDate = null == preDate || preDate.isEmpty() ?
                 DateUtil.getRelateDate(0, -1, 0, DateUtil.DATE_FORMAT_1) : preDate;
         //同步重点指标

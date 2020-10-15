@@ -1,7 +1,10 @@
 package com.fox.api.util;
 
 import com.fox.api.constant.StockConst;
+import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.util.redis.StockRedisUtil;
+
+import java.math.BigDecimal;
 
 /**
  * 股票工具类
@@ -60,7 +63,7 @@ public class StockUtil {
      * @param stockMarket
      * @return
      */
-    public static String getLastDealDateCacheKey(Integer stockMarket) {
+    public static String lastDealDateCacheKey(Integer stockMarket) {
         return stockMarketLastDealDateCacheKey + ":" + stockMarket;
     }
 
@@ -69,8 +72,8 @@ public class StockUtil {
      * @param stockMarket
      * @return
      */
-    public static String getLastDealDate(Integer stockMarket) {
-        String cacheKey = StockUtil.getLastDealDateCacheKey(stockMarket);
+    public static String lastDealDate(Integer stockMarket) {
+        String cacheKey = StockUtil.lastDealDateCacheKey(stockMarket);
         return redisGet(cacheKey);
     }
 
@@ -79,7 +82,7 @@ public class StockUtil {
      * @param stockMarket
      * @return
      */
-    public static String getPreDealDateCacheKey(Integer stockMarket) {
+    public static String preDealDateCacheKey(Integer stockMarket) {
         return stockMarketPreDealDateCacheKey + ":" + stockMarket;
     }
 
@@ -88,8 +91,8 @@ public class StockUtil {
      * @param stockMarket
      * @return
      */
-    public static String getPreDealDate(Integer stockMarket) {
-        String cacheKey = StockUtil.getPreDealDateCacheKey(stockMarket);
+    public static String preDealDate(Integer stockMarket) {
+        String cacheKey = StockUtil.preDealDateCacheKey(stockMarket);
         return redisGet(cacheKey);
     }
 
@@ -98,7 +101,7 @@ public class StockUtil {
      * @param stockMarket
      * @return
      */
-    public static String getNextDealDateCacheKey(Integer stockMarket) {
+    public static String nextDealDateCacheKey(Integer stockMarket) {
         return stockMarketNextDealDateCacheKey + ":" + stockMarket;
     }
 
@@ -107,8 +110,8 @@ public class StockUtil {
      * @param stockMarket
      * @return
      */
-    public static String getNextDealDate(Integer stockMarket) {
-        String cacheKey = StockUtil.getNextDealDateCacheKey(stockMarket);
+    public static String nextDealDate(Integer stockMarket) {
+        String cacheKey = StockUtil.nextDealDateCacheKey(stockMarket);
         return redisGet(cacheKey);
     }
 
@@ -119,7 +122,7 @@ public class StockUtil {
      */
     public static Boolean todayIsDealDate(Integer stockMarket) {
         String today = DateUtil.getCurrentDate();
-        return today.equals(StockUtil.getLastDealDate(stockMarket));
+        return today.equals(StockUtil.lastDealDate(stockMarket));
     }
 
     /**
@@ -169,5 +172,34 @@ public class StockUtil {
      */
     public static String hkStockMarketToken() {
         return redisGet(StockUtil.HK_STOCK_MARKET_TOKEN);
+    }
+
+    /**
+     * 获取股票涨跌幅限制
+     * @param stockEntity
+     * @return
+     */
+    public static BigDecimal limitRate(StockEntity stockEntity) {
+        if (null == stockEntity) {
+            return null;
+        }
+        //港股不设涨跌幅限制
+        Integer stockMarket = stockEntity.getStockMarket();
+        if (StockConst.SM_HK.equals(stockMarket)) {
+            return BigDecimal.ZERO;
+        }
+        //科创板不设涨跌幅限制
+        Integer stockKind = stockEntity.getStockKind();
+        if (StockConst.SK_STAR.equals(stockKind)) {
+            return BigDecimal.ZERO;
+        }
+        //创业版涨跌幅限制为20%
+        if (StockConst.SK_GEM.equals(stockKind)) {
+            return new BigDecimal(0.2);
+        }
+        //非ST的股票涨跌幅限制为10%，ST的股票涨跌幅限制为5%
+        String stockName = stockEntity.getStockName();
+        double limitRate = null != stockName && stockName.contains(StockConst.STOCK_NAME_ST) ? 0.5 : 0.1;
+        return new BigDecimal(limitRate);
     }
 }

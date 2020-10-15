@@ -1,19 +1,16 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.property.stock.StockCodeProperty;
-import com.fox.api.service.admin.DateTypeService;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StockUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -48,7 +45,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
         String currentDate = DateUtil.getCurrentDate();
         for (StockCodeProperty stockCodeProperty : stockCodePropertyList) {
             try {
-                String lastDealDateCacheKey = StockUtil.getLastDealDateCacheKey(
+                String lastDealDateCacheKey = StockUtil.lastDealDateCacheKey(
                         stockCodeProperty.getStockMarket()
                 );
                 String currentDealDate = (String)this.stockRedisUtil.get(lastDealDateCacheKey);
@@ -90,7 +87,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
             preDealDate = getCloselyDealDate(lastDealDate, stockMarket, false);
         }
         this.stockRedisUtil.set(
-                StockUtil.getPreDealDateCacheKey(stockMarket),
+                StockUtil.preDealDateCacheKey(stockMarket),
                 null == preDealDate || 0 == preDealDate.length() ? "" : preDealDate
         );
     }
@@ -103,7 +100,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
     private void refreshNextDealDate(Integer stockMarket, String lastDealDate) {
         String nextDealDate = getCloselyDealDate(lastDealDate, stockMarket, true);
         this.stockRedisUtil.set(
-                StockUtil.getNextDealDateCacheKey(stockMarket),
+                StockUtil.nextDealDateCacheKey(stockMarket),
                 null == nextDealDate || 0 == nextDealDate.length() ? "" : nextDealDate
         );
     }

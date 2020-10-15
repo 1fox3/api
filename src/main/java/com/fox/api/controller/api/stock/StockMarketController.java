@@ -23,6 +23,6 @@ public class StockMarketController {
      */
     @RequestMapping("lastDealDate")
     public ResultDto lastDealDate() {
-        return ResultDto.success(StockUtil.getLastDealDate(StockConst.SM_A));
+        return ResultDto.success(StockUtil.lastDealDate(StockConst.SM_A));
     }
 }

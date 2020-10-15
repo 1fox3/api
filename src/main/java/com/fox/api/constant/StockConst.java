@@ -50,4 +50,18 @@ public class StockConst {
      * 股票
      */
     public static final Integer ST_STOCK = 2;
+
+    /**
+     * 科创版
+     */
+    public static final Integer SK_STAR = 4;
+    /**
+     * 创业版
+     */
+    public static final Integer SK_GEM = 10;
+
+    /**
+     * st股票名称标识
+     */
+    public static final String STOCK_NAME_ST = "ST";
 }

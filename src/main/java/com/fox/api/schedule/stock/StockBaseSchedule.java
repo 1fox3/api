@@ -1,16 +1,22 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.constant.StockConst;
+import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
+import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
 import com.fox.api.property.stock.StockProperty;
 import com.fox.api.service.admin.DateTypeService;
 import com.fox.api.service.stock.StockUtilService;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
 import com.fox.api.util.redis.StockRedisUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;
 
@@ -19,6 +25,7 @@ import java.util.List;
  * @author lusongsong
  */
 public class StockBaseSchedule {
+    private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     protected StockMapper stockMapper;
 
@@ -108,5 +115,75 @@ public class StockBaseSchedule {
             }
         }
         return false;
+    }
+
+    /**
+     * 遍历所有股票
+     * @param stockScheduleHandler
+     */
+    public void allStockMarketScan(StockScheduleHandler stockScheduleHandler) {
+        stockMarketListScan(StockConst.SM_ALL, stockScheduleHandler);
+    }
+
+    /**
+     * 遍历A股
+     * @param stockScheduleHandler
+     */
+    public void aStockMarketScan(StockScheduleHandler stockScheduleHandler) {
+        stockMarketListScan(StockConst.SM_A_LIST, stockScheduleHandler);
+    }
+
+    /**
+     * 遍历集市列表处理
+     * @param stockMarketList
+     * @param stockScheduleHandler
+     */
+    public void stockMarketListScan(List<Integer> stockMarketList, StockScheduleHandler stockScheduleHandler) {
+        for (Integer stockMarket : stockMarketList) {
+            stockMarketScan(stockMarket, stockScheduleHandler);
+        }
+    }
+
+    /**
+     * 遍历单集市过票
+     * @param stockMarket
+     * @param stockScheduleHandler
+     */
+    public void stockMarketScan(Integer stockMarket, StockScheduleHandler stockScheduleHandler) {
+        Integer stockId = 0;
+        Integer onceLimit = 100;
+        try{
+            while (true) {
+                List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
+                        2,
+                        stockId,
+                        stockMarket,
+                        onceLimit.toString()
+                );
+                if (null == stockEntityList || stockEntityList.isEmpty()) {
+                    break;
+                }
+                for (StockEntity stockEntity : stockEntityList) {
+                    if (null == stockEntity) {
+                        continue;
+                    }
+                    stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
+                    try {
+                        if (null != stockEntity.getId()) {
+                            stockScheduleHandler.handle(stockEntity);
+                        }
+                    } catch (Exception e) {
+                        logger.error(Integer.toString(stockId));
+                        logger.error(e.getMessage());
+                    }
+                }
+                if (stockEntityList.size() < onceLimit) {
+                    break;
+                }
+            }
+        } catch (Exception e){
+            logger.error(Integer.toString(stockId));
+            logger.error(e.getMessage());
+        }
     }
 }
