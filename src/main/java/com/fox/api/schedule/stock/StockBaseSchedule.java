@@ -2,21 +2,18 @@ package com.fox.api.schedule.stock;
 
 import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
-import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
-import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
 import com.fox.api.property.stock.StockProperty;
 import com.fox.api.service.admin.DateTypeService;
 import com.fox.api.service.stock.StockUtilService;
 import com.fox.api.util.DateUtil;
-import com.fox.api.util.StockUtil;
 import com.fox.api.util.redis.StockRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;
 
@@ -28,6 +25,9 @@ public class StockBaseSchedule {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     protected StockMapper stockMapper;
+
+    @Autowired
+    protected StockInfoMapper stockInfoMapper;
 
     @Autowired
     protected StockProperty stockProperty;
