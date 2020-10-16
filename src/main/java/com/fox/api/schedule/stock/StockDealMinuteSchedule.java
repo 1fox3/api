@@ -3,18 +3,22 @@ package com.fox.api.schedule.stock;
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.dao.stock.entity.StockPriceMinuteDtEntity;
 import com.fox.api.dao.stock.entity.StockPriceMinuteEntity;
+import com.fox.api.dao.stock.mapper.StockPriceMinuteDtMapper;
 import com.fox.api.dao.stock.mapper.StockPriceMinuteMapper;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeNodePo;
 import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
 import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
+import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,8 +32,19 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     StockPriceMinuteMapper stockPriceMinuteMapper;
+    @Autowired
+    StockPriceMinuteDtMapper stockPriceMinuteDtMapper;
+
+    private static final Integer BAK_NO = 0;
+    private static final Integer BAK_YES = 1;
+
     private static final Integer SAVE_DAYS = 5;
     private static final Integer BAK_ONCE_LIMIT = 100000;
+
+    /**
+     * 当前交易日
+     */
+    private String lastDealDate = "";
 
     /**
      * 处理单只股票
@@ -47,7 +62,7 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
             StockRealtimeLinePo stockRealtimeLinePo = netsMinuteRealtime.getRealtimeData(
                     NetsStockBaseApi.getNetsStockInfoMap(stockEntity)
             );
-            if (null == stockRealtimeLinePo) {
+            if (null == stockRealtimeLinePo || !lastDealDate.equals(stockRealtimeLinePo.getDt())) {
                 return;
             }
             List<StockRealtimeNodePo> stockRealtimeNodePoList = stockRealtimeLinePo.getLineNode();
@@ -83,7 +98,17 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
     public void syncLastDealDateMinutePriceInfo() {
         try {
             if (StockUtil.todayIsDealDate(StockConst.SM_A)) {
+                lastDealDate = StockUtil.lastDealDate(StockConst.SM_A);
+                //记录日期
+                StockPriceMinuteDtEntity stockPriceMinuteDtEntity = new StockPriceMinuteDtEntity();
+                stockPriceMinuteDtEntity.setDt(DateUtil.getCurrentDate());
+                stockPriceMinuteDtMapper.insert(stockPriceMinuteDtEntity);
+                //同步TOP指数
+                aStockMarketTopIndexScan(this);
+                //同步股票
                 aStockMarketScan(this);
+                //数据备份
+                backupMinutePriceInfo();
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -96,19 +121,31 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
     @LogShowTimeAnt
     public void backupMinutePriceInfo() {
         try {
-            List<String> dtList = stockPriceMinuteMapper.dtList();
-            if (null == dtList || dtList.size() < SAVE_DAYS) {
+            //判断日期
+            List<StockPriceMinuteDtEntity> dtList = stockPriceMinuteDtMapper.getByType(BAK_NO);
+
+            if (null == dtList || dtList.size() <= SAVE_DAYS) {
                 return;
             }
-            for (Integer i = SAVE_DAYS - 1; i <= dtList.size(); i++) {
-                String clearDt = dtList.get(i);
-                Integer dtCount = stockPriceMinuteMapper.dtRowCount(clearDt);
-                if (0 == dtCount) {
-                    continue;
-                }
-                for (Integer j = 0; j < dtCount; j += BAK_ONCE_LIMIT) {
-                    stockPriceMinuteMapper.bak(clearDt, BAK_ONCE_LIMIT);
-                    stockPriceMinuteMapper.delete(clearDt, BAK_ONCE_LIMIT);
+
+            //创建备份表
+            stockPriceMinuteMapper.createBak();
+
+            Integer lastPos = dtList.size() - SAVE_DAYS;
+            for (Integer i = 0; i < lastPos; i++) {
+                StockPriceMinuteDtEntity stockPriceMinuteDtEntity = dtList.get(i);
+                String clearDt = stockPriceMinuteDtEntity.getDt();
+
+                if (null != clearDt && !clearDt.isEmpty()) {
+                    while (true) {
+                        stockPriceMinuteMapper.bak(clearDt, BAK_ONCE_LIMIT);
+                        Integer bakCount = stockPriceMinuteMapper.delete(clearDt, BAK_ONCE_LIMIT);
+                        if (!BAK_ONCE_LIMIT.equals(bakCount)) {
+                            break;
+                        }
+                    }
+                    stockPriceMinuteDtEntity.setType(BAK_YES);
+                    stockPriceMinuteDtMapper.update(stockPriceMinuteDtEntity);
                 }
             }
             stockPriceMinuteMapper.optimize();
@@ -116,5 +153,4 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
             logger.error(e.getMessage());
         }
     }
-
 }

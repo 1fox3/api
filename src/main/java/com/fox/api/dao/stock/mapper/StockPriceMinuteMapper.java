@@ -27,19 +27,6 @@ public interface StockPriceMinuteMapper {
     Integer batchInsert(List<StockPriceMinuteEntity> list);
 
     /**
-     * 查询所有日期
-     * @return
-     */
-    List<String> dtList();
-
-    /**
-     * 查询某天记录条数
-     * @param dt
-     * @return
-     */
-    Integer dtRowCount(String dt);
-
-    /**
      * 备份
      * @param dt
      * @param limit
@@ -60,4 +47,10 @@ public interface StockPriceMinuteMapper {
      * @return
      */
     Boolean optimize();
+
+    /**
+     * 创建备份表
+     * @return
+     */
+    Boolean createBak();
 }

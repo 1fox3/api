@@ -4,6 +4,7 @@ import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.entity.property.stock.StockCodeProperty;
 import com.fox.api.property.stock.StockProperty;
 import com.fox.api.service.admin.DateTypeService;
 import com.fox.api.service.stock.StockUtilService;
@@ -145,7 +146,7 @@ public class StockBaseSchedule {
     }
 
     /**
-     * 遍历单集市过票
+     * 遍历单集市股票
      * @param stockMarket
      * @param stockScheduleHandler
      */
@@ -183,6 +184,49 @@ public class StockBaseSchedule {
             }
         } catch (Exception e){
             logger.error(Integer.toString(stockId));
+            logger.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 遍历A股TOP指数
+     * @param stockScheduleHandler
+     */
+    public void aStockMarketTopIndexScan(StockScheduleHandler stockScheduleHandler) {
+        stockMarketListTopIndexScan(StockConst.SM_A_LIST, stockScheduleHandler);
+    }
+
+    /**
+     * 遍历集市TOP指数处理
+     * @param stockMarketList
+     * @param stockScheduleHandler
+     */
+    public void stockMarketListTopIndexScan(List<Integer> stockMarketList, StockScheduleHandler stockScheduleHandler) {
+        for (Integer stockMarket : stockMarketList) {
+            stockMarketTopIndexScan(stockMarket, stockScheduleHandler);
+        }
+    }
+
+    /**
+     * 遍历单集市TOP指数
+     * @param stockMarket
+     * @param stockScheduleHandler
+     */
+    public void stockMarketTopIndexScan(Integer stockMarket, StockScheduleHandler stockScheduleHandler) {
+        try{
+            List<StockCodeProperty> topIndexList = stockProperty.getTopIndex();
+            for (StockCodeProperty stockCodeProperty : topIndexList) {
+                if (stockCodeProperty.getStockMarket().equals(stockMarket)) {
+                    StockEntity stockEntity = this.stockMapper.getByStockCode(
+                            stockCodeProperty.getStockCode(),
+                            stockCodeProperty.getStockMarket()
+                    );
+                    if (null != stockEntity && null != stockEntity.getId()) {
+                        stockScheduleHandler.handle(stockEntity);
+                    }
+                }
+            }
+        } catch (Exception e){
             logger.error(e.getMessage());
         }
     }

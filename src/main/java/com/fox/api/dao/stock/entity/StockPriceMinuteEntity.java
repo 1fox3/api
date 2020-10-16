@@ -42,9 +42,4 @@ public class StockPriceMinuteEntity {
      * 成交量
     */
     Long dealNum;
-    /**
-     * 创建时间
-    */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    String createTime;
 }

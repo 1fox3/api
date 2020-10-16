@@ -9,7 +9,6 @@
         <result column="price" property="price" jdbcType="DECIMAL" />
         <result column="avg_price" property="avgPrice" jdbcType="DECIMAL" />
         <result column="deal_num" property="dealNum" jdbcType="BIGINT" />
-        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
     <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockPriceMinuteEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
@@ -52,24 +51,6 @@
         </foreach >
     </insert>
 
-    <select id="dtList" resultType="List">
-        SELECT
-            dt
-        FROM
-            t_stock_price_minute
-        ORDER BY
-            dt DESC;
-    </select>
-
-    <select id="dtRowCount" resultType="INTEGER">
-        SELECT
-            count(*) as c
-        FROM
-            t_stock_price_minute
-        WHERE
-            dt = #{dt};
-    </select>
-
     <update id="bak">
         INSERT INTO
          t_stock_price_minute_bak
@@ -93,5 +74,9 @@
 
     <update id="optimize">
         OPTIMIZE TABLE t_stock_price_minute;
+    </update>
+
+    <update id="createBak">
+        CREATE TABLE IF NOT EXISTS t_stock_price_minute_bak LIKE t_stock_price_minute;
     </update>
 </mapper>
