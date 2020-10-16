@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.stock.mapper.StockPriceMinuteMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockPriceMinuteEntity">
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="stock_id" property="stockId" jdbcType="INTEGER" />
+        <result column="dt" property="dt" jdbcType="DATE" />
+        <result column="time" property="time" jdbcType="TIME" />
+        <result column="price" property="price" jdbcType="DECIMAL" />
+        <result column="avg_price" property="avgPrice" jdbcType="DECIMAL" />
+        <result column="deal_num" property="dealNum" jdbcType="BIGINT" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockPriceMinuteEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_stock_price_minute (
+            stock_id,
+            dt,
+            `time`,
+            price,
+            avg_price,
+            deal_num
+        ) VALUES (
+            #{stockId},
+            #{dt},
+            #{time},
+            #{price},
+            #{avgPrice},
+            #{dealNum}
+        );
+    </insert>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO t_stock_price_minute (
+            stock_id,
+            dt,
+            `time`,
+            price,
+            avg_price,
+            deal_num
+        )
+        VALUES
+        <foreach collection ="list" item="stockPriceMinuteEntity" index= "index" separator =",">
+            (
+                #{stockPriceMinuteEntity.stockId},
+                #{stockPriceMinuteEntity.dt},
+                #{stockPriceMinuteEntity.time},
+                #{stockPriceMinuteEntity.price},
+                #{stockPriceMinuteEntity.avgPrice},
+                #{stockPriceMinuteEntity.dealNum}
+            )
+        </foreach >
+    </insert>
+
+    <select id="dtList" resultType="List">
+        SELECT
+            dt
+        FROM
+            t_stock_price_minute
+        ORDER BY
+            dt DESC;
+    </select>
+
+    <select id="dtRowCount" resultType="INTEGER">
+        SELECT
+            count(*) as c
+        FROM
+            t_stock_price_minute
+        WHERE
+            dt = #{dt};
+    </select>
+
+    <update id="bak">
+        INSERT INTO
+         t_stock_price_minute_bak
+        SELECT
+            *
+        FROM
+            t_stock_price_minute
+        WHERE
+            dt = #{dt}
+        LIMIT #{limit};
+    </update>
+
+    <delete id="delete">
+        DELETE
+        FROM
+            t_stock_price_minute
+        WHERE
+            dt = #{dt}
+        LIMIT #{limit};
+    </delete>
+
+    <update id="optimize">
+        OPTIMIZE TABLE t_stock_price_minute;
+    </update>
+</mapper>

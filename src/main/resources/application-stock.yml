@@ -42,6 +42,7 @@ stock:
         - "600"
         - "601"
         - "603"
+        - "605"
     sh-stock-b:
       stock-kind-name: 沪B
       stock-market: 1

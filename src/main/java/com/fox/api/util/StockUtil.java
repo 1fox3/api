@@ -5,6 +5,7 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.util.redis.StockRedisUtil;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * 股票工具类
@@ -195,11 +196,11 @@ public class StockUtil {
         }
         //创业版涨跌幅限制为20%
         if (StockConst.SK_GEM.equals(stockKind)) {
-            return new BigDecimal(0.2);
+            return new BigDecimal(0.2).setScale(2, RoundingMode.HALF_UP);
         }
         //非ST的股票涨跌幅限制为10%，ST的股票涨跌幅限制为5%
         String stockName = stockEntity.getStockName();
         double limitRate = null != stockName && stockName.contains(StockConst.STOCK_NAME_ST) ? 0.5 : 0.1;
-        return new BigDecimal(limitRate);
+        return new BigDecimal(limitRate).setScale(2, RoundingMode.HALF_UP);
     }
 }

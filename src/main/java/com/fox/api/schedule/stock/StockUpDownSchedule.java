@@ -102,47 +102,52 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
         BigDecimal currentPrice , highestPrice, lowestPrice;
         currentPrice = highestPrice = lowestPrice = BigDecimal.ZERO;
 
-        Integer dealDayCount = 0;
-        for (int j = len; j > 0; j--) {
-            StockDealDayDto stockDealDayDto = stockDealDayDtoList.get(j);
-            if (null == stockDealDayDto || null == stockDealDayDto.getClosePrice()
-                    || BigDecimal.ZERO.equals(stockDealDayDto.getClosePrice())) {
-                continue;
+        Integer pos = len;
+        StockDealDayDto stockDealDayDto = new StockDealDayDto();
+        for (int j = 0; j <= limitLen; j++) {
+            while (pos > 0) {
+                pos--;
+                stockDealDayDto = stockDealDayDtoList.get(pos);
+                if (null == stockDealDayDto || null == stockDealDayDto.getClosePrice()
+                        || 0 <= BigDecimal.ZERO.compareTo(stockDealDayDto.getClosePrice())) {
+                    continue;
+                }
+                break;
             }
             currentPrice = 0 == currentPrice.compareTo(BigDecimal.ZERO) ? stockDealDayDto.getClosePrice() : currentPrice;
-            highestPrice = 0 < stockDealDayDto.getHighestPrice().compareTo(highestPrice) ?
-                    stockDealDayDto.getHighestPrice() : highestPrice;
-            lowestPrice = 0 > stockDealDayDto.getLowestPrice().compareTo(lowestPrice)
+            highestPrice = 0 > highestPrice.compareTo(stockDealDayDto.getHighestPrice())
+                    ? stockDealDayDto.getHighestPrice() : highestPrice;
+            lowestPrice = 0 == lowestPrice.compareTo(BigDecimal.ZERO)
+                    || (0 < lowestPrice.compareTo(stockDealDayDto.getLowestPrice())
+                    && 0 > BigDecimal.ZERO.compareTo(stockDealDayDto.getLowestPrice()))
                     ? stockDealDayDto.getLowestPrice() : lowestPrice;
-
-            dealDayCount++;
-            if (scopeList.contains(dealDayCount) && 0 < currentPrice.compareTo(BigDecimal.ZERO)
+            if (scopeList.contains(j) && 0 < currentPrice.compareTo(BigDecimal.ZERO)
                     && 0 < highestPrice.compareTo(BigDecimal.ZERO)
                     && 0 < lowestPrice.compareTo(BigDecimal.ZERO)
             ) {
                 BigDecimal up = currentPrice.subtract(lowestPrice).divide(lowestPrice, 4, RoundingMode.HALF_UP);
                 BigDecimal down = highestPrice.subtract(currentPrice).divide(highestPrice, 4, RoundingMode.HALF_UP);
-                if (10 >= dealDayCount) {
+                if (10 == j) {
                     stockUpDownEntity.setD10Up(up);
                     stockUpDownEntity.setD10Down(down);
                 }
-                if (30 >= dealDayCount) {
+                if (30 == j) {
                     stockUpDownEntity.setD30Up(up);
                     stockUpDownEntity.setD30Down(down);
                 }
-                if (50 >= dealDayCount) {
+                if (50 == j) {
                     stockUpDownEntity.setD50Up(up);
                     stockUpDownEntity.setD50Down(down);
                 }
-                if (100 >= dealDayCount) {
+                if (100 == j) {
                     stockUpDownEntity.setD100Up(up);
                     stockUpDownEntity.setD100Down(down);
                 }
-                if (200 >= dealDayCount) {
+                if (200 == j) {
                     stockUpDownEntity.setD200Up(up);
                     stockUpDownEntity.setD200Down(down);
                 }
-                if (300 >= dealDayCount) {
+                if (300 == j) {
                     stockUpDownEntity.setD300Up(up);
                     stockUpDownEntity.setD300Down(down);
                 }
@@ -162,7 +167,7 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
         }
         BigDecimal limitRate = StockUtil.limitRate(stockEntity);
         //未设增幅限制的忽略
-        if (null == limitRate || limitRate.equals(BigDecimal.ZERO)) {
+        if (null == limitRate || 0 <= BigDecimal.ZERO.compareTo(limitRate)) {
             return;
         }
         int len = stockDealDayDtoList.size();
@@ -174,7 +179,8 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
         stockLimitUpDownEntity.setStockId(stockEntity.getId());
         for (int i = len - 1; i >= 0; i--) {
             StockDealDayDto currentDealDto = stockDealDayDtoList.get(i);
-            if (null == currentDealDto || currentDealDto.getClosePrice().equals(BigDecimal.ZERO)) {
+            if (null == currentDealDto || 0 <= BigDecimal.ZERO.compareTo(currentDealDto.getClosePrice())) {
+                System.out.println("v");
                 continue;
             }
             todayDealDto = yesterdayDealDto;
@@ -185,13 +191,18 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
             todayPrice = todayDealDto.getClosePrice().setScale(2, RoundingMode.HALF_UP);
             yesterdayPrice = yesterdayDealDto.getClosePrice().setScale(2, RoundingMode.HALF_UP);
 
+            BigDecimal uptickPrice = todayPrice.subtract(yesterdayPrice).abs();
+            BigDecimal limitRatePrice = yesterdayPrice.multiply(limitRate).abs().setScale(2, RoundingMode.HALF_UP);
+
             //type值说明 0-正常，1-涨停，2-跌停
             Integer type = 0;
-            if (yesterdayPrice.multiply(limitRate).abs().equals(todayPrice.subtract(yesterdayPrice).abs())) {
+            if (uptickPrice.equals(limitRatePrice)) {
                 type = 0 < todayPrice.compareTo(yesterdayPrice) ? 1 : 2;
             }
             //不涨，涨跌发生转变则停止
-            if (type.equals(0) || !type.equals(stockLimitUpDownEntity.getType())) {
+            if (type.equals(0)
+                    || (null != stockLimitUpDownEntity.getType() && !type.equals(stockLimitUpDownEntity.getType()))
+            ) {
                 break;
             }
 
@@ -254,6 +265,8 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
     public void handle(StockEntity stockEntity) {
         try{
             if (null != stockEntity && null != stockEntity.getId()) {
+                startDate = null == startDate ?
+                        DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1) : startDate;
                 StockDealDayLineDto stockDealDayLineDto = stockOfflineService.line(stockEntity.getId(), startDate);
                 List<StockDealDayDto> stockDealDayDtoList = stockDealDayLineDto.getLineNode();
                 if (null == stockDealDayDtoList || stockDealDayDtoList.isEmpty()) {
