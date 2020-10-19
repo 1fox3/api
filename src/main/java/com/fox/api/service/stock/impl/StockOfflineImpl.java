@@ -99,7 +99,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
     @Override
     public List<StockDealNumPo> dealRatio(Integer stockId, String startDate, String endDate) {
         SinaDealRatio sinaDealRatio = new SinaDealRatio();
-        return sinaDealRatio.getDealRatio(this.getSinaStockCode(stockId), startDate, endDate);
+        return sinaDealRatio.getDealRatio(this.getStockEntity(stockId), startDate, endDate);
     }
 
     /**

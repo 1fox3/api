@@ -24,7 +24,7 @@ import java.util.*;
  * @date 2020/3/5 18:13
  */
 @Component
-public class StockScanSchedule extends StockBaseSchedule {
+public class StockScanSchedule extends StockBaseSchedule implements StockScheduleHandler {
     /**
      * 单词扫描股票代码数
      */
@@ -32,20 +32,10 @@ public class StockScanSchedule extends StockBaseSchedule {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private SinaRealtime sinaRealtime;
-    @Autowired
-    private NetsMinuteRealtime netsMinuteRealtime;
     /**
      * 最新交易日
      */
     private String lastDealDate;
-    /**
-     * 新浪数据中心股票集市前缀
-     */
-    private String sinaStockMarketPY;
-    /**
-     * 网易数据中心股票集市前缀
-     */
-    private String netsStockMarketPY;
     /**
      * 股票代码扫描范围
      */
@@ -65,59 +55,29 @@ public class StockScanSchedule extends StockBaseSchedule {
     }};
 
     /**
-     * 获取网易股票接口对应的股票代码
-     * @param stockCode
-     * @param stockCodeName
-     * @return
-     */
-    private String getNetsStockCode(String stockCode, String stockCodeName) {
-        for (String netsStockCodePrefix : NetsStockBaseApi.stockCodePrefix) {
-            String currentNetsStockCode = netsStockCodePrefix + stockCode;
-            Map<String, String> netsStockInfoMap = new HashMap<>(2);
-            netsStockInfoMap.put("netsStockCode", currentNetsStockCode);
-            netsStockInfoMap.put("netsStockMarketPY", netsStockMarketPY);
-            StockRealtimeLinePo stockRealtimeLineEntity =
-                    netsMinuteRealtime.getRealtimeData(netsStockInfoMap);
-            if (null != stockRealtimeLineEntity
-                    && null != stockRealtimeLineEntity.getStockName()
-                    && stockCodeName.equals(stockRealtimeLineEntity.getStockName())
-            ) {
-                return currentNetsStockCode;
-            }
-        }
-        return "";
-    }
-
-    /**
      * 扫描股票代码列表
-     * @param stockMarket
      * @param stockCodeList
      */
-    private void scanStockCodeList(Integer stockMarket, List<String> stockCodeList) {
+    private void scanStockCodeList(List<StockEntity> stockCodeList) {
         Map<String, StockRealtimePo> sinaStockRealtimeEntityMap = sinaRealtime.getRealtimeData(stockCodeList);
-        String stockCode;
         int stockStatus;
-        for (String currentStockCode : stockCodeList) {
-            if (sinaStockRealtimeEntityMap.containsKey(currentStockCode)) {
-                StockRealtimePo stockRealtimeEntity = sinaStockRealtimeEntityMap.get(currentStockCode);
+        for (StockEntity stockEntity : stockCodeList) {
+            if (sinaStockRealtimeEntityMap.containsKey(stockEntity.getStockCode())) {
+                StockRealtimePo stockRealtimeEntity = sinaStockRealtimeEntityMap.get(stockEntity.getStockCode());
                 if (null != stockRealtimeEntity
                         && null != stockRealtimeEntity.getStockName()
                         && !stockRealtimeEntity.getStockName().equals("")) {
-                    stockCode = currentStockCode.replace(sinaStockMarketPY, "");
                     String stockName = stockRealtimeEntity.getStockName();
-                    String netsStockCode = this.getNetsStockCode(stockCode, stockName);
-                    StockEntity stockEntity = stockMapper.getByStockCode(stockCode, stockMarket);
-                    if (null == stockEntity) {
-                        stockEntity = new StockEntity();
+                    StockEntity dbStockEntity = stockMapper.getByStockCode(
+                            stockEntity.getStockCode(), stockEntity.getStockMarket()
+                    );
+                    if (null != dbStockEntity) {
+                        stockEntity = dbStockEntity;
                     }
-                    stockEntity.setStockCode(stockCode);
                     stockEntity.setStockName(stockName);
                     if (null != stockRealtimeEntity.getStockNameEn()) {
                         stockEntity.setStockNameEn(stockRealtimeEntity.getStockNameEn());
                     }
-                    stockEntity.setSinaStockCode(currentStockCode);
-                    stockEntity.setNetsStockCode(netsStockCode);
-                    stockEntity.setStockMarket(stockMarket);
                     stockStatus = 0;
                     if (!lastDealDate.equals(stockRealtimeEntity.getCurrentDate())
                             || "-2".equals(stockRealtimeEntity.getDealStatus())
@@ -126,7 +86,9 @@ public class StockScanSchedule extends StockBaseSchedule {
                     }
                     stockEntity.setStockStatus(stockStatus);
                     //判定类别
-                    StockKindInfoProperty stockKindInfoEntity = stockUtilService.getStockKindInfo(stockCode, stockMarket);
+                    StockKindInfoProperty stockKindInfoEntity = stockUtilService.getStockKindInfo(
+                            stockEntity.getStockCode(), stockEntity.getStockMarket()
+                    );
                     stockEntity.setStockType(null == stockKindInfoEntity.getStockType() ?
                             0 : stockKindInfoEntity.getStockType());
                     stockEntity.setStockKind(null == stockKindInfoEntity.getStockKind() ?
@@ -163,7 +125,7 @@ public class StockScanSchedule extends StockBaseSchedule {
      * @param maxLimit
      */
     private void scanStockMarket(Integer stockMarket, Integer maxLimit) {
-        List<String> stockCodeList = new LinkedList<>();
+        List<StockEntity> stockEntityList = new LinkedList<>();
         Integer stockCodeLen = String.valueOf(maxLimit).length() - 1;
         Integer cCopies = 0;
         String stockCodePer = "";
@@ -175,14 +137,16 @@ public class StockScanSchedule extends StockBaseSchedule {
                 cCopies++;
             }
             StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append(sinaStockMarketPY);
             stringBuffer.append(stockCodePer);
             stringBuffer.append(i);
-            stockCodeList.add(stringBuffer.toString());
+            StockEntity stockEntity = new StockEntity();
+            stockEntity.setStockCode(stringBuffer.toString());
+            stockEntity.setStockMarket(stockMarket);
+            stockEntityList.add(stockEntity);
 
-            if (stockCodeList.size() >= ScanOnceLimit || maxLimit.equals(i)) {
+            if (stockEntityList.size() >= ScanOnceLimit || maxLimit.equals(i)) {
                 try {
-                    this.scanStockCodeList(stockMarket, stockCodeList);
+                    this.scanStockCodeList(stockEntityList);
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                 }
@@ -197,16 +161,16 @@ public class StockScanSchedule extends StockBaseSchedule {
     private void scanSpecialStockCode(Integer stockMarket) {
         if (specialStockCodeMap.containsKey(stockMarket)) {
             List<String> specialStockCodeList = specialStockCodeMap.get(stockMarket);
-            List<String> stockCodeList = new LinkedList<>();
+            List<StockEntity> stockEntityList = new LinkedList<>();
             for (String stockCode : specialStockCodeList) {
-                StringBuffer stringBuffer = new StringBuffer();
-                stringBuffer.append(sinaStockMarketPY);
-                stringBuffer.append(stockCode);
-                stockCodeList.add(stringBuffer.toString());
+                StockEntity stockEntity = new StockEntity();
+                stockEntity.setStockCode(stockCode);
+                stockEntity.setStockMarket(stockMarket);
+                stockEntityList.add(stockEntity);
             }
-            if (!stockCodeList.isEmpty()) {
+            if (!stockEntityList.isEmpty()) {
                 try {
-                    this.scanStockCodeList(stockMarket, stockCodeList);
+                    this.scanStockCodeList(stockEntityList);
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                 }
@@ -223,11 +187,66 @@ public class StockScanSchedule extends StockBaseSchedule {
     public void stockCodeScan() {
         for (Integer stockMarket : StockScanSchedule.stockScanScopeConfig.keySet()) {
             lastDealDate = StockUtil.lastDealDate(stockMarket);
-            sinaStockMarketPY = SinaStockBaseApi.getSinaStockMarketPY(stockMarket);
-            netsStockMarketPY = NetsStockBaseApi.getNetsStockMarketPY(stockMarket);
             this.scanStockMarket(stockMarket, StockScanSchedule.stockScanScopeConfig.get(stockMarket));
             this.scanSpecialStockCode(stockMarket);
         }
         stockMapper.optimize();
+    }
+
+    /**
+     * 扫描已经扫描出来的股票代码，同比当前交易状态
+     * 补网易股票代码
+     */
+    @LogShowTimeAnt
+    public void stockDealStatusScan() {
+        if (StockUtil.todayIsDealDate(StockConst.SM_A)) {
+            aStockMarketTopIndexScan(this);
+            aStockMarketScan(this);
+        }
+    }
+
+    /**
+     * 处理单只股票
+     * @param stockEntity
+     */
+    @Override
+    public void handle(StockEntity stockEntity) {
+        if (null == stockEntity.getStockCode() || stockEntity.getStockCode().isEmpty()
+                || null == stockEntity.getStockMarket() || !StockConst.SM_ALL.contains(stockEntity.getStockMarket())) {
+            return;
+        }
+        StockRealtimePo sinaStockRealtimePo = sinaRealtime.getRealtimeData(stockEntity);
+        if (null == sinaStockRealtimePo || null == sinaStockRealtimePo.getStockName()
+                || sinaStockRealtimePo.getStockName().isEmpty()) {
+            return;
+        }
+        stockEntity.setStockName(sinaStockRealtimePo.getStockName());
+        stockEntity.setStockNameEn(sinaStockRealtimePo.getStockNameEn());
+
+        //股票状态
+        Integer stockStatus = 0;
+        if (!StockUtil.lastDealDate(stockEntity.getStockMarket()).equals(sinaStockRealtimePo.getCurrentDate())
+                || "-2".equals(sinaStockRealtimePo.getDealStatus())
+        ) {
+            stockStatus = 1;
+        }
+        stockEntity.setStockStatus(stockStatus);
+
+        stockEntity.setDealDate(
+                null == sinaStockRealtimePo.getCurrentDate() ? "1900-01-01" : sinaStockRealtimePo.getCurrentDate()
+        );
+        stockEntity.setDealStatus(
+                null == sinaStockRealtimePo.getDealStatus() ? "" : sinaStockRealtimePo.getDealStatus()
+        );
+        stockEntity.setUnknownInfo(
+                null == sinaStockRealtimePo.getUnknownKeyList()
+                        ? "" : sinaStockRealtimePo.getUnknownKeyList().toString()
+        );
+        try {
+            stockMapper.update(stockEntity);
+        } catch (Exception e) {
+            logger.error(stockEntity.toString());
+            logger.error(e.getMessage());
+        }
     }
 }

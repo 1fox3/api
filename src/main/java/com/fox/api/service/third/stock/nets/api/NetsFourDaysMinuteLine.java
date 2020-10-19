@@ -12,6 +12,11 @@ import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 获取近4天的分钟粒度交易信息
+ * @author lusongsong
+ * @date 2020/3/5 18:13
+ */
 public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
     //样例链接
     private static String demoUrl = "http://img1.money.126.net/data/{stockMarketPY}/time/4days/{stockCode}.json";
@@ -67,7 +72,7 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
                 JSONObject dataObject = (JSONObject) totalDataArr.get(i);
                 StockRealtimeLinePo stockRealtimeLineEntity = new StockRealtimeLinePo();
                 stockRealtimeLineEntity.setStockCode(stockCode);
-                stockRealtimeLineEntity.setStockName(stockName);
+                stockRealtimeLineEntity.setStockName(stockName.replace(" ", ""));
                 if (dataObject.containsKey("count")) {
                     stockRealtimeLineEntity.setNodeCount(dataObject.getInt("count"));
                 }

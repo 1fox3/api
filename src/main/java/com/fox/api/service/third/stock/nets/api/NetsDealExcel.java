@@ -2,6 +2,8 @@ package com.fox.api.service.third.stock.nets.api;
 
 /**
  * 获取某日成交信息excel
+ * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 public class NetsDealExcel extends NetsStockBaseApi {
     //样例链接

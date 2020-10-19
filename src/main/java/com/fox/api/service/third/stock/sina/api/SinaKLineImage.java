@@ -1,10 +1,14 @@
 package com.fox.api.service.third.stock.sina.api;
 
+import com.fox.api.dao.stock.entity.StockEntity;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * k线图片
+ * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 public class SinaKLineImage extends SinaStockBaseApi {
     //分钟
@@ -29,14 +33,15 @@ public class SinaKLineImage extends SinaStockBaseApi {
 
     /**
      * 获取k线图片
-     * @param stockCode
+     * @param stockEntity
      * @param dateType
      * @return
      */
-    public String getKLineImageUrl(String stockCode, String dateType) {
+    public String getKLineImageUrl(StockEntity stockEntity, String dateType) {
         dateType = dateType.toUpperCase();
         if (dateTypeMap.containsKey(dateType)) {
-            return demoUrl.replace("{dateType}", dateTypeMap.get(dateType)).replace("{stockCode}", stockCode);
+            return demoUrl.replace("{dateType}", dateTypeMap.get(dateType))
+                    .replace("{stockCode}", SinaStockBaseApi.getSinaStockCode(stockEntity));
         }
         return "";
     }

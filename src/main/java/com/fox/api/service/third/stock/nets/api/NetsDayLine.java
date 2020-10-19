@@ -137,7 +137,7 @@ public class NetsDayLine extends NetsStockBaseApi {
                 stockDayLinePo.setStockCode(responseObj.getString("symbol"));
             }
             if (responseObj.containsKey("name")) {
-                stockDayLinePo.setStockName(responseObj.getString("name"));
+                stockDayLinePo.setStockName(responseObj.getString("name").replace(" ", ""));
             }
             if (responseObj.containsKey("data")) {
                 JSONArray dataArr = (JSONArray)responseObj.get("data");

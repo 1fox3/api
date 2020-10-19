@@ -50,9 +50,9 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
                     }
                 }
             }
-            List<String> sinaStockCodeList = new ArrayList<>();
+            List<StockEntity> sinaStockCodeList = new ArrayList<>();
             for (Object stockEntity : stockEntityList) {
-                sinaStockCodeList.add(((StockEntity)stockEntity).getSinaStockCode());
+                sinaStockCodeList.add(((StockEntity)stockEntity));
             }
             if (0 >= sinaStockCodeList.size()) {
                 continue;
@@ -61,9 +61,9 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
             stockRealtimePoMap.clear();
             for (Object stockEntity : stockEntityList) {
                 Integer stockId = ((StockEntity)stockEntity).getId();
-                String sinaStockCode = ((StockEntity)stockEntity).getSinaStockCode();
-                if (null != stockId && null != sinaStockCode && sinaStockRealtimePoMap.containsKey(sinaStockCode)) {
-                    StockRealtimePo stockRealtimePo = sinaStockRealtimePoMap.get(sinaStockCode);
+                String stockCode = ((StockEntity)stockEntity).getStockCode();
+                if (null != stockId && null != stockCode && sinaStockRealtimePoMap.containsKey(stockCode)) {
+                    StockRealtimePo stockRealtimePo = sinaStockRealtimePoMap.get(stockCode);
                     stockRealtimePo.setStockId(((StockEntity) stockEntity).getId());
                     stockRealtimePo.setStockCode(((StockEntity) stockEntity).getStockCode());
                     stockRealtimePoMap.put(String.valueOf(stockId), stockRealtimePo);

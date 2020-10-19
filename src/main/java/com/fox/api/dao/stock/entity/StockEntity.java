@@ -27,14 +27,6 @@ public class StockEntity {
      */
     String stockNameEn = "";
     /**
-     * 新浪资源的股票代码
-     */
-    String sinaStockCode = "";
-    /**
-     * 网易资源的股票代码
-     */
-    String netsStockCode = "";
-    /**
      * 股票集市
      */
     Integer stockMarket = 0;
@@ -68,9 +60,4 @@ public class StockEntity {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     String updateTime;
-    /**
-     * 创建时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    String createTime;
 }

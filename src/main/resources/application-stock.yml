@@ -181,6 +181,7 @@ stock:
         - "128"
         - "131"
         - "149"
+        - "190"
     hk-stock:
       stock-kind-name: 港股
       stock-market: 3

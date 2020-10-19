@@ -322,8 +322,8 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
      */
     @Override
     public void handle(StockEntity stockEntity) {
-        if (null == stockEntity || null == stockEntity.getNetsStockCode()
-                || stockEntity.getNetsStockCode().isEmpty()) {
+        if (null == stockEntity || null == stockEntity.getStockCode()
+                || stockEntity.getStockCode().isEmpty()) {
             return;
         }
         //如果是同步全部交易数据，则获取股票的具体上市时间

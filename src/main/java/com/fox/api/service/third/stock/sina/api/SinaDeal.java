@@ -1,5 +1,6 @@
 package com.fox.api.service.third.stock.sina.api;
 
+import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.entity.po.third.stock.StockDealPo;
@@ -16,6 +17,7 @@ import java.util.List;
 /**
  * 获取成交信息
  * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 public class SinaDeal extends SinaStockBaseApi {
     /**
@@ -29,12 +31,12 @@ public class SinaDeal extends SinaStockBaseApi {
 
     /**
      * 获取交易信息列表
-     * @param stockCode
+     * @param stockEntity
      * @param scale
      * @param dataLen
      * @return
      */
-    public List<StockDealPo> getDealList(String stockCode, Integer scale, Integer dataLen) {
+    public List<StockDealPo> getDealList(StockEntity stockEntity, Integer scale, Integer dataLen) {
         List<StockDealPo> list = new LinkedList<>();
         try {
             if (!scaleList.contains(scale)) {
@@ -42,7 +44,7 @@ public class SinaDeal extends SinaStockBaseApi {
             }
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(apiUrl).setOriCharset("GBK");
-            httpUtil.setParam("symbol", stockCode);
+            httpUtil.setParam("symbol", SinaStockBaseApi.getSinaStockCode(stockEntity));
             httpUtil.setParam("scale", Integer.toString(scale));
             httpUtil.setParam("datalen", Integer.toString(dataLen));
             httpUtil.setParam("ma", "no");

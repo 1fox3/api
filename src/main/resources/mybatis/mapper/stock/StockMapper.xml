@@ -6,8 +6,6 @@
         <result column="stock_code" property="stockCode" jdbcType="VARCHAR" />
         <result column="stock_name" property="stockName" jdbcType="VARCHAR" />
         <result column="stock_name_en" property="stockNameEn" jdbcType="VARCHAR" />
-        <result column="sina_stock_code" property="sinaStockCode" jdbcType="VARCHAR" />
-        <result column="nets_stock_code" property="netsStockCode" jdbcType="VARCHAR" />
         <result column="stock_market" property="stockMarket" jdbcType="INTEGER" />
         <result column="stock_type" property="stockType" jdbcType="INTEGER" />
         <result column="stock_kind" property="stockKind" jdbcType="INTEGER" />
@@ -16,7 +14,6 @@
         <result column="deal_status" property="dealStatus" jdbcType="VARCHAR" />
         <result column="unknown_info" property="unknownInfo" jdbcType="VARCHAR" />
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
-        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
     <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockEntity" keyColumn="id"
@@ -25,8 +22,6 @@
             stock_code,
             stock_name,
             stock_name_en,
-            sina_stock_code,
-            nets_stock_code,
             stock_market,
             stock_type,
             stock_kind,
@@ -40,8 +35,6 @@
                 #{stockCode},
                 #{stockName},
                 #{stockNameEn},
-                #{sinaStockCode},
-                #{netsStockCode},
                 #{stockMarket},
                 #{stockType},
                 #{stockKind},
@@ -58,8 +51,6 @@
             stock_code = #{stockCode},
             stock_name = #{stockName},
             stock_name_en = #{stockNameEn},
-            sina_stock_code = #{sinaStockCode},
-            nets_stock_code = #{netsStockCode},
             stock_market = #{stockMarket},
             stock_type = #{stockType},
             stock_kind = #{stockKind},
@@ -90,16 +81,6 @@
             AND
             stock_market = #{stockMarket}
         LIMIT 1;
-    </select>
-
-    <select id="getLastId" resultType="INTEGER">
-        SELECT
-            id
-        FROM
-            t_stock
-        ORDER BY
-            id DESC
-        LIMIT 1
     </select>
 
     <select id="getListByType" resultMap="BasicResultMap">
@@ -139,4 +120,16 @@
     <update id="optimize">
         OPTIMIZE TABLE t_stock;
     </update>
+
+    <select id="getListById" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock
+        WHERE
+            id > #{id}
+        ORDER BY
+            id ASC
+        LIMIT ${limit}
+    </select>
 </mapper>

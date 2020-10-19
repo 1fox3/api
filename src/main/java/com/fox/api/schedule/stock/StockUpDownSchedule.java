@@ -180,7 +180,6 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
         for (int i = len - 1; i >= 0; i--) {
             StockDealDayDto currentDealDto = stockDealDayDtoList.get(i);
             if (null == currentDealDto || 0 <= BigDecimal.ZERO.compareTo(currentDealDto.getClosePrice())) {
-                System.out.println("v");
                 continue;
             }
             todayDealDto = yesterdayDealDto;

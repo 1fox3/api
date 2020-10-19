@@ -70,4 +70,12 @@ public interface StockMapper {
      * @return
      */
     Boolean optimize();
+
+    /**
+     * 根据id获取列表
+     * @param id
+     * @param limit
+     * @return
+     */
+    List<StockEntity> getListById(Integer id, Integer limit);
 }

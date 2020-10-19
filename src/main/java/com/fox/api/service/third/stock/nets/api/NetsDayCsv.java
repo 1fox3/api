@@ -101,7 +101,7 @@ public class NetsDayCsv extends NetsStockBaseApi {
                                 stockDealDayPo.setStockCode(subStr.replace("'", ""));
                                 break;
                             case 2:
-                                stockDealDayPo.setStockName(subStr);
+                                stockDealDayPo.setStockName(subStr.replace(" ", ""));
                                 break;
                             case 3:
                                 stockDealDayPo.setClosePrice(BigDecimal.valueOf(Double.valueOf(subStr)));

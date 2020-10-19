@@ -56,13 +56,12 @@ public class StockUtilSchedule extends StockBaseSchedule {
                 StockEntity stockEntity = stockMapper.getByStockCode(
                         stockCodeProperty.getStockCode(), stockCodeProperty.getStockMarket()
                 );
-                if (null != stockEntity && null != stockEntity.getSinaStockCode()) {
-                    StockRealtimePo stockRealtimeEntity = sinaRealtime.getRealtimeData(
-                            stockEntity.getSinaStockCode()
-                    );
+                if (null != stockEntity && null != stockEntity.getStockCode()) {
+                    StockRealtimePo stockRealtimeEntity = sinaRealtime.getRealtimeData(stockEntity);
                     if (null != stockRealtimeEntity) {
                         String lastDealDate = stockRealtimeEntity.getCurrentDate();
                         if (null != lastDealDate && !lastDealDate.equals("")) {
+                            logger.error(stockCodeProperty.getStockMarket() + ":" + lastDealDate);
                             //设置最新交易日期
                             this.stockRedisUtil.set(lastDealDateCacheKey, lastDealDate);
                             refreshPreDealDate(stockCodeProperty.getStockMarket(), currentDealDate, lastDealDate);

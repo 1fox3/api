@@ -1,5 +1,6 @@
 package com.fox.api.service.third.stock.sina.api;
 
+import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.entity.po.third.stock.StockDealNumPo;
@@ -13,6 +14,8 @@ import java.util.regex.Pattern;
 
 /**
  * 获取成交占比信息
+ * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 public class SinaDealRatio extends SinaStockBaseApi {
     //接口
@@ -20,17 +23,17 @@ public class SinaDealRatio extends SinaStockBaseApi {
 
     /**
      * 获取成交占比信息
-     * @param stockCode
+     * @param stockEntity
      * @param startDate
      * @param endDate
      * @return
      */
-    public List<StockDealNumPo> getDealRatio(String stockCode, String startDate, String endDate) {
+    public List<StockDealNumPo> getDealRatio(StockEntity stockEntity, String startDate, String endDate) {
         List<StockDealNumPo> list = new LinkedList<>();
         try {
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(apiUrl).setOriCharset("GBK");
-            httpUtil.setParam("symbol", stockCode);
+            httpUtil.setParam("symbol", SinaStockBaseApi.getSinaStockCode(stockEntity));
             httpUtil.setParam("startdate", startDate);
             httpUtil.setParam("enddate", endDate);
             HttpResponseDto httpResponse = httpUtil.request();

@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,8 +52,8 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
      */
     @Override
     public void handle(StockEntity stockEntity) {
-        if (null == stockEntity || null == stockEntity.getNetsStockCode()
-                || stockEntity.getNetsStockCode().isEmpty()) {
+        if (null == stockEntity || null == stockEntity.getStockCode()
+                || stockEntity.getStockCode().isEmpty()) {
             return;
         }
         try {

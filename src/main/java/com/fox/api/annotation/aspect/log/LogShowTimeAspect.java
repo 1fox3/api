@@ -51,7 +51,7 @@ public class LogShowTimeAspect {
     }
 
     @AfterThrowing(value = "logShowTimePointcut()", throwing = "ex")
-    public void afterThrowing(JoinPoint joinPoint, Exception ex) {
-        this.showTime(joinPoint, ex.getMessage());
+    public void afterThrowing(JoinPoint joinPoint, Throwable ex) {
+        this.showTime(joinPoint, null == ex.getMessage() ? ex.toString() : ex.getMessage());
     }
 }

@@ -1,5 +1,6 @@
 package com.fox.api.service.third.stock.sina.api;
 
+import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.util.HttpUtil;
@@ -16,6 +17,7 @@ import java.util.*;
 /**
  * 实时信息
  * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 @Component
 public class SinaRealtime extends SinaStockBaseApi {
@@ -32,26 +34,40 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 获取单只股票的实时数据
-     * @param stockCode
+     * @param stockEntity
      * @return
      */
-    public StockRealtimePo getRealtimeData(String stockCode) {
-        List<String> stockCodes = new LinkedList<>();
-        stockCodes.add(stockCode);
+    public StockRealtimePo getRealtimeData(StockEntity stockEntity) {
+        if (null == stockEntity || null == stockEntity.getStockCode() || null == stockEntity.getStockMarket()) {
+            return null;
+        }
+        List<StockEntity> stockCodes = new LinkedList<>();
+        stockCodes.add(stockEntity);
         Map<String, StockRealtimePo> stockRealtimeEntityMap = this.getRealtimeData(stockCodes);
-        if (stockRealtimeEntityMap.containsKey(stockCode)) {
-            return stockRealtimeEntityMap.get(stockCode);
+        if (stockRealtimeEntityMap.containsKey(stockEntity.getStockCode())) {
+            return stockRealtimeEntityMap.get(stockEntity.getStockCode());
         }
         return new StockRealtimePo();
     }
 
     /**
      * 获取批量股票的实时数据
-     * @param stockCodes
+     * @param stockEntityList
      * @return
      */
-    public Map<String, StockRealtimePo> getRealtimeData(List<String> stockCodes) {
+    public Map<String, StockRealtimePo> getRealtimeData(List<StockEntity> stockEntityList) {
+        HashMap<String, StockRealtimePo> hashMap = new HashMap<>();
+        if (null == stockEntityList || stockEntityList.isEmpty()) {
+            return hashMap;
+        }
         try {
+            List<String> stockCodes = new LinkedList<>();
+            for (StockEntity stockEntity : stockEntityList) {
+                String sinaStockCode = SinaStockBaseApi.getSinaStockCode(stockEntity);
+                if (null != sinaStockCode) {
+                    stockCodes.add(sinaStockCode);
+                }
+            }
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(apiUrl + StringUtil.listToString(stockCodes, ",")).setOriCharset("GBK");
             HttpResponseDto httpResponse = httpUtil.request();
@@ -59,9 +75,8 @@ public class SinaRealtime extends SinaStockBaseApi {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            return hashMap;
         }
-        HashMap<String, StockRealtimePo> hashMap = new HashMap<>();
-        return hashMap;
     }
 
     /**
@@ -146,7 +161,7 @@ public class SinaRealtime extends SinaStockBaseApi {
                     continue;
                 }
                 if (0 == i) {
-                    stockRealtimePo.setStockName(responseArr[i]);
+                    stockRealtimePo.setStockName(responseArr[i].replace(" ", ""));
                 }
                 if (1 == i) {
                     stockRealtimePo.setOpenPrice(new BigDecimal(responseArr[i]));
@@ -271,7 +286,7 @@ public class SinaRealtime extends SinaStockBaseApi {
                     stockRealtimePo.setStockNameEn(responseArr[i]);
                 }
                 if (1 == i) {
-                    stockRealtimePo.setStockName(responseArr[i]);
+                    stockRealtimePo.setStockName(responseArr[i].replace(" ", ""));
                 }
                 if (2 == i) {
                     stockRealtimePo.setOpenPrice(new BigDecimal(responseArr[i]));

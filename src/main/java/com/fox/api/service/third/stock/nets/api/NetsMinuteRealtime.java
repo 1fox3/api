@@ -64,7 +64,7 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
                 stockRealtimeLineEntity.setStockCode(responseObject.getString("symbol"));
             }
             if (responseObject.containsKey("name")) {
-                stockRealtimeLineEntity.setStockName(responseObject.getString("name"));
+                stockRealtimeLineEntity.setStockName(responseObject.getString("name").replace(" ", ""));
             }
             if (responseObject.containsKey("yestclose")) {
                 stockRealtimeLineEntity.setPreClosePrice(new BigDecimal(responseObject.getDouble("yestclose")));

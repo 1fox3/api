@@ -1,5 +1,6 @@
 package com.fox.api.service.third.stock.sina.api;
 
+import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
 import net.sf.json.JSONArray;
@@ -10,6 +11,8 @@ import java.util.*;
 
 /**
  * 获取复权线图
+ * @author lusongsong
+ * @date 2020/3/5 18:13
  */
 public class SinaRehabilitationLine extends SinaStockBaseApi {
     //样例链接 http://finance.sina.com.cn/realstock/company/sh603383/qianfuquan.js?d=20200330
@@ -19,18 +22,18 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
 
     /**
      * 获取复权信息
-     * @param stockCode
+     * @param stockEntity
      * @param rehabilitationType
      * @param date
      * @return
      */
-    public Map<String, Float> getRehabilitationLine(String stockCode, String rehabilitationType, String date) {
+    public Map<String, Float> getRehabilitationLine(StockEntity stockEntity, String rehabilitationType, String date) {
         Map<String, Float> map = new HashMap<>();
         try {
             if (!rehabilitationTypeList.contains(rehabilitationType)) {
                 return map;
             }
-            String url = demoUrl.replace("{stockCode}", stockCode)
+            String url = demoUrl.replace("{stockCode}", SinaStockBaseApi.getSinaStockCode(stockEntity))
                     .replace("{rehabilitationType}", rehabilitationType)
                     .replace("{date}", date);
             HttpUtil httpUtil = new HttpUtil();
