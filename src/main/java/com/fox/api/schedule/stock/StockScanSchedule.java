@@ -28,7 +28,7 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
     /**
      * 单词扫描股票代码数
      */
-    private static Integer ScanOnceLimit = 200;
+    private static Integer ScanOnceLimit = 300;
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private SinaRealtime sinaRealtime;
@@ -63,11 +63,12 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
         int stockStatus;
         for (StockEntity stockEntity : stockCodeList) {
             if (sinaStockRealtimeEntityMap.containsKey(stockEntity.getStockCode())) {
-                StockRealtimePo stockRealtimeEntity = sinaStockRealtimeEntityMap.get(stockEntity.getStockCode());
-                if (null != stockRealtimeEntity
-                        && null != stockRealtimeEntity.getStockName()
-                        && !stockRealtimeEntity.getStockName().equals("")) {
-                    String stockName = stockRealtimeEntity.getStockName();
+                StockRealtimePo stockRealtimePo = sinaStockRealtimeEntityMap.get(stockEntity.getStockCode());
+                System.out.println(stockRealtimePo);
+                if (null != stockRealtimePo
+                        && null != stockRealtimePo.getStockName()
+                        && !stockRealtimePo.getStockName().equals("")) {
+                    String stockName = stockRealtimePo.getStockName();
                     StockEntity dbStockEntity = stockMapper.getByStockCode(
                             stockEntity.getStockCode(), stockEntity.getStockMarket()
                     );
@@ -75,12 +76,12 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
                         stockEntity = dbStockEntity;
                     }
                     stockEntity.setStockName(stockName);
-                    if (null != stockRealtimeEntity.getStockNameEn()) {
-                        stockEntity.setStockNameEn(stockRealtimeEntity.getStockNameEn());
+                    if (null != stockRealtimePo.getStockNameEn()) {
+                        stockEntity.setStockNameEn(stockRealtimePo.getStockNameEn());
                     }
                     stockStatus = 0;
-                    if (!lastDealDate.equals(stockRealtimeEntity.getCurrentDate())
-                            || "-2".equals(stockRealtimeEntity.getDealStatus())
+                    if (!lastDealDate.equals(stockRealtimePo.getCurrentDate())
+                            || "-2".equals(stockRealtimePo.getDealStatus())
                     ) {
                         stockStatus = 1;
                     }
@@ -94,14 +95,14 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
                     stockEntity.setStockKind(null == stockKindInfoEntity.getStockKind() ?
                             0 : stockKindInfoEntity.getStockKind());
                     stockEntity.setDealDate(
-                            null == stockRealtimeEntity.getCurrentDate() ? "1900-01-01" : stockRealtimeEntity.getCurrentDate()
+                            null == stockRealtimePo.getCurrentDate() ? "1900-01-01" : stockRealtimePo.getCurrentDate()
                     );
                     stockEntity.setDealStatus(
-                            null == stockRealtimeEntity.getDealStatus() ? "" : stockRealtimeEntity.getDealStatus()
+                            null == stockRealtimePo.getDealStatus() ? "" : stockRealtimePo.getDealStatus()
                     );
                     stockEntity.setUnknownInfo(
-                            null == stockRealtimeEntity.getUnknownKeyList()
-                                    ? "" : stockRealtimeEntity.getUnknownKeyList().toString()
+                            null == stockRealtimePo.getUnknownKeyList()
+                                    ? "" : stockRealtimePo.getUnknownKeyList().toString()
                     );
                     try {
                         if (null != stockEntity.getId()) {
@@ -194,7 +195,7 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
     }
 
     /**
-     * 扫描已经扫描出来的股票代码，同比当前交易状态
+     * 扫描已经扫描出来的股票代码，同步当前交易状态
      * 补网易股票代码
      */
     @LogShowTimeAnt

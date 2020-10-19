@@ -52,7 +52,7 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
      * 复权类型
      */
     Map<String, Integer> fqTypeMap = new LinkedHashMap<String, Integer>(){{
-        //put("kline", 0);
+        put("kline", 0);
         put("klinederc", 1);
     }};
     /**
@@ -156,9 +156,9 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
                         stockPriceDayMapper.batchInsert(list);
                     }
                 } catch (Exception e) {
-                    System.out.println(startDate);
-                    System.out.println(stockEntity);
-                    e.printStackTrace();
+                    logger.error(startDate);
+                    logger.error(stockEntity.toString());
+                    logger.error(e.getMessage());
                 }
             }
         }
@@ -184,38 +184,38 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
                 if (null == stockDealDayPoList || stockDealDayPoList.size() == 0) {
                     break;
                 }
-                List<StockPriceDayEntity> stockPriceDayEntityList = new LinkedList<>();
+//                List<StockPriceDayEntity> stockPriceDayEntityList = new LinkedList<>();
                 List<StockDealDayEntity> stockDealDayEntityList = new LinkedList<>();
                 for (StockDealDayPo stockDealDayPo : stockDealDayPoList) {
-                    StockPriceDayEntity stockPriceDayEntity = new StockPriceDayEntity();
-                    stockPriceDayEntity.setStockId(stockEntity.getId());
-                    stockPriceDayEntity.setDt(stockDealDayPo.getDt());
-                    stockPriceDayEntity.setFqType(0);
-                    stockPriceDayEntity.setOpenPrice(stockDealDayPo.getOpenPrice());
-                    stockPriceDayEntity.setClosePrice(stockDealDayPo.getClosePrice());
-                    stockPriceDayEntity.setHighestPrice(stockDealDayPo.getHighestPrice());
-                    stockPriceDayEntity.setLowestPrice(stockDealDayPo.getLowestPrice());
-                    if (BigDecimal.ZERO.equals(preClosePrice)) {
-                        preClosePrice = stockDealDayPo.getOpenPrice();
-                    }
-                    stockPriceDayEntity.setPreClosePrice(preClosePrice);
-                    if (BigDecimal.ZERO.equals(stockDealDayPo.getClosePrice())) {
-                        continue;
-                    }
-                    preClosePrice = stockDealDayPo.getClosePrice();
-                    if (syncTotal) {
-                        stockPriceDayEntityList.add(stockPriceDayEntity);
-                    } else {
-                        if (currentDate.equals(stockDealDayPo.getDt())) {
-                            StockPriceDayEntity dbStockPriceDayEntity = stockPriceDayMapper.getBySignalDate(stockPriceDayEntity);
-                            if (null == dbStockPriceDayEntity) {
-                                stockPriceDayMapper.insert(stockPriceDayEntity);
-                            } else {
-                                stockPriceDayEntity.setId(dbStockPriceDayEntity.getId());
-                                stockPriceDayMapper.update(stockPriceDayEntity);
-                            }
-                        }
-                    }
+//                    StockPriceDayEntity stockPriceDayEntity = new StockPriceDayEntity();
+//                    stockPriceDayEntity.setStockId(stockEntity.getId());
+//                    stockPriceDayEntity.setDt(stockDealDayPo.getDt());
+//                    stockPriceDayEntity.setFqType(0);
+//                    stockPriceDayEntity.setOpenPrice(stockDealDayPo.getOpenPrice());
+//                    stockPriceDayEntity.setClosePrice(stockDealDayPo.getClosePrice());
+//                    stockPriceDayEntity.setHighestPrice(stockDealDayPo.getHighestPrice());
+//                    stockPriceDayEntity.setLowestPrice(stockDealDayPo.getLowestPrice());
+//                    if (BigDecimal.ZERO.equals(preClosePrice)) {
+//                        preClosePrice = stockDealDayPo.getOpenPrice();
+//                    }
+//                    stockPriceDayEntity.setPreClosePrice(preClosePrice);
+//                    if (BigDecimal.ZERO.equals(stockDealDayPo.getClosePrice())) {
+//                        continue;
+//                    }
+//                    preClosePrice = stockDealDayPo.getClosePrice();
+//                    if (syncTotal) {
+//                        stockPriceDayEntityList.add(stockPriceDayEntity);
+//                    } else {
+//                        if (currentDate.equals(stockDealDayPo.getDt())) {
+//                            StockPriceDayEntity dbStockPriceDayEntity = stockPriceDayMapper.getBySignalDate(stockPriceDayEntity);
+//                            if (null == dbStockPriceDayEntity) {
+//                                stockPriceDayMapper.insert(stockPriceDayEntity);
+//                            } else {
+//                                stockPriceDayEntity.setId(dbStockPriceDayEntity.getId());
+//                                stockPriceDayMapper.update(stockPriceDayEntity);
+//                            }
+//                        }
+//                    }
 
                     StockDealDayEntity stockDealDayEntity = new StockDealDayEntity();
                     stockDealDayEntity.setStockId(stockEntity.getId());
@@ -246,34 +246,15 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
                     }
                 }
 
-                if (stockPriceDayEntityList.size() > 0 && stockDealDayEntityList.size() > 0){
-                    stockPriceDayMapper.batchInsert(stockPriceDayEntityList);
+//                if (stockPriceDayEntityList.size() > 0 && stockDealDayEntityList.size() > 0){
+                if (stockDealDayEntityList.size() > 0){
+//                    stockPriceDayMapper.batchInsert(stockPriceDayEntityList);
                     stockDealDayMapper.batchInsert(stockDealDayEntityList);
                 }
             } catch (Exception e) {
-                System.out.println(startDate);
-                System.out.println(stockEntity);
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * 遍历所有需同步的股票列表
-     */
-    private void aStockIndexSync() {
-        //交易开始年份
-        startYear = defaultStartYear;
-        //同步重点指标
-        List<StockCodeProperty> topIndexList = this.stockProperty.getTopIndex();
-        for (StockCodeProperty stockCodeProperty : topIndexList) {
-            if (StockConst.SM_A_LIST.contains(stockCodeProperty.getStockMarket())) {
-                StockEntity stockEntity = this.stockMapper.getByStockCode(
-                        stockCodeProperty.getStockCode(),
-                        stockCodeProperty.getStockMarket()
-                );
-                this.syncPriceDay(stockEntity);
-                this.syncDealDay(stockEntity);
+                logger.error(startDate);
+                logger.error(stockEntity.toString());
+                logger.error(e.getMessage());
             }
         }
     }
@@ -287,7 +268,9 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
         try {
             this.dropShadow();
             this.createShadow();
-            aStockIndexSync();
+            //交易开始年份
+            startYear = defaultStartYear;
+            aStockMarketTopIndexScan(this);
             aStockMarketScan(this);
             this.shadowConvert();
             this.dropShadow();
@@ -308,7 +291,9 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
             preDealDate = StockUtil.preDealDate(StockConst.SM_A);
             preDealDate = null == preDealDate || preDealDate.isEmpty() ?
                     DateUtil.getRelateDate(0, -1, 0, DateUtil.DATE_FORMAT_1) : preDealDate;
-            aStockIndexSync();
+            //交易开始年份
+            startYear = defaultStartYear;
+            aStockMarketTopIndexScan(this);
             aStockMarketScan(this);
         } catch (Exception e) {
             logger.error(e.getMessage());

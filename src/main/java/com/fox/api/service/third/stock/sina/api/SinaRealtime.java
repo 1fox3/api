@@ -74,9 +74,8 @@ public class SinaRealtime extends SinaStockBaseApi {
             return this.handleResponse(httpResponse.getContent());
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            return hashMap;
         }
+        return hashMap;
     }
 
     /**
@@ -111,6 +110,11 @@ public class SinaRealtime extends SinaStockBaseApi {
         int index = response.lastIndexOf("=");
         response = response.substring(0, index);
         response = response.replace("var hq_str_", "");
+        for (String sinaStockPreCode : SinaStockBaseApi.stockMarketPYMap.values()) {
+            if (response.startsWith(sinaStockPreCode)) {
+                response = response.replace(sinaStockPreCode, "");
+            }
+        }
         return response;
     }
 
