@@ -52,8 +52,8 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
      */
     @Override
     public void handle(StockEntity stockEntity) {
-        if (null == stockEntity || null == stockEntity.getStockCode()
-                || stockEntity.getStockCode().isEmpty()) {
+        if (null == stockEntity || null == stockEntity.getStockCode() || stockEntity.getStockCode().isEmpty()
+                || null == stockEntity.getStockStatus() || 1 == stockEntity.getStockStatus()) {
             return;
         }
         try {

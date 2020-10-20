@@ -64,7 +64,6 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
         for (StockEntity stockEntity : stockCodeList) {
             if (sinaStockRealtimeEntityMap.containsKey(stockEntity.getStockCode())) {
                 StockRealtimePo stockRealtimePo = sinaStockRealtimeEntityMap.get(stockEntity.getStockCode());
-                System.out.println(stockRealtimePo);
                 if (null != stockRealtimePo
                         && null != stockRealtimePo.getStockName()
                         && !stockRealtimePo.getStockName().equals("")) {
@@ -81,7 +80,7 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
                     }
                     stockStatus = 0;
                     if (!lastDealDate.equals(stockRealtimePo.getCurrentDate())
-                            || "-2".equals(stockRealtimePo.getDealStatus())
+                            || SinaStockBaseApi.noDealStatusList.contains(stockRealtimePo.getDealStatus())
                     ) {
                         stockStatus = 1;
                     }
@@ -144,7 +143,6 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
             stockEntity.setStockCode(stringBuffer.toString());
             stockEntity.setStockMarket(stockMarket);
             stockEntityList.add(stockEntity);
-
             if (stockEntityList.size() >= ScanOnceLimit || maxLimit.equals(i)) {
                 try {
                     this.scanStockCodeList(stockEntityList);
@@ -222,12 +220,13 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
             return;
         }
         stockEntity.setStockName(sinaStockRealtimePo.getStockName());
-        stockEntity.setStockNameEn(sinaStockRealtimePo.getStockNameEn());
+        stockEntity.setStockNameEn(null == sinaStockRealtimePo.getStockNameEn()
+                ? "" : sinaStockRealtimePo.getStockNameEn());
 
         //股票状态
         Integer stockStatus = 0;
         if (!StockUtil.lastDealDate(stockEntity.getStockMarket()).equals(sinaStockRealtimePo.getCurrentDate())
-                || "-2".equals(sinaStockRealtimePo.getDealStatus())
+                || SinaStockBaseApi.noDealStatusList.contains(sinaStockRealtimePo.getDealStatus())
         ) {
             stockStatus = 1;
         }

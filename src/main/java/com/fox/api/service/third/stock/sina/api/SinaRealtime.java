@@ -1,5 +1,6 @@
 package com.fox.api.service.third.stock.sina.api;
 
+import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
@@ -27,7 +28,7 @@ public class SinaRealtime extends SinaStockBaseApi {
      */
     private static String apiUrl = "http://hq.sinajs.cn/list=";
     /**
-     * 返回样例,最后一个字段解释（00:正常,03:停牌,07:临时停牌,-2:未上市新股）
+     * 返回样例,最后一个字段解释（00:正常,03:停牌,07:临时停牌,-2:未上市新股, -3:(未知明确含义，但当日无交易)）
      * var hq_str_sh603383="顶点软件,75.300,73.200,74.160,75.300,73.200,74.160,74.170,1441855,106849717.000,3900,74.160,1400,74.150,200,74.120,1900,74.100,1600,74.090,4600,74.170,1500,74.180,1200,74.200,300,74.330,100,74.400,2019-12-24,15:00:00,00,";
      * var hq_str_sh601519="大智慧,7.930,7.860,7.980,8.050,7.860,7.970,7.980,47836338,380201052.000,544700,7.970,181700,7.960,260474,7.950,89698,7.940,108200,7.930,73500,7.980,88100,7.990,539700,8.000,92700,8.010,247800,8.020,2019-12-24,15:00:03,00,";
      */
@@ -89,7 +90,8 @@ public class SinaRealtime extends SinaStockBaseApi {
             String[] responseArr = response.trim().split(";");
             for (int i = 0; i< responseArr.length; i++) {
                 if (!responseArr[i].equals("")) {
-                    String key = getStockCode(responseArr[i]);
+                    String stockCodeStr = getStockCodeStr(responseArr[i]);
+                    String key = getStockCode(stockCodeStr);
                     StockRealtimePo stockRealtimePo = getStockRealtimeEntity(responseArr[i]);
                     if (!key.equals("")) {
                         hashMap.put(key, stockRealtimePo);
@@ -101,21 +103,44 @@ public class SinaRealtime extends SinaStockBaseApi {
     }
 
     /**
-     * 获取返回中的股票编号
+     * 获取新浪股票代码
      * @param response
      * @return
      */
-    private static String getStockCode(String response) {
+    private static String getStockCodeStr(String response) {
         response = response.trim();
         int index = response.lastIndexOf("=");
         response = response.substring(0, index);
         response = response.replace("var hq_str_", "");
+        return response;
+    }
+
+    /**
+     * 获取返回中的股票编号
+     * @param stockCodeStr
+     * @return
+     */
+    private static String getStockCode(String stockCodeStr) {
         for (String sinaStockPreCode : SinaStockBaseApi.stockMarketPYMap.values()) {
-            if (response.startsWith(sinaStockPreCode)) {
-                response = response.replace(sinaStockPreCode, "");
+            if (stockCodeStr.startsWith(sinaStockPreCode)) {
+                stockCodeStr = stockCodeStr.replace(sinaStockPreCode, "");
             }
         }
-        return response;
+        return stockCodeStr;
+    }
+
+    /**
+     * 获取股票集市
+     * @param stockCodeStr
+     * @return
+     */
+    private static Integer getStockMarket(String stockCodeStr) {
+        for (Integer stockMarket : SinaStockBaseApi.stockMarketPYMap.keySet()) {
+            if (stockCodeStr.startsWith(SinaStockBaseApi.stockMarketPYMap.get(stockMarket))) {
+                return stockMarket;
+            }
+        }
+        return null;
     }
 
     /**
@@ -125,14 +150,14 @@ public class SinaRealtime extends SinaStockBaseApi {
      */
     private StockRealtimePo getStockRealtimeEntity(String response) {
         StockRealtimePo stockRealtimePo = new StockRealtimePo();
-        String stockCode = getStockCode(response);
+        String stockCodeStr = getStockCodeStr(response);
         int startIndex = response.indexOf("\"");
         int endIndex = response.lastIndexOf("\"");
         if (startIndex > 0 && endIndex > 0) {
             response = response.substring(startIndex + 1, endIndex);
             if (response.contains(",")) {
                 String[] responseArr = response.split(",");
-                if (stockCode.startsWith("hk")) {
+                if (StockConst.SM_HK.equals(getStockMarket(stockCodeStr))) {
                     stockRealtimePo = buildHkStockRealtimeEntity(responseArr);
                 } else {
                     stockRealtimePo = buildCnStockRealtimeEntity(responseArr);

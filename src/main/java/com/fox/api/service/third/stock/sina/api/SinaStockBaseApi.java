@@ -3,7 +3,9 @@ package com.fox.api.service.third.stock.sina.api;
 import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +22,11 @@ public class SinaStockBaseApi {
         put(StockConst.SM_SZ, "sz");//深
         put(StockConst.SM_HK, "hk");//港
     }};
+
+    /**
+     * 当日无交易的状态
+     */
+    public static List<String> noDealStatusList = Arrays.asList("-3", "03", "-2", "07");
 
     /**
      * 处理json字符串的key无双引号的问题
