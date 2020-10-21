@@ -117,9 +117,6 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
     private void syncPrice(StockEntity stockEntity) {
         StockPriceWeekEntity stockPriceWeekEntity = null, dbStockPriceWeekEntity;
         List<StockPriceWeekEntity> stockPriceWeekEntityList = new LinkedList<>();
-        Integer weekPos;
-        String dt = null, weekStartDate = null, weekEndDate = null;
-        BigDecimal openPrice = null, closePrice = null, highestPrice = null, lowestPrice = null, preClosePrice = null;
         for (Integer fqType : fqTypeList) {
             List<StockPriceDayEntity> stockPriceDayEntityList = getStockPriceDayEntityList(
                     fqType, stockEntity.getId()
@@ -127,7 +124,11 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
             if (null == stockPriceDayEntityList || stockPriceDayEntityList.isEmpty()) {
                 continue;
             }
-            weekPos = 0;
+            Integer weekPos = 0;
+            Boolean changeWeek = false;
+            String dt = null, weekStartDate = null, weekEndDate = null;
+            BigDecimal openPrice = null, closePrice = null, highestPrice = null;
+            BigDecimal lowestPrice = null, preClosePrice = null;
             for (StockPriceDayEntity stockPriceDayEntity : stockPriceDayEntityList) {
                 if (null == stockPriceDayEntity) {
                     continue;
@@ -139,10 +140,17 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
                 }
                 try {
                     while (null == weekStartDate || null == weekEndDate
-                            || DateUtil.compare(weekEndDate, dt, DateUtil.DATE_FORMAT_1)) {
+                            || DateUtil.compare(weekEndDate, stockPriceDayEntity.getDt(), DateUtil.DATE_FORMAT_1)) {
+                        changeWeek = true;
+                        if (weekPos > weekList.size() - 1) {
+                            break;
+                        }
                         weekStartDate = weekList.get(weekPos);
                         weekEndDate = weekList.get(weekPos + 1);
                         weekPos += 2;
+                    }
+                    if (changeWeek) {
+                        changeWeek = false;
                         stockPriceWeekEntity = new StockPriceWeekEntity();
                         stockPriceWeekEntity.setFqType(fqType);
                         stockPriceWeekEntity.setStockId(stockEntity.getId());
@@ -183,7 +191,20 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
                     logger.error(e.getMessage());
                 }
             }
-            if (!stockPriceDayEntityList.isEmpty()) {
+            //处理最后一周的数据
+            if (null != closePrice) {
+                stockPriceWeekEntity = new StockPriceWeekEntity();
+                stockPriceWeekEntity.setFqType(fqType);
+                stockPriceWeekEntity.setStockId(stockEntity.getId());
+                stockPriceWeekEntity.setDt(dt);
+                stockPriceWeekEntity.setOpenPrice(openPrice);
+                stockPriceWeekEntity.setClosePrice(closePrice);
+                stockPriceWeekEntity.setHighestPrice(highestPrice);
+                stockPriceWeekEntity.setLowestPrice(lowestPrice);
+                stockPriceWeekEntity.setPreClosePrice(preClosePrice);
+                stockPriceWeekEntityList.add(stockPriceWeekEntity);
+            }
+            if (!stockPriceWeekEntityList.isEmpty()) {
                 if (syncTotal) {
                     stockPriceWeekMapper.batchInsert(stockPriceWeekEntityList);
                 } else {
@@ -212,8 +233,9 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
                         }
                     }
                 }
-                stockPriceDayEntityList.clear();
             }
+            stockPriceDayEntityList.clear();
+            stockPriceWeekEntityList.clear();
         }
     }
 
@@ -227,6 +249,7 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
         StockDealWeekEntity stockDealWeekEntity = null, dbStockDealWeekEntity;
         List<StockDealWeekEntity> stockDealWeekEntityList = new LinkedList<>();
         Integer weekPos = 0;
+        Boolean changeWeek = false;
         String dt = null, weekStartDate = null, weekEndDate = null;
         BigDecimal closePrice = null, dealMoney = null;
         Long dealNum = null, circEquity = null, totalEquity = null;
@@ -247,10 +270,17 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
             }
             try {
                 while (null == weekStartDate || null == weekEndDate
-                        || DateUtil.compare(weekEndDate, dt, DateUtil.DATE_FORMAT_1)) {
+                        || DateUtil.compare(weekEndDate, stockDealDayEntity.getDt(), DateUtil.DATE_FORMAT_1)) {
+                    changeWeek = true;
+                    if (weekPos > weekList.size() - 1) {
+                        break;
+                    }
                     weekStartDate = weekList.get(weekPos);
                     weekEndDate = weekList.get(weekPos + 1);
                     weekPos += 2;
+                }
+                if (changeWeek) {
+                    changeWeek = false;
                     stockDealWeekEntity = new StockDealWeekEntity();
                     stockDealWeekEntity.setStockId(stockEntity.getId());
                     if (null != closePrice) {
@@ -283,6 +313,18 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
                 logger.error(e.getMessage());
             }
         }
+        //处理最后一周的数据
+        if (null != closePrice) {
+            stockDealWeekEntity = new StockDealWeekEntity();
+            stockDealWeekEntity.setStockId(stockEntity.getId());
+            stockDealWeekEntity.setDt(dt);
+            stockDealWeekEntity.setClosePrice(closePrice);
+            stockDealWeekEntity.setDealNum(dealNum);
+            stockDealWeekEntity.setDealMoney(dealMoney);
+            stockDealWeekEntity.setCircEquity(circEquity);
+            stockDealWeekEntity.setTotalEquity(totalEquity);
+            stockDealWeekEntityList.add(stockDealWeekEntity);
+        }
         if (!stockDealWeekEntityList.isEmpty()) {
             if (syncTotal) {
                 stockDealWeekMapper.batchInsert(stockDealWeekEntityList);
@@ -302,8 +344,9 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
                     }
                 }
             }
-            stockDealWeekEntityList.clear();
         }
+        stockDealDayEntityList.clear();
+        stockDealWeekEntityList.clear();
     }
 
 

@@ -52,26 +52,26 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO t_stock_price_week_shadow (
-        stock_id,
-        dt,
-        fq_type,
-        open_price,
-        close_price,
-        highest_price,
-        lowest_price,
-        pre_close_price
+            stock_id,
+            dt,
+            fq_type,
+            open_price,
+            close_price,
+            highest_price,
+            lowest_price,
+            pre_close_price
         )
         VALUES
-        <foreach collection ="list" item="stockPriceDayEntity" index= "index" separator =",">
+        <foreach collection ="list" item="stockPriceWeekEntity" index= "index" separator =",">
             (
-            #{stockPriceDayEntity.stockId},
-            #{stockPriceDayEntity.dt},
-            #{stockPriceDayEntity.fqType},
-            #{stockPriceDayEntity.openPrice},
-            #{stockPriceDayEntity.closePrice},
-            #{stockPriceDayEntity.highestPrice},
-            #{stockPriceDayEntity.lowestPrice},
-            #{stockPriceDayEntity.preClosePrice}
+                #{stockPriceWeekEntity.stockId},
+                #{stockPriceWeekEntity.dt},
+                #{stockPriceWeekEntity.fqType},
+                #{stockPriceWeekEntity.openPrice},
+                #{stockPriceWeekEntity.closePrice},
+                #{stockPriceWeekEntity.highestPrice},
+                #{stockPriceWeekEntity.lowestPrice},
+                #{stockPriceWeekEntity.preClosePrice}
             )
         </foreach >
     </insert>
@@ -108,7 +108,7 @@
             dt ASC;
     </select>
 
-    <select id="getBySignalDate" parameterType="com.fox.api.dao.stock.entity.StockPriceDayEntity" resultMap="BasicResultMap">
+    <select id="getBySignalDate" parameterType="com.fox.api.dao.stock.entity.StockPriceWeekEntity" resultMap="BasicResultMap">
         SELECT
             *
         FROM

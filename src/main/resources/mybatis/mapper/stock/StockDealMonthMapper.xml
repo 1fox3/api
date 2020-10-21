@@ -48,24 +48,24 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO t_stock_deal_month_shadow (
-        stock_id,
-        dt,
-        close_price,
-        deal_num,
-        deal_money,
-        circ_equity,
-        total_equity
+            stock_id,
+            dt,
+            close_price,
+            deal_num,
+            deal_money,
+            circ_equity,
+            total_equity
         )
         VALUES
-        <foreach collection ="list" item="stockDealDayEntity" index= "index" separator =",">
+        <foreach collection ="list" item="stockDealMonthEntity" index= "index" separator =",">
             (
-            #{stockDealDayEntity.stockId},
-            #{stockDealDayEntity.dt},
-            #{stockDealDayEntity.closePrice},
-            #{stockDealDayEntity.dealNum},
-            #{stockDealDayEntity.dealMoney},
-            #{stockDealDayEntity.circEquity},
-            #{stockDealDayEntity.totalEquity}
+            #{stockDealMonthEntity.stockId},
+            #{stockDealMonthEntity.dt},
+            #{stockDealMonthEntity.closePrice},
+            #{stockDealMonthEntity.dealNum},
+            #{stockDealMonthEntity.dealMoney},
+            #{stockDealMonthEntity.circEquity},
+            #{stockDealMonthEntity.totalEquity}
             )
         </foreach >
     </insert>
@@ -85,7 +85,7 @@
         DROP TABLE IF EXISTS t_stock_deal_month_shadow
     </update>
 
-    <select id="getBySignalDate" parameterType="com.fox.api.dao.stock.entity.StockDealDayEntity" resultMap="BasicResultMap">
+    <select id="getBySignalDate" parameterType="com.fox.api.dao.stock.entity.StockDealMonthEntity" resultMap="BasicResultMap">
         SELECT
             *
         FROM

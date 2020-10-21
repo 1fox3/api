@@ -117,9 +117,6 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
     private void syncPrice(StockEntity stockEntity) {
         StockPriceMonthEntity stockPriceMonthEntity = null, dbStockPriceMonthEntity;
         List<StockPriceMonthEntity> stockPriceMonthEntityList = new LinkedList<>();
-        Integer monthPos;
-        String dt = null, monthStartDate = null, monthEndDate = null;
-        BigDecimal openPrice = null, closePrice = null, highestPrice = null, lowestPrice = null, preClosePrice = null;
         for (Integer fqType : fqTypeList) {
             List<StockPriceDayEntity> stockPriceDayEntityList = getStockPriceDayEntityList(
                     fqType, stockEntity.getId()
@@ -127,7 +124,11 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
             if (null == stockPriceDayEntityList || stockPriceDayEntityList.isEmpty()) {
                 continue;
             }
-            monthPos = 0;
+            Integer monthPos = 0;
+            Boolean changeMonth = false;
+            String dt = null, monthStartDate = null, monthEndDate = null;
+            BigDecimal openPrice = null, closePrice = null, highestPrice = null;
+            BigDecimal lowestPrice = null, preClosePrice = null;
             for (StockPriceDayEntity stockPriceDayEntity : stockPriceDayEntityList) {
                 if (null == stockPriceDayEntity) {
                     continue;
@@ -139,10 +140,17 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
                 }
                 try {
                     while (null == monthStartDate || null == monthEndDate
-                            || DateUtil.compare(monthEndDate, dt, DateUtil.DATE_FORMAT_1)) {
+                            || DateUtil.compare(monthEndDate, stockPriceDayEntity.getDt(), DateUtil.DATE_FORMAT_1)) {
+                        changeMonth = true;
+                        if (monthPos > monthList.size() - 1) {
+                            break;
+                        }
                         monthStartDate = monthList.get(monthPos);
                         monthEndDate = monthList.get(monthPos + 1);
                         monthPos += 2;
+                    }
+                    if (changeMonth) {
+                        changeMonth = false;
                         stockPriceMonthEntity = new StockPriceMonthEntity();
                         stockPriceMonthEntity.setFqType(fqType);
                         stockPriceMonthEntity.setStockId(stockEntity.getId());
@@ -183,7 +191,20 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
                     logger.error(e.getMessage());
                 }
             }
-            if (!stockPriceDayEntityList.isEmpty()) {
+            //处理最后一个月的数据
+            if (null != closePrice) {
+                stockPriceMonthEntity = new StockPriceMonthEntity();
+                stockPriceMonthEntity.setFqType(fqType);
+                stockPriceMonthEntity.setStockId(stockEntity.getId());
+                stockPriceMonthEntity.setDt(dt);
+                stockPriceMonthEntity.setOpenPrice(openPrice);
+                stockPriceMonthEntity.setClosePrice(closePrice);
+                stockPriceMonthEntity.setHighestPrice(highestPrice);
+                stockPriceMonthEntity.setLowestPrice(lowestPrice);
+                stockPriceMonthEntity.setPreClosePrice(preClosePrice);
+                stockPriceMonthEntityList.add(stockPriceMonthEntity);
+            }
+            if (!stockPriceMonthEntityList.isEmpty()) {
                 if (syncTotal) {
                     stockPriceMonthMapper.batchInsert(stockPriceMonthEntityList);
                 } else {
@@ -212,8 +233,9 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
                         }
                     }
                 }
-                stockPriceDayEntityList.clear();
             }
+            stockPriceMonthEntityList.clear();
+            stockPriceDayEntityList.clear();
         }
     }
 
@@ -227,6 +249,7 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
         StockDealMonthEntity stockDealMonthEntity = null, dbStockDealMonthEntity;
         List<StockDealMonthEntity> stockDealMonthEntityList = new LinkedList<>();
         Integer monthPos = 0;
+        Boolean changeMonth = false;
         String dt = null, monthStartDate = null, monthEndDate = null;
         BigDecimal closePrice = null, dealMoney = null;
         Long dealNum = null, circEquity = null, totalEquity = null;
@@ -247,10 +270,17 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
             }
             try {
                 while (null == monthStartDate || null == monthEndDate
-                        || DateUtil.compare(monthEndDate, dt, DateUtil.DATE_FORMAT_1)) {
+                        || DateUtil.compare(monthEndDate, stockDealDayEntity.getDt(), DateUtil.DATE_FORMAT_1)) {
+                    changeMonth = true;
+                    if (monthPos > monthList.size() - 1) {
+                        break;
+                    }
                     monthStartDate = monthList.get(monthPos);
                     monthEndDate = monthList.get(monthPos + 1);
                     monthPos += 2;
+                }
+                if (changeMonth) {
+                    changeMonth = false;
                     stockDealMonthEntity = new StockDealMonthEntity();
                     stockDealMonthEntity.setStockId(stockEntity.getId());
                     if (null != closePrice) {
@@ -283,6 +313,18 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
                 logger.error(e.getMessage());
             }
         }
+        //处理最后一个月的数据
+        if (null != closePrice) {
+            stockDealMonthEntity = new StockDealMonthEntity();
+            stockDealMonthEntity.setStockId(stockEntity.getId());
+            stockDealMonthEntity.setDt(dt);
+            stockDealMonthEntity.setClosePrice(closePrice);
+            stockDealMonthEntity.setDealNum(dealNum);
+            stockDealMonthEntity.setDealMoney(dealMoney);
+            stockDealMonthEntity.setCircEquity(circEquity);
+            stockDealMonthEntity.setTotalEquity(totalEquity);
+            stockDealMonthEntityList.add(stockDealMonthEntity);
+        }
         if (!stockDealMonthEntityList.isEmpty()) {
             if (syncTotal) {
                 stockDealMonthMapper.batchInsert(stockDealMonthEntityList);
@@ -302,8 +344,9 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
                     }
                 }
             }
-            stockDealMonthEntityList.clear();
         }
+        stockDealDayEntityList.clear();
+        stockDealMonthEntityList.clear();
     }
 
 
