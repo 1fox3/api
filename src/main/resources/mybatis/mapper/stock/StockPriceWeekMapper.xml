@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.fox.api.dao.stock.mapper.StockPriceDayMapper">
-    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockPriceDayEntity">
-        <id column="id" property="id" jdbcType="INTEGER" />
+<mapper namespace="com.fox.api.dao.stock.mapper.StockPriceWeekMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockPriceWeekEntity">
+        <id column="id" property="id" jdbcType="BIGINT" />
         <result column="stock_id" property="stockId" jdbcType="INTEGER" />
         <result column="dt" property="dt" jdbcType="DATE" />
         <result column="fq_type" property="fqType" jdbcType="INTEGER" />
@@ -12,9 +12,9 @@
         <result column="lowest_price" property="lowestPrice" jdbcType="DECIMAL" />
         <result column="pre_close_price" property="preClosePrice" jdbcType="DECIMAL" />
     </resultMap>
-    
-    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockPriceDayEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO t_stock_price_day (
+
+    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockPriceWeekEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_stock_price_week (
             stock_id,
             dt,
             fq_type,
@@ -34,9 +34,9 @@
             #{preClosePrice}
         );
     </insert>
-    
-    <update id="update" parameterType="com.fox.api.dao.stock.entity.StockPriceDayEntity">
-        UPDATE t_stock_price_day
+
+    <update id="update" parameterType="com.fox.api.dao.stock.entity.StockPriceWeekEntity">
+        UPDATE t_stock_price_week
         SET
             stock_id = #{stockId},
             dt = #{dt},
@@ -51,51 +51,51 @@
     </update>
 
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO t_stock_price_day_shadow (
-            stock_id,
-            dt,
-            fq_type,
-            open_price,
-            close_price,
-            highest_price,
-            lowest_price,
-            pre_close_price
+        INSERT INTO t_stock_price_week_shadow (
+        stock_id,
+        dt,
+        fq_type,
+        open_price,
+        close_price,
+        highest_price,
+        lowest_price,
+        pre_close_price
         )
         VALUES
         <foreach collection ="list" item="stockPriceDayEntity" index= "index" separator =",">
             (
-                #{stockPriceDayEntity.stockId},
-                #{stockPriceDayEntity.dt},
-                #{stockPriceDayEntity.fqType},
-                #{stockPriceDayEntity.openPrice},
-                #{stockPriceDayEntity.closePrice},
-                #{stockPriceDayEntity.highestPrice},
-                #{stockPriceDayEntity.lowestPrice},
-                #{stockPriceDayEntity.preClosePrice}
+            #{stockPriceDayEntity.stockId},
+            #{stockPriceDayEntity.dt},
+            #{stockPriceDayEntity.fqType},
+            #{stockPriceDayEntity.openPrice},
+            #{stockPriceDayEntity.closePrice},
+            #{stockPriceDayEntity.highestPrice},
+            #{stockPriceDayEntity.lowestPrice},
+            #{stockPriceDayEntity.preClosePrice}
             )
         </foreach >
     </insert>
 
     <update id="createShadow">
-        CREATE TABLE IF NOT EXISTS t_stock_price_day_shadow LIKE t_stock_price_day;
+        CREATE TABLE IF NOT EXISTS t_stock_price_week_shadow LIKE t_stock_price_week;
     </update>
 
     <update id="shadowConvert">
         RENAME TABLE
-            t_stock_price_day TO t_stock_price_day_temp,
-            t_stock_price_day_shadow TO t_stock_price_day,
-            t_stock_price_day_temp TO t_stock_price_day_shadow;
+            t_stock_price_week TO t_stock_price_week_temp,
+            t_stock_price_week_shadow TO t_stock_price_week,
+            t_stock_price_week_temp TO t_stock_price_week_shadow;
     </update>
 
     <update id="dropShadow">
-        DROP TABLE IF EXISTS t_stock_price_day_shadow;
+        DROP TABLE IF EXISTS t_stock_price_week_shadow;
     </update>
 
     <select id="getByDate" resultMap="BasicResultMap">
         SELECT
             *
         FROM
-            t_stock_price_day
+            t_stock_price_week
         WHERE
             fq_type = #{fqType}
             AND
@@ -112,7 +112,7 @@
         SELECT
             *
         FROM
-            t_stock_price_day
+            t_stock_price_week
         WHERE
             fq_type = #{fqType}
             AND
@@ -126,7 +126,7 @@
         SELECT
             *
         FROM
-            t_stock_price_day
+            t_stock_price_week
         WHERE
             fq_type = #{fqType}
             AND
@@ -134,6 +134,6 @@
     </select>
 
     <update id="optimize">
-        OPTIMIZE TABLE t_stock_price_day;
+        OPTIMIZE TABLE t_stock_price_week;
     </update>
 </mapper>

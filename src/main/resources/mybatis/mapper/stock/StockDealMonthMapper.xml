@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.stock.mapper.StockDealMonthMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockDealMonthEntity">
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="stock_id" property="stockId" jdbcType="INTEGER" />
+        <result column="dt" property="dt" jdbcType="DATE" />
+        <result column="close_price" property="closePrice" jdbcType="DECIMAL" />
+        <result column="deal_num" property="dealNum" jdbcType="BIGINT" />
+        <result column="deal_money" property="dealMoney" jdbcType="DECIMAL" />
+        <result column="circ_equity" property="circEquity" jdbcType="BIGINT" />
+        <result column="total_equity" property="totalEquity" jdbcType="BIGINT" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockDealMonthEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_stock_deal_month (
+            stock_id,
+            dt,
+            close_price,
+            deal_num,
+            deal_money,
+            circ_equity,
+            total_equity
+        ) VALUES (
+            #{stockId},
+            #{dt},
+            #{closePrice},
+            #{dealNum},
+            #{dealMoney},
+            #{circEquity},
+            #{totalEquity}
+        );
+    </insert>
+
+    <update id="update" parameterType="com.fox.api.dao.stock.entity.StockDealMonthEntity">
+        UPDATE t_stock_deal_month
+        SET
+            stock_id = #{stockId},
+            dt = #{dt},
+            close_price = #{closePrice},
+            deal_num = #{dealNum},
+            deal_money = #{dealMoney},
+            circ_equity = #{circEquity},
+            total_equity = #{totalEquity}
+        WHERE
+            id = #{id}
+    </update>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO t_stock_deal_month_shadow (
+        stock_id,
+        dt,
+        close_price,
+        deal_num,
+        deal_money,
+        circ_equity,
+        total_equity
+        )
+        VALUES
+        <foreach collection ="list" item="stockDealDayEntity" index= "index" separator =",">
+            (
+            #{stockDealDayEntity.stockId},
+            #{stockDealDayEntity.dt},
+            #{stockDealDayEntity.closePrice},
+            #{stockDealDayEntity.dealNum},
+            #{stockDealDayEntity.dealMoney},
+            #{stockDealDayEntity.circEquity},
+            #{stockDealDayEntity.totalEquity}
+            )
+        </foreach >
+    </insert>
+
+    <update id="createShadow">
+        CREATE TABLE IF NOT EXISTS t_stock_deal_month_shadow LIKE t_stock_deal_month;
+    </update>
+
+    <update id="shadowConvert">
+        RENAME TABLE
+            t_stock_deal_month TO t_stock_deal_month_temp,
+            t_stock_deal_month_shadow TO t_stock_deal_month,
+            t_stock_deal_month_temp TO t_stock_deal_month_shadow;
+    </update>
+
+    <update id="dropShadow">
+        DROP TABLE IF EXISTS t_stock_deal_month_shadow
+    </update>
+
+    <select id="getBySignalDate" parameterType="com.fox.api.dao.stock.entity.StockDealDayEntity" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_month
+        WHERE
+            stock_id = #{stockId}
+            AND
+            dt = #{dt}
+        LIMIT 1;
+    </select>
+
+    <select id="getTotalByStock" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_month
+        WHERE
+            stock_id = #{stockId};
+    </select>
+
+    <select id="getByDate" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_month
+        WHERE
+            stock_id = #{stockId}
+            AND
+            dt >= #{startDate}
+            AND
+            dt &lt;= #{endDate}
+        ORDER BY
+            dt ASC;
+    </select>
+
+    <update id="optimize">
+        OPTIMIZE TABLE t_stock_deal_month;
+    </update>
+</mapper>

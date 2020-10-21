@@ -24,7 +24,7 @@ import java.util.*;
  * @date 2020/3/5 18:13
  */
 @Component
-public class StockScanSchedule extends StockBaseSchedule implements StockScheduleHandler {
+public class StockScanSchedule extends StockBaseSchedule {
     /**
      * 单词扫描股票代码数
      */
@@ -60,59 +60,19 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
      */
     private void scanStockCodeList(List<StockEntity> stockCodeList) {
         Map<String, StockRealtimePo> sinaStockRealtimeEntityMap = sinaRealtime.getRealtimeData(stockCodeList);
-        int stockStatus;
         for (StockEntity stockEntity : stockCodeList) {
             if (sinaStockRealtimeEntityMap.containsKey(stockEntity.getStockCode())) {
                 StockRealtimePo stockRealtimePo = sinaStockRealtimeEntityMap.get(stockEntity.getStockCode());
                 if (null != stockRealtimePo
                         && null != stockRealtimePo.getStockName()
                         && !stockRealtimePo.getStockName().equals("")) {
-                    String stockName = stockRealtimePo.getStockName();
                     StockEntity dbStockEntity = stockMapper.getByStockCode(
                             stockEntity.getStockCode(), stockEntity.getStockMarket()
                     );
                     if (null != dbStockEntity) {
                         stockEntity = dbStockEntity;
                     }
-                    stockEntity.setStockName(stockName);
-                    if (null != stockRealtimePo.getStockNameEn()) {
-                        stockEntity.setStockNameEn(stockRealtimePo.getStockNameEn());
-                    }
-                    stockStatus = 0;
-                    if (!lastDealDate.equals(stockRealtimePo.getCurrentDate())
-                            || SinaStockBaseApi.noDealStatusList.contains(stockRealtimePo.getDealStatus())
-                    ) {
-                        stockStatus = 1;
-                    }
-                    stockEntity.setStockStatus(stockStatus);
-                    //判定类别
-                    StockKindInfoProperty stockKindInfoEntity = stockUtilService.getStockKindInfo(
-                            stockEntity.getStockCode(), stockEntity.getStockMarket()
-                    );
-                    stockEntity.setStockType(null == stockKindInfoEntity.getStockType() ?
-                            0 : stockKindInfoEntity.getStockType());
-                    stockEntity.setStockKind(null == stockKindInfoEntity.getStockKind() ?
-                            0 : stockKindInfoEntity.getStockKind());
-                    stockEntity.setDealDate(
-                            null == stockRealtimePo.getCurrentDate() ? "1900-01-01" : stockRealtimePo.getCurrentDate()
-                    );
-                    stockEntity.setDealStatus(
-                            null == stockRealtimePo.getDealStatus() ? "" : stockRealtimePo.getDealStatus()
-                    );
-                    stockEntity.setUnknownInfo(
-                            null == stockRealtimePo.getUnknownKeyList()
-                                    ? "" : stockRealtimePo.getUnknownKeyList().toString()
-                    );
-                    try {
-                        if (null != stockEntity.getId()) {
-                            stockMapper.update(stockEntity);
-                        } else {
-                            stockMapper.insert(stockEntity);
-                        }
-                    } catch (Exception e) {
-                        logger.error(stockEntity.toString());
-                        logger.error(e.getMessage());
-                    }
+                    syncStockDealStatus(stockEntity, stockRealtimePo);
                 }
             }
         }
@@ -199,22 +159,57 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
     @LogShowTimeAnt
     public void stockDealStatusScan() {
         if (StockUtil.todayIsDealDate(StockConst.SM_A)) {
-            aStockMarketTopIndexScan(this);
-            aStockMarketScan(this);
+            Integer stockId = 0;
+            Integer onceLimit = 200;
+            for (Integer stockMarket : StockConst.SM_A_LIST) {
+                try{
+                    while (true) {
+                        List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
+                                2,
+                                stockId,
+                                stockMarket,
+                                onceLimit.toString()
+                        );
+                        if (null == stockEntityList || stockEntityList.isEmpty()) {
+                            break;
+                        }
+                        Map<String, StockRealtimePo> sinaStockRealtimePoMap =
+                                sinaRealtime.getRealtimeData(stockEntityList);
+                        for (StockEntity stockEntity : stockEntityList) {
+                            if (null == stockEntity) {
+                                continue;
+                            }
+                            stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
+                            String stockCode = stockEntity.getStockCode();
+                            if (sinaStockRealtimePoMap.containsKey(stockCode)) {
+                                try {
+                                    syncStockDealStatus(stockEntity, sinaStockRealtimePoMap.get(stockCode));
+                                } catch (Exception e) {
+                                    logger.error(Integer.toString(stockId));
+                                    logger.error(e.getMessage());
+                                }
+                            }
+
+                        }
+                        if (stockEntityList.size() < onceLimit) {
+                            break;
+                        }
+                    }
+                } catch (Exception e){
+                    logger.error(Integer.toString(stockId));
+                    logger.error(e.getMessage());
+                }
+            }
+
         }
     }
 
     /**
-     * 处理单只股票
+     * 同步交易信息
      * @param stockEntity
+     * @param sinaStockRealtimePo
      */
-    @Override
-    public void handle(StockEntity stockEntity) {
-        if (null == stockEntity.getStockCode() || stockEntity.getStockCode().isEmpty()
-                || null == stockEntity.getStockMarket() || !StockConst.SM_ALL.contains(stockEntity.getStockMarket())) {
-            return;
-        }
-        StockRealtimePo sinaStockRealtimePo = sinaRealtime.getRealtimeData(stockEntity);
+    private void syncStockDealStatus(StockEntity stockEntity, StockRealtimePo sinaStockRealtimePo) {
         if (null == sinaStockRealtimePo || null == sinaStockRealtimePo.getStockName()
                 || sinaStockRealtimePo.getStockName().isEmpty()) {
             return;
@@ -231,7 +226,14 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
             stockStatus = 1;
         }
         stockEntity.setStockStatus(stockStatus);
-
+        //判定类别
+        StockKindInfoProperty stockKindInfoEntity = stockUtilService.getStockKindInfo(
+                stockEntity.getStockCode(), stockEntity.getStockMarket()
+        );
+        stockEntity.setStockType(null == stockKindInfoEntity.getStockType() ?
+                0 : stockKindInfoEntity.getStockType());
+        stockEntity.setStockKind(null == stockKindInfoEntity.getStockKind() ?
+                0 : stockKindInfoEntity.getStockKind());
         stockEntity.setDealDate(
                 null == sinaStockRealtimePo.getCurrentDate() ? "1900-01-01" : sinaStockRealtimePo.getCurrentDate()
         );
@@ -243,7 +245,11 @@ public class StockScanSchedule extends StockBaseSchedule implements StockSchedul
                         ? "" : sinaStockRealtimePo.getUnknownKeyList().toString()
         );
         try {
-            stockMapper.update(stockEntity);
+            if (null != stockEntity.getId()) {
+                stockMapper.update(stockEntity);
+            } else {
+                stockMapper.insert(stockEntity);
+            }
         } catch (Exception e) {
             logger.error(stockEntity.toString());
             logger.error(e.getMessage());

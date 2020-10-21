@@ -15,8 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 计划任务基类
@@ -257,5 +259,55 @@ public class StockBaseSchedule {
                 break;
             }
         }
+    }
+
+    /**
+     * 获取周月范围列表
+     * @param statisticsType
+     * @param map
+     * @return
+     * @throws ParseException
+     */
+    public List<String> doDateByStatisticsType(String statisticsType, Map<String, String> map) throws ParseException {
+        List<String> listWeekOrMonth = new ArrayList<String>();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String startDate = map.get("startDate");
+        String endDate = map.get("endDate");
+        Date sDate = dateFormat.parse(startDate);
+        Calendar sCalendar = Calendar.getInstance();
+        sCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+        sCalendar.setTime(sDate);
+        Date eDate = dateFormat.parse(endDate);
+        Calendar eCalendar = Calendar.getInstance();
+        eCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+        eCalendar.setTime(eDate);
+        boolean bool =true;
+        if(statisticsType.equals("week")){
+            while(sCalendar.getTime().getTime()<eCalendar.getTime().getTime()){
+                if(bool||sCalendar.get(Calendar.DAY_OF_WEEK)==2||sCalendar.get(Calendar.DAY_OF_WEEK)==1){
+                    listWeekOrMonth.add(dateFormat.format(sCalendar.getTime()));
+                    bool = false;
+                }
+                sCalendar.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            listWeekOrMonth.add(dateFormat.format(eCalendar.getTime()));
+            if(listWeekOrMonth.size()%2!=0){
+                listWeekOrMonth.add(dateFormat.format(eCalendar.getTime()));
+            }
+        }else{
+            while(sCalendar.getTime().getTime()<eCalendar.getTime().getTime()){
+                if(bool||sCalendar.get(Calendar.DAY_OF_MONTH)==1||sCalendar.get(Calendar.DAY_OF_MONTH)==sCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+                    listWeekOrMonth.add(dateFormat.format(sCalendar.getTime()));
+                    bool = false;
+                }
+                sCalendar.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            listWeekOrMonth.add(dateFormat.format(eCalendar.getTime()));
+            if(listWeekOrMonth.size()%2!=0){
+                listWeekOrMonth.add(dateFormat.format(eCalendar.getTime()));
+            }
+        }
+
+        return listWeekOrMonth;
     }
 }
