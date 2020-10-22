@@ -1,24 +1,22 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.dao.stock.entity.StockDealDayEntity;
-import com.fox.api.dao.stock.entity.StockEntity;
-import com.fox.api.dao.stock.entity.StockPriceDayEntity;
+import com.fox.api.constant.StockConst;
+import com.fox.api.dao.stock.entity.*;
 import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
 import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
-import com.fox.api.entity.po.third.stock.StockDayLinePo;
-import com.fox.api.entity.po.third.stock.StockDealNumPo;
-import com.fox.api.entity.po.third.stock.StockDealPo;
+import com.fox.api.entity.po.third.stock.*;
 import com.fox.api.service.stock.StockOfflineService;
+import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.service.third.stock.nets.api.NetsDayLine;
 import com.fox.api.service.third.stock.sina.api.SinaDealRatio;
 import com.fox.api.util.DateUtil;
+import com.fox.api.util.StockUtil;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * 股票历史交易信息
@@ -27,6 +25,8 @@ import java.util.Map;
  */
 @Service
 public class StockOfflineImpl extends StockBaseImpl implements StockOfflineService {
+    @Autowired
+    StockRealtimeService stockRealtimeService;
 
     @Override
     public StockDealDayLineDto line(Integer stockId, String startDate) {
@@ -126,19 +126,167 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
         for (int i = 0; i < priceDayList.size(); i++) {
             List<Object> dayInfoList = new LinkedList<>();
             StockPriceDayEntity stockPriceDayEntity = priceDayList.get(i);
-            StockDealDayEntity stockDealDayEntity = dealDayList.get(i);
             dayInfoList.add(stockPriceDayEntity.getDt());
             dayInfoList.add(stockPriceDayEntity.getOpenPrice());
             dayInfoList.add(stockPriceDayEntity.getClosePrice());
             dayInfoList.add(stockPriceDayEntity.getHighestPrice());
             dayInfoList.add(stockPriceDayEntity.getLowestPrice());
             dayInfoList.add(stockPriceDayEntity.getPreClosePrice());
-            dayInfoList.add(stockDealDayEntity.getDealNum());
-            dayInfoList.add(stockDealDayEntity.getDealMoney());
-            dayInfoList.add(stockDealDayEntity.getCircEquity());
-            dayInfoList.add(stockDealDayEntity.getTotalEquity());
+            if (i < dealDayList.size() - 1) {
+                StockDealDayEntity stockDealDayEntity = dealDayList.get(i);
+                dayInfoList.add(stockDealDayEntity.getDealNum());
+                dayInfoList.add(stockDealDayEntity.getDealMoney());
+                dayInfoList.add(stockDealDayEntity.getCircEquity());
+                dayInfoList.add(stockDealDayEntity.getTotalEquity());
+            } else {
+                dayInfoList.add(BigDecimal.ZERO);
+                dayInfoList.add(BigDecimal.ZERO);
+                dayInfoList.add(BigDecimal.ZERO);
+                dayInfoList.add(BigDecimal.ZERO);
+            }
             dayList.add(dayInfoList);
         }
         return dayList;
+    }
+
+    /**
+     * 股票按周交易数据
+     *
+     * @param stockId
+     * @param fqType
+     * @return
+     */
+    @Override
+    public List<List<Object>> week(Integer stockId, Integer fqType) {
+        List<List<Object>> weekList = new LinkedList<>();
+        List<StockPriceWeekEntity> priceWeekList = this.stockPriceWeekMapper.getTotalByStock(fqType, stockId);
+        List<StockDealWeekEntity> dealWeekList = this.stockDealWeekMapper.getTotalByStock(stockId);
+        for (int i = 0; i < priceWeekList.size(); i++) {
+            List<Object> weekInfoList = new LinkedList<>();
+            StockPriceWeekEntity stockPriceWeekEntity = priceWeekList.get(i);
+            weekInfoList.add(stockPriceWeekEntity.getDt());
+            weekInfoList.add(stockPriceWeekEntity.getOpenPrice());
+            weekInfoList.add(stockPriceWeekEntity.getClosePrice());
+            weekInfoList.add(stockPriceWeekEntity.getHighestPrice());
+            weekInfoList.add(stockPriceWeekEntity.getLowestPrice());
+            weekInfoList.add(stockPriceWeekEntity.getPreClosePrice());
+            if (i < dealWeekList.size() - 1) {
+                StockDealWeekEntity stockDealWeekEntity = dealWeekList.get(i);
+                weekInfoList.add(stockDealWeekEntity.getDealNum());
+                weekInfoList.add(stockDealWeekEntity.getDealMoney());
+                weekInfoList.add(stockDealWeekEntity.getCircEquity());
+                weekInfoList.add(stockDealWeekEntity.getTotalEquity());
+            } else {
+                weekInfoList.add(BigDecimal.ZERO);
+                weekInfoList.add(BigDecimal.ZERO);
+                weekInfoList.add(BigDecimal.ZERO);
+                weekInfoList.add(BigDecimal.ZERO);
+            }
+            weekList.add(weekInfoList);
+        }
+        return weekList;
+    }
+
+    /**
+     * 股票按月交易数据
+     *
+     * @param stockId
+     * @param fqType
+     * @return
+     */
+    @Override
+    public List<List<Object>> month(Integer stockId, Integer fqType) {
+        List<List<Object>> monthList = new LinkedList<>();
+        List<StockPriceMonthEntity> priceMonthList = this.stockPriceMonthMapper.getTotalByStock(fqType, stockId);
+        List<StockDealMonthEntity> dealMonthList = this.stockDealMonthMapper.getTotalByStock(stockId);
+        for (int i = 0; i < priceMonthList.size(); i++) {
+            List<Object> monthInfoList = new LinkedList<>();
+            StockPriceMonthEntity stockPriceMonthEntity = priceMonthList.get(i);
+            monthInfoList.add(stockPriceMonthEntity.getDt());
+            monthInfoList.add(stockPriceMonthEntity.getOpenPrice());
+            monthInfoList.add(stockPriceMonthEntity.getClosePrice());
+            monthInfoList.add(stockPriceMonthEntity.getHighestPrice());
+            monthInfoList.add(stockPriceMonthEntity.getLowestPrice());
+            monthInfoList.add(stockPriceMonthEntity.getPreClosePrice());
+            if (i < dealMonthList.size() - 1) {
+                StockDealMonthEntity stockDealMonthEntity = dealMonthList.get(i);
+                monthInfoList.add(stockDealMonthEntity.getDealNum());
+                monthInfoList.add(stockDealMonthEntity.getDealMoney());
+                monthInfoList.add(stockDealMonthEntity.getCircEquity());
+                monthInfoList.add(stockDealMonthEntity.getTotalEquity());
+            } else {
+                monthInfoList.add(BigDecimal.ZERO);
+                monthInfoList.add(BigDecimal.ZERO);
+                monthInfoList.add(BigDecimal.ZERO);
+                monthInfoList.add(BigDecimal.ZERO);
+            }
+            monthList.add(monthInfoList);
+        }
+        return monthList;
+    }
+
+    /**
+     * 近5天交易日分钟成交数据
+     *
+     * @param stockId
+     * @return
+     */
+    @Override
+    public List<List<Object>> fiveDayMin(Integer stockId) {
+        List<StockPriceMinuteEntity> stockPriceMinuteEntityList = stockPriceMinuteMapper.fiveDay(stockId);
+        stockPriceMinuteEntityList = null == stockPriceMinuteEntityList ?
+                new LinkedList<>() : stockPriceMinuteEntityList;
+        Boolean getRealtime = true;
+        String lastDealDate = StockUtil.lastDealDate(StockConst.SM_A);
+        if (stockPriceMinuteEntityList.size() > 0) {
+            StockPriceMinuteEntity stockPriceMinuteEntity = stockPriceMinuteEntityList.get(
+                    stockPriceMinuteEntityList.size() - 1
+            );
+            if (null != stockPriceMinuteEntity && null != stockPriceMinuteEntity.getDt()
+                    && stockPriceMinuteEntity.getDt().equals(lastDealDate)) {
+                getRealtime = false;
+            }
+        }
+
+        if (getRealtime) {
+            StockRealtimeLinePo stockRealtimeLinePo = stockRealtimeService.line(stockId);
+            if (null != stockRealtimeLinePo && null != stockRealtimeLinePo.getLineNode()) {
+                List<StockRealtimeNodePo> lineNodeList = stockRealtimeLinePo.getLineNode();
+                for (StockRealtimeNodePo stockRealtimeNodePo : lineNodeList) {
+                    StockPriceMinuteEntity stockPriceMinuteEntity = new StockPriceMinuteEntity();
+                    stockPriceMinuteEntity.setDt(lastDealDate);
+                    stockPriceMinuteEntity.setTime(stockRealtimeNodePo.getTime());
+                    stockPriceMinuteEntity.setPrice(stockRealtimeNodePo.getPrice());
+                    stockPriceMinuteEntity.setAvgPrice(stockRealtimeNodePo.getAvgPrice());
+                    stockPriceMinuteEntity.setDealNum(stockRealtimeNodePo.getDealNum());
+                }
+            }
+        }
+
+        Collections.reverse(stockPriceMinuteEntityList);
+
+        List<String> dtList = new LinkedList<>();
+        List<List<Object>> fiveDayList = new LinkedList<>();
+        for (StockPriceMinuteEntity stockPriceMinuteEntity : stockPriceMinuteEntityList) {
+            if (null == stockPriceMinuteEntity) {
+                continue;
+            }
+            if (!dtList.contains(stockPriceMinuteEntity.getDt())) {
+                dtList.add(stockPriceMinuteEntity.getDt());
+            }
+            if (dtList.size() > 5) {
+                break;
+            }
+            List<Object> oneMinList = new LinkedList<>();
+            oneMinList.add(stockPriceMinuteEntity.getDt());
+            oneMinList.add(stockPriceMinuteEntity.getTime());
+            oneMinList.add(stockPriceMinuteEntity.getPrice());
+            oneMinList.add(stockPriceMinuteEntity.getAvgPrice());
+            oneMinList.add(stockPriceMinuteEntity.getDealNum());
+            fiveDayList.add(oneMinList);
+        }
+
+        Collections.reverse(fiveDayList);
+        return fiveDayList;
     }
 }

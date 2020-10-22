@@ -53,4 +53,11 @@ public interface StockPriceMinuteMapper {
      * @return
      */
     Boolean createBak();
+
+    /**
+     * 获取近5天的数据
+     * @param stockId
+     * @return
+     */
+    List<StockPriceMinuteEntity> fiveDay(Integer stockId);
 }

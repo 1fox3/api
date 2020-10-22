@@ -45,11 +45,33 @@ public interface StockOfflineService {
     List<List<Object>> day(Integer stockId);
 
     /**
-     * 股票单天交易数据
+     * 股票按天交易数据
      * @param stockId
      * @param fqType
      * @return
      */
     List<List<Object>> day(Integer stockId, Integer fqType);
 
+    /**
+     * 股票按周交易数据
+     * @param stockId
+     * @param fqType
+     * @return
+     */
+    List<List<Object>> week(Integer stockId, Integer fqType);
+
+    /**
+     * 股票按月交易数据
+     * @param stockId
+     * @param fqType
+     * @return
+     */
+    List<List<Object>> month(Integer stockId, Integer fqType);
+
+    /**
+     * 近5天交易日分钟成交数据
+     * @param stockId
+     * @return
+     */
+    List<List<Object>> fiveDayMin(Integer stockId);
 }

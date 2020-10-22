@@ -79,4 +79,17 @@
     <update id="createBak">
         CREATE TABLE IF NOT EXISTS t_stock_price_minute_bak LIKE t_stock_price_minute;
     </update>
+
+    <select id="fiveDay" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_price_minute
+        WHERE
+            stock_id = #{stockId}
+        ORDER BY
+            dt ASC,
+            time ASC
+        LIMIT 1200;
+    </select>
 </mapper>

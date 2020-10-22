@@ -1,10 +1,7 @@
 package com.fox.api.service.stock.impl;
 
 import com.fox.api.dao.stock.entity.StockEntity;
-import com.fox.api.dao.stock.mapper.StockDealDayMapper;
-import com.fox.api.dao.stock.mapper.StockInfoMapper;
-import com.fox.api.dao.stock.mapper.StockMapper;
-import com.fox.api.dao.stock.mapper.StockPriceDayMapper;
+import com.fox.api.dao.stock.mapper.*;
 import com.fox.api.property.stock.StockProperty;
 import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.service.third.stock.sina.api.SinaStockBaseApi;
@@ -60,6 +57,21 @@ public class StockBaseImpl {
 
     @Autowired
     protected StockPriceDayMapper stockPriceDayMapper;
+
+    @Autowired
+    protected StockDealWeekMapper stockDealWeekMapper;
+
+    @Autowired
+    protected StockPriceWeekMapper stockPriceWeekMapper;
+
+    @Autowired
+    protected StockDealMonthMapper stockDealMonthMapper;
+
+    @Autowired
+    protected StockPriceMonthMapper stockPriceMonthMapper;
+
+    @Autowired
+    protected StockPriceMinuteMapper stockPriceMinuteMapper;
 
     @Autowired
     protected StockInfoMapper stockInfoMapper;

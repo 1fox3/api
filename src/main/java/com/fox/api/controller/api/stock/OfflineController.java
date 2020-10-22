@@ -55,4 +55,21 @@ public class OfflineController {
         fqType = null == fqType ? 0 : fqType;
         return ResultDto.success(stockOfflineService.day(stockId, fqType));
     }
+
+    @RequestMapping("/stock/offline/week")
+    public ResultDto week(Integer stockId, Integer fqType) {
+        fqType = null == fqType ? 0 : fqType;
+        return ResultDto.success(stockOfflineService.week(stockId, fqType));
+    }
+
+    @RequestMapping("/stock/offline/month")
+    public ResultDto month(Integer stockId, Integer fqType) {
+        fqType = null == fqType ? 0 : fqType;
+        return ResultDto.success(stockOfflineService.month(stockId, fqType));
+    }
+
+    @RequestMapping("/stock/offline/fiveDayMin")
+    public ResultDto fiveDayMin(Integer stockId) {
+        return ResultDto.success(stockOfflineService.fiveDayMin(stockId));
+    }
 }
