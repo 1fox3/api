@@ -160,15 +160,15 @@ public class StockScanSchedule extends StockBaseSchedule {
     public void stockDealStatusScan() {
         if (StockUtil.todayIsDealDate(StockConst.SM_A)) {
             Integer stockId = 0;
-            Integer onceLimit = 200;
             for (Integer stockMarket : StockConst.SM_A_LIST) {
+                stockId = 0;
                 try{
                     while (true) {
                         List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
                                 2,
                                 stockId,
                                 stockMarket,
-                                onceLimit.toString()
+                                ScanOnceLimit.toString()
                         );
                         if (null == stockEntityList || stockEntityList.isEmpty()) {
                             break;
@@ -191,7 +191,7 @@ public class StockScanSchedule extends StockBaseSchedule {
                             }
 
                         }
-                        if (stockEntityList.size() < onceLimit) {
+                        if (stockEntityList.size() < ScanOnceLimit) {
                             break;
                         }
                     }
@@ -200,7 +200,6 @@ public class StockScanSchedule extends StockBaseSchedule {
                     logger.error(e.getMessage());
                 }
             }
-
         }
     }
 

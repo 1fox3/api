@@ -61,7 +61,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
                     if (null != stockRealtimeEntity) {
                         String lastDealDate = stockRealtimeEntity.getCurrentDate();
                         if (null != lastDealDate && !lastDealDate.equals("") && !lastDealDate.equals(currentDealDate)) {
-                            logger.error(stockCodeProperty.getStockMarket() + ":" + lastDealDate);
+                            logger.info(stockCodeProperty.getStockMarket() + ":" + lastDealDate);
                             //设置最新交易日期
                             this.stockRedisUtil.set(lastDealDateCacheKey, lastDealDate);
                             refreshPreDealDate(stockCodeProperty.getStockMarket(), currentDealDate, lastDealDate);
