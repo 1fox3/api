@@ -3,17 +3,17 @@ package com.fox.api.util;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 日期时间工具
  * @author lusongsong
  */
 public class DateUtil {
-    private static final List weekList = Arrays.asList("星期日","星期一","星期二","星期三","星期四","星期五","星期六");
+    /**
+     * 星期列表
+     */
+    private static final List weekList = Arrays.asList("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
     /**
      * 年期格式
      */
@@ -34,7 +34,7 @@ public class DateUtil {
     /**
      * 星期格式
      */
-    public static final String WEEK_FORMAT_1 = "EEEE";
+    public static final String WEEK_FORMAT_1 = "E";
 
     /**
      * 格式类
@@ -223,7 +223,7 @@ public class DateUtil {
     public static String getDayInWeekStr(String dateStr, String format) throws ParseException {
         simpleDateFormat.applyPattern(format);
         Date date = simpleDateFormat.parse(dateStr);
-        SimpleDateFormat sdf = new SimpleDateFormat(WEEK_FORMAT_1);
+        SimpleDateFormat sdf = new SimpleDateFormat(WEEK_FORMAT_1, Locale.ENGLISH);
         return sdf.format(date);
     }
 
