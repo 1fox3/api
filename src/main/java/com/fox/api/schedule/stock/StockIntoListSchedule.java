@@ -22,16 +22,18 @@ import java.util.Map;
 public class StockIntoListSchedule extends StockBaseSchedule {
     private Logger logger = LoggerFactory.getLogger(getClass());
     /**
+     * 缓存key修改前缀
+     */
+    private String cacheNamePre = "pre";
+    /**
      * 清楚缓存中的股票信息，并重新填充
      */
     @LogShowTimeAnt
-    public void clearStockCacheInfo() {
+    public void refreshStockCacheInfo() {
         try {
             if (isDealDate(StockConst.SM_A, DateUtil.getCurrentDate())) {
-                this.stockRedisUtil.delete(this.redisStockHash);
-                this.stockRedisUtil.delete(this.redisStockList);
-                this.stockRedisUtil.delete(this.redisStockIdList);
-                this.stockIntoList();
+                stockIntoDBToRedis();
+                clearStockCacheData();
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -53,7 +55,6 @@ public class StockIntoListSchedule extends StockBaseSchedule {
                 this.stockRedisUtil.delete(this.redisRealtimeRankDealNumZSet);
                 this.stockRedisUtil.delete(this.redisRealtimeRankDealMoneyZSet);
                 this.stockRedisUtil.delete(this.stockRealtimeStockUptickRateStatistics);
-                this.stockIntoList();
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -65,11 +66,18 @@ public class StockIntoListSchedule extends StockBaseSchedule {
      */
     @LogShowTimeAnt
     public void stockIntoList() {
-        int startId = 0;
         if (this.stockRedisUtil.hasKey(this.redisStockList) && 0 != this.stockRedisUtil.lSize(this.redisStockList)) {
             return;
         }
+        stockIntoDBToRedis();
+    }
+
+    /**
+     * 数据从数据导入缓存
+     */
+    public void stockIntoDBToRedis() {
         List<StockEntity> stockEntityList;
+        int startId = 0;
         String limit = "500";
         List<Integer> idList = new LinkedList<>();
         Map<String, StockEntity> stockEntityMap = new LinkedHashMap<>();
@@ -80,17 +88,19 @@ public class StockIntoListSchedule extends StockBaseSchedule {
                     break;
                 }
                 startId = stockEntityList.get(stockEntityList.size() - 1).getId();
-                this.stockRedisUtil.lPushAll(this.redisStockList, stockEntityList);
+                this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockList, stockEntityList);
                 idList.clear();
                 stockEntityMap.clear();
                 for (StockEntity stockEntity : stockEntityList) {
                     idList.add(stockEntity.getId());
                     stockEntityMap.put(String.valueOf(stockEntity.getId()), stockEntity);
                 }
-                this.stockRedisUtil.hPutAll(this.redisStockHash, stockEntityMap);
-                this.stockRedisUtil.lPushAll(this.redisStockIdList, idList);
+                this.stockRedisUtil.hPutAll(cacheNamePre + this.redisStockHash, stockEntityMap);
+                this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockIdList, idList);
             }
         }
-
+        this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockList, this.redisStockList);
+        this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockHash, this.redisStockHash);
+        this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockIdList, this.redisStockIdList);
     }
 }

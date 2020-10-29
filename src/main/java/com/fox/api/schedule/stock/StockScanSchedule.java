@@ -25,6 +25,8 @@ import java.util.*;
  */
 @Component
 public class StockScanSchedule extends StockBaseSchedule {
+    @Autowired
+    StockIntoListSchedule stockIntoListSchedule;
     /**
      * 单词扫描股票代码数
      */
@@ -182,11 +184,15 @@ public class StockScanSchedule extends StockBaseSchedule {
                             stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
                             String stockCode = stockEntity.getStockCode();
                             if (sinaStockRealtimePoMap.containsKey(stockCode)) {
-                                try {
-                                    syncStockDealStatus(stockEntity, sinaStockRealtimePoMap.get(stockCode));
-                                } catch (Exception e) {
-                                    logger.error(Integer.toString(stockId));
-                                    logger.error(e.getMessage());
+                                StockRealtimePo stockRealtimePo = sinaStockRealtimePoMap.get(stockCode);
+                                //本地标记当前无交易或者接口获取的交易状态不正常则更新
+                                if (1 == stockEntity.getStockStatus() || "00" != stockRealtimePo.getDealStatus()) {
+                                    try {
+                                        syncStockDealStatus(stockEntity, sinaStockRealtimePoMap.get(stockCode));
+                                    } catch (Exception e) {
+                                        logger.error(Integer.toString(stockId));
+                                        logger.error(e.getMessage());
+                                    }
                                 }
                             }
 
@@ -201,6 +207,7 @@ public class StockScanSchedule extends StockBaseSchedule {
                 }
             }
         }
+        stockIntoListSchedule.refreshStockCacheInfo();
     }
 
     /**

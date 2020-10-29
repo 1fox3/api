@@ -1,6 +1,7 @@
 package com.fox.api.util.redis;
 
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -848,6 +849,22 @@ public abstract class RedisUtil {
         } catch (Throwable e) {
             this.logThrowable(e);
             return new HashSet();
+        }
+    }
+
+    /**
+     * 缓存key重命名
+     * @param oldKey
+     * @param newKey
+     * @return
+     */
+    public Boolean rename(String oldKey, String newKey) {
+        try {
+            this.getRedisTemplate().rename(oldKey, newKey);
+            return true;
+        } catch (Throwable e) {
+            this.logThrowable(e);
+            return false;
         }
     }
 }
