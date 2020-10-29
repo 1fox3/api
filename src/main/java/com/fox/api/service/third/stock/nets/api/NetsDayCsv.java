@@ -3,10 +3,12 @@ package com.fox.api.service.third.stock.nets.api;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.entity.po.third.stock.StockDealDayPo;
 import com.fox.api.util.DateUtil;
+import com.fox.api.util.FileUtil;
 import com.fox.api.util.HttpUtil;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +41,44 @@ public class NetsDayCsv extends NetsStockBaseApi {
      * MCAP:流通市值
      */
     private static String fieldList = "TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP";
+
+    /**
+     * 稳定日期
+     */
+    protected Integer stableDay = 60;
+
+    /**
+     * 获取本地文件保存路径
+     * @param params
+     * @return
+     */
+    protected String saveFile(Map<String, String> params) {
+        String startDate = params.containsKey("startDate") ? params.get("startDate") : "";
+        String endDate = params.containsKey("endDate") ? params.get("endDate") : "";
+        if (!startDate.endsWith("-01-01") || !endDate.endsWith("-12-31")) {
+            return "";
+        }
+        String startYear = startDate.replace("-01-01", "");
+        String endYear = endDate.replace("-12-31", "");
+        if (!startYear.equals(endYear)) {
+            return "";
+        }
+        String stableDate = DateUtil.getRelateDate(0, 0, -stableDay, DateUtil.DATE_FORMAT_1);
+        try {
+            if (DateUtil.compare(endDate, stableDate, DateUtil.DATE_FORMAT_1)) {
+                String filePath = saveFilePath(params, getClass().getSimpleName());
+                StringBuffer stringBuffer = new StringBuffer();
+                stringBuffer.append(filePath);
+                stringBuffer.append("/");
+                stringBuffer.append(startYear);
+                stringBuffer.append(".txt");
+                return stringBuffer.toString().replace("//", "/");
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
     /**
      * 构建csv文件地址
@@ -75,13 +115,23 @@ public class NetsDayCsv extends NetsStockBaseApi {
      */
     public List<StockDealDayPo> getDealDayInfo(Map<String, String> params) {
         List<StockDealDayPo> stockDealDayPoList = new ArrayList<>();
-        String csvFileUrl = getDealCsvUrl(params);
-        HttpUtil httpUtil = new HttpUtil();
-        httpUtil.setUrl(csvFileUrl).setOriCharset("GBK");
-        HttpResponseDto httpResponse = null;
+        String filePath = saveFile(params);
+        filePath = null == filePath ? "" : filePath;
         try {
-            httpResponse = httpUtil.request();
-            String dealString = httpResponse.getContent();
+            String dealString = null;
+            Boolean writeFile = false;
+            if (!filePath.isEmpty()) {
+                dealString = FileUtil.read(filePath);
+            }
+            if (null == dealString || dealString.isEmpty()) {
+                writeFile = true;
+                String csvFileUrl = getDealCsvUrl(params);
+                HttpUtil httpUtil = new HttpUtil();
+                httpUtil.setUrl(csvFileUrl).setOriCharset("GBK");
+                HttpResponseDto httpResponse = null;
+                httpResponse = httpUtil.request();
+                dealString = httpResponse.getContent();
+            }
             if (null != dealString && dealString.length() > 0) {
                 String[] dealStringArr = dealString.split("\n");
                 for (int i = 1; i < dealStringArr.length; i++) {
@@ -145,6 +195,11 @@ public class NetsDayCsv extends NetsStockBaseApi {
                 }
             }
             Collections.reverse(stockDealDayPoList);
+
+            if (writeFile && null != dealString && !dealString.isEmpty()
+                    && !stockDealDayPoList.isEmpty() && !filePath.isEmpty()) {
+                FileUtil.coverWrite(filePath, dealString);
+            }
             return stockDealDayPoList;
         } catch (IOException e) {
             e.printStackTrace();

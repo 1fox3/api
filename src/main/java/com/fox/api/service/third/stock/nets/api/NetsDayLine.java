@@ -2,6 +2,7 @@ package com.fox.api.service.third.stock.nets.api;
 
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.DateUtil;
+import com.fox.api.util.FileUtil;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
 import com.fox.api.entity.po.third.stock.StockDealPo;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -40,6 +42,40 @@ public class NetsDayLine extends NetsStockBaseApi {
      * 默认复权类型
      */
     private String rehabilitationType = "kline";
+    /**
+     * 稳定日期
+     */
+    protected Integer stableDay = 60;
+
+    /**
+     * 获取本地文件保存路径
+     * @param params
+     * @return
+     */
+    protected String saveFile(Map<String, String> params) {
+        String year = params.containsKey("year") ? params.get("year") : "";
+        String rehabilitationType = params.containsKey("rehabilitationType") ? params.get("rehabilitationType") : "";
+        if (null == year || year.isEmpty()) {
+            return "";
+        }
+        String stableDate = DateUtil.getRelateDate(0, 0, -stableDay, DateUtil.DATE_FORMAT_1);
+        try {
+            if (DateUtil.compare(year + "-12-31", stableDate, DateUtil.DATE_FORMAT_1)) {
+                String filePath = saveFilePath(params, getClass().getSimpleName());
+                StringBuffer stringBuffer = new StringBuffer();
+                stringBuffer.append(filePath);
+                stringBuffer.append("/");
+                stringBuffer.append(rehabilitationType);
+                stringBuffer.append("/");
+                stringBuffer.append(year);
+                stringBuffer.append(".txt");
+                return stringBuffer.toString().replace("//", "/");
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
     /**
      * 获取线图数据
@@ -84,16 +120,39 @@ public class NetsDayLine extends NetsStockBaseApi {
         String url = "";
         HttpResponseDto httpResponse;
         try {
+            String year = "";
+            String filePath = "";
+            Map<String, String> fileParams = new HashMap<>(3);
+            fileParams.put("rehabilitationType", rehabilitationType);
+            fileParams.put("netsStockMarketPY", netsCodeInfoMap.get("netsStockMarketPY"));
+            fileParams.put("netsStockCode", stockCode);
             for (int i = startYear; i <= endYear; i++) {
+                year = String.valueOf(i);
                 url = demoUrl.replace("{stockMarketPY}", netsCodeInfoMap.get("netsStockMarketPY"))
                         .replace("{rehabilitationType}", rehabilitationType)
-                        .replace("{year}", String.valueOf(i))
+                        .replace("{year}", year)
                         .replace("{stockCode}", stockCode);
-                HttpUtil httpUtil = new HttpUtil();
-                httpUtil.setUrl(url).setOriCharset("GBK");
-                httpResponse = httpUtil.request();
-                StockDayLinePo currentStockDayLineEntity = this.handleResponse(httpResponse.getContent());
+                fileParams.put("year", year);
+                filePath = saveFile(fileParams);
+                String dealString = null;
+                Boolean writeFile = false;
+                if (!filePath.isEmpty()) {
+                    dealString = FileUtil.read(filePath);
+                }
+                if (null == dealString || dealString.isEmpty()) {
+                    writeFile = true;
+                    HttpUtil httpUtil = new HttpUtil();
+                    httpUtil.setUrl(url).setOriCharset("GBK");
+                    httpResponse = httpUtil.request();
+                    dealString = httpResponse.getContent();
+                }
+                StockDayLinePo currentStockDayLineEntity = this.handleResponse(dealString);
                 List<StockDealPo> list = currentStockDayLineEntity.getLineNode();
+                if (writeFile && null != filePath && !filePath.isEmpty() &&
+                        null != dealString && !dealString.isEmpty() &&
+                        null != list && !list.isEmpty()) {
+                    FileUtil.coverWrite(filePath, dealString);
+                }
                 List<StockDealPo> filterList = new LinkedList<>();
                 if (null != list && list.size() > 0) {
                     for (StockDealPo stockDayNodeEntity : list) {

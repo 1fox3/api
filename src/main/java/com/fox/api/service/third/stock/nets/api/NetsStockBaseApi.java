@@ -2,9 +2,9 @@ package com.fox.api.service.third.stock.nets.api;
 
 import com.fox.api.constant.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
-import com.fox.api.service.third.stock.sina.api.SinaStockBaseApi;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 网易股票接口基类
@@ -78,5 +78,27 @@ public class NetsStockBaseApi {
         stringBuffer.append(NetsStockBaseApi.getNetsStockPreCode(stockEntity.getStockMarket()));
         stringBuffer.append(stockEntity.getStockCode());
         return stringBuffer.toString();
+    }
+
+    /**
+     * 获取文件存储路径
+     * @param params
+     * @param dataName
+     * @return
+     */
+    protected String saveFilePath(Map<String, String> params, String dataName) {
+        String netsStockCode = params.containsKey("netsStockCode") ? params.get("netsStockCode") : "";
+        String netsStockMarketPY = params.containsKey("netsStockMarketPY") ? params.get("netsStockMarketPY") : "";
+        //去掉首位补充字符
+        netsStockCode = netsStockCode.substring(1);
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("/nets/");
+        stringBuffer.append(dataName);
+        stringBuffer.append("/");
+        stringBuffer.append(netsStockMarketPY);
+        stringBuffer.append("/");
+        stringBuffer.append(netsStockCode.replaceAll("(\\d{2})", "$1/"));
+        stringBuffer.append("/");
+        return stringBuffer.toString().replace("//", "/");
     }
 }
