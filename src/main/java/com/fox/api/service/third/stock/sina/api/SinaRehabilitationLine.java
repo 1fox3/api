@@ -11,17 +11,23 @@ import java.util.*;
 
 /**
  * 获取复权线图
+ *
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
 public class SinaRehabilitationLine extends SinaStockBaseApi {
-    //样例链接 http://finance.sina.com.cn/realstock/company/sh603383/qianfuquan.js?d=20200330
+    /**
+     * 样例链接 http://finance.sina.com.cn/realstock/company/sh603383/qianfuquan.js?d=20200330
+     */
     private static String demoUrl = "http://finance.sina.com.cn/realstock/company/{stockCode}/{rehabilitationType}.js?d={date}";
-    //复权类型
+    /**
+     * 复权类型
+     */
     private static List<String> rehabilitationTypeList = Arrays.asList("qianfuquan", "houfuquan");
 
     /**
      * 获取复权信息
+     *
      * @param stockEntity
      * @param rehabilitationType
      * @param date
@@ -49,6 +55,7 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
 
     /**
      * 处理返回信息
+     *
      * @param response
      * @return
      */
@@ -58,8 +65,8 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
         //给json字符串的key加双引号
         response = this.handleJsonStr(response);
         JSONArray jsonArray = JSONArray.fromObject(response);
-        JSONObject jsonObject = (JSONObject)jsonArray.get(0);
-        JSONObject dataObject = (JSONObject)jsonObject.get("data");
+        JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+        JSONObject dataObject = (JSONObject) jsonObject.get("data");
         Iterator<String> dataKeyIterator = dataObject.keys();
         Map<String, Float> map = new TreeMap<>();
         while (dataKeyIterator.hasNext()) {
@@ -75,6 +82,7 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
 
     /**
      * 去掉返回数据中的注释信息
+     *
      * @param response
      * @return
      */

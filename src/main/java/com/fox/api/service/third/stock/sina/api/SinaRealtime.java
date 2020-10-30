@@ -17,6 +17,7 @@ import java.util.*;
 
 /**
  * 实时信息
+ *
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
@@ -35,6 +36,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 获取单只股票的实时数据
+     *
      * @param stockEntity
      * @return
      */
@@ -53,6 +55,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 获取批量股票的实时数据
+     *
      * @param stockEntityList
      * @return
      */
@@ -81,6 +84,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 处理接口返回
+     *
      * @param response
      * @return
      */
@@ -88,7 +92,7 @@ public class SinaRealtime extends SinaStockBaseApi {
         HashMap<String, StockRealtimePo> hashMap = new HashMap<>();
         if (response.contains(";")) {
             String[] responseArr = response.trim().split(";");
-            for (int i = 0; i< responseArr.length; i++) {
+            for (int i = 0; i < responseArr.length; i++) {
                 if (!responseArr[i].equals("")) {
                     String stockCodeStr = getStockCodeStr(responseArr[i]);
                     String key = getStockCode(stockCodeStr);
@@ -104,6 +108,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 获取新浪股票代码
+     *
      * @param response
      * @return
      */
@@ -117,6 +122,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 获取返回中的股票编号
+     *
      * @param stockCodeStr
      * @return
      */
@@ -131,6 +137,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 获取股票集市
+     *
      * @param stockCodeStr
      * @return
      */
@@ -145,6 +152,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 获取股票数据实体
+     *
      * @param response
      * @return
      */
@@ -170,6 +178,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 构建中国股票信息
+     *
      * @param responseArr
      * @return
      */
@@ -250,7 +259,7 @@ public class SinaRealtime extends SinaStockBaseApi {
             if (sellList.size() > 0) {
                 Collections.reverse(sellPriceList);
                 List<Map<String, BigDecimal>> list = new LinkedList<>();
-                for(BigDecimal price : sellPriceList) {
+                for (BigDecimal price : sellPriceList) {
                     list.add(sellList.get(price));
                 }
                 stockRealtimePo.setSellPriceList(list);
@@ -258,7 +267,7 @@ public class SinaRealtime extends SinaStockBaseApi {
             if (buyList.size() > 0) {
                 Collections.sort(buyPriceList);
                 List<Map<String, BigDecimal>> list = new LinkedList<>();
-                for(BigDecimal price : buyPriceList) {
+                for (BigDecimal price : buyPriceList) {
                     list.add(0, buyList.get(price));
                 }
                 stockRealtimePo.setBuyPriceList(list);
@@ -297,6 +306,7 @@ public class SinaRealtime extends SinaStockBaseApi {
 
     /**
      * 构建香港股票信息
+     *
      * @param responseArr
      * @return
      */

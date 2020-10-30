@@ -14,15 +14,19 @@ import java.util.regex.Pattern;
 
 /**
  * 获取成交占比信息
+ *
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
 public class SinaDealRatio extends SinaStockBaseApi {
-    //接口
+    /**
+     * 样例链接 http://market.finance.sina.com.cn/pricehis.php?symbol=sh603383&startdate=2019-12-01&enddate=2019-12-13
+     */
     private static String apiUrl = "http://market.finance.sina.com.cn/pricehis.php";
 
     /**
      * 获取成交占比信息
+     *
      * @param stockEntity
      * @param startDate
      * @param endDate
@@ -47,6 +51,7 @@ public class SinaDealRatio extends SinaStockBaseApi {
 
     /**
      * 解析返回的信息
+     *
      * @param response
      * @return
      */
@@ -60,23 +65,26 @@ public class SinaDealRatio extends SinaStockBaseApi {
         String patternStr = "<td>(.*)<\\/td>*?";
         Pattern pattern = Pattern.compile(patternStr);
         Matcher matcher = pattern.matcher(response);
-        StockDealNumPo stockDealNumEntity = new StockDealNumPo();
+        StockDealNumPo stockDealNumPo = new StockDealNumPo();
         int i = 0;
         while (matcher.find()) {
             i++;
             String e = matcher.group(1);
-            if (1 == i) {//匹配价格
-                stockDealNumEntity = new StockDealNumPo();
-                stockDealNumEntity.setPrice(new BigDecimal(e));
+            //匹配价格
+            if (1 == i) {
+                stockDealNumPo = new StockDealNumPo();
+                stockDealNumPo.setPrice(new BigDecimal(e));
             }
-            if (2 == i) {//匹配成交量
-                stockDealNumEntity.setDealNum(Long.valueOf(e));
+            //匹配成交量
+            if (2 == i) {
+                stockDealNumPo.setDealNum(Long.valueOf(e));
             }
-            if (3 == i) {//匹配占比
+            //匹配占比
+            if (3 == i) {
                 //去掉占比的百分号
                 e = e.replace("%", "");
-                stockDealNumEntity.setRatio(new BigDecimal(e));
-                list.add(stockDealNumEntity);
+                stockDealNumPo.setRatio(new BigDecimal(e));
+                list.add(stockDealNumPo);
                 i = 0;
             }
         }

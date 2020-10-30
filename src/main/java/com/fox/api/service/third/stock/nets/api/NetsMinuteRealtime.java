@@ -15,25 +15,38 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-@Component
 /**
  * 实时分钟信息
+ *
  * @author lusongsong
+ * @date 2020/3/5 18:13
  */
+@Component
 public class NetsMinuteRealtime extends NetsStockBaseApi {
-    //样例链接
+    /**
+     * 样例链接
+     * http://img1.money.126.net/data/hs/time/today/1399001.json
+     */
     private static String demoUrl = "http://img1.money.126.net/data/{stockMarketPY}/time/today/{stockCode}.json";
-    //http://img1.money.126.net/data/hk/time/today/00700.json
 
     /**
      * 获取分钟数据
+     *
      * @param netsCodeInfoMap
      * @return
      */
     public StockRealtimeLinePo getRealtimeData(Map<String, String> netsCodeInfoMap) {
+        if (null == netsCodeInfoMap || !netsCodeInfoMap.containsKey("netsStockMarketPY")
+                || !netsCodeInfoMap.containsKey("netsStockCode")) {
+            return new StockRealtimeLinePo();
+        }
+        String netsStockCode = netsCodeInfoMap.get("netsStockCode");
+        netsStockCode = null == netsStockCode ? "" : netsStockCode;
+        String netsStockMarketPY = netsCodeInfoMap.get("netsStockMarketPY");
+        netsStockMarketPY = null == netsStockMarketPY ? "" : netsStockMarketPY;
         try {
-            String url = demoUrl.replace("{stockMarketPY}", netsCodeInfoMap.get("netsStockMarketPY"))
-                    .replace("{stockCode}", netsCodeInfoMap.get("netsStockCode"));
+            String url = demoUrl.replace("{stockMarketPY}", netsStockMarketPY)
+                    .replace("{stockCode}", netsStockCode);
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(url).setOriCharset("GBK");
             HttpResponseDto httpResponse = httpUtil.request();
@@ -47,6 +60,7 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
 
     /**
      * 处理返回数据
+     *
      * @param response
      * @return
      */
@@ -82,11 +96,11 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
                 );
             }
             if (responseObject.containsKey("data")) {
-                JSONArray dataArr = (JSONArray)responseObject.get("data");
+                JSONArray dataArr = (JSONArray) responseObject.get("data");
                 List<StockRealtimeNodePo> nodeList = new LinkedList();
                 int dataLen = dataArr.size();
                 for (int i = 0; i < dataLen; i++) {
-                    JSONArray noteArr = (JSONArray)dataArr.get(i);
+                    JSONArray noteArr = (JSONArray) dataArr.get(i);
                     if (4 == noteArr.size()) {
                         StockRealtimeNodePo stockRealtimeNodeEntity = new StockRealtimeNodePo();
                         String timeStr = noteArr.getString(0);

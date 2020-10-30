@@ -11,38 +11,39 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
- * 获取近4天的分钟粒度交易信息
+ * 获取近4天的分钟粒度交易信息(数据不对，禁止使用)
+ *
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
 public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
-    //样例链接
+    /**
+     * 样例链接 http://img1.money.126.net/data/hs/time/4days/1399001.json
+     */
     private static String demoUrl = "http://img1.money.126.net/data/{stockMarketPY}/time/4days/{stockCode}.json";
-    private String stockMarketPY = "hs";
 
     /**
      * 获取前4天分钟数据
-     * @param stockCode
-     * @param stockMarket
+     *
+     * @param netsCodeInfoMap
      * @return
      */
-    public List<StockRealtimeLinePo> getFourDaysMinuteLine(String stockCode, String stockMarket) {
-        this.stockMarketPY = stockMarket;
-        return this.getFourDaysMinuteLine(stockCode);
-    }
-
-    /**
-     * 获取分钟数据
-     * @param stockCode
-     * @return
-     */
-    public List<StockRealtimeLinePo> getFourDaysMinuteLine(String stockCode) {
+    public List<StockRealtimeLinePo> getFourDaysMinuteLine(Map<String, String> netsCodeInfoMap) {
         List<StockRealtimeLinePo> list = new LinkedList<>();
+        if (null == netsCodeInfoMap || !netsCodeInfoMap.containsKey("netsStockMarketPY")
+                || !netsCodeInfoMap.containsKey("netsStockCode")) {
+            return list;
+        }
+        String netsStockCode = netsCodeInfoMap.get("netsStockCode");
+        netsStockCode = null == netsStockCode ? "" : netsStockCode;
+        String netsStockMarketPY = netsCodeInfoMap.get("netsStockMarketPY");
+        netsStockMarketPY = null == netsStockMarketPY ? "" : netsStockMarketPY;
         try {
-            String url = demoUrl.replace("{stockMarketPY}", this.stockMarketPY)
-                    .replace("{stockCode}", stockCode);
+            String url = demoUrl.replace("{stockMarketPY}", netsStockMarketPY)
+                    .replace("{stockCode}", netsStockCode);
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(url).setOriCharset("GBK");
             HttpResponseDto httpResponse = httpUtil.request();
@@ -55,6 +56,7 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
 
     /**
      * 处理返回数据
+     *
      * @param response
      * @return
      */
@@ -66,7 +68,7 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
         String stockName = responseObject.containsKey("name") ? responseObject.getString("name") : "";
 
         if (responseObject.containsKey("data")) {
-            JSONArray totalDataArr = (JSONArray)responseObject.get("data");
+            JSONArray totalDataArr = (JSONArray) responseObject.get("data");
             int totalDataLen = totalDataArr.size();
             for (int i = 0; i < totalDataLen; i++) {
                 JSONObject dataObject = (JSONObject) totalDataArr.get(i);
@@ -86,11 +88,11 @@ public class NetsFourDaysMinuteLine extends NetsStockBaseApi {
                     stockRealtimeLineEntity.setDt(dataObject.getString("lastVolume"));
                 }
                 if (dataObject.containsKey("data")) {
-                    JSONArray dataArr = (JSONArray)dataObject.get("data");
+                    JSONArray dataArr = (JSONArray) dataObject.get("data");
                     List<StockRealtimeNodePo> nodeList = new LinkedList();
                     int dataLen = dataArr.size();
                     for (int j = 0; j < dataLen; j++) {
-                        JSONArray noteArr = (JSONArray)dataArr.get(j);
+                        JSONArray noteArr = (JSONArray) dataArr.get(j);
                         if (4 == noteArr.size()) {
                             StockRealtimeNodePo stockRealtimeNodeEntity = new StockRealtimeNodePo();
                             stockRealtimeNodeEntity.setTime(noteArr.getString(0));

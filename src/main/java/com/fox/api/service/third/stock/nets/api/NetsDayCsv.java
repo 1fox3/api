@@ -16,6 +16,7 @@ import java.util.Map;
 
 /**
  * 股票按天成交信息
+ *
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
@@ -49,6 +50,7 @@ public class NetsDayCsv extends NetsStockBaseApi {
 
     /**
      * 获取本地文件保存路径
+     *
      * @param params
      * @return
      */
@@ -82,6 +84,7 @@ public class NetsDayCsv extends NetsStockBaseApi {
 
     /**
      * 构建csv文件地址
+     *
      * @param params
      * @return
      */
@@ -110,6 +113,7 @@ public class NetsDayCsv extends NetsStockBaseApi {
 
     /**
      * 获取交易信息
+     *
      * @param params
      * @return
      */

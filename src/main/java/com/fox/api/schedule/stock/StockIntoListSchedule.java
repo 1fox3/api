@@ -99,8 +99,8 @@ public class StockIntoListSchedule extends StockBaseSchedule {
                 this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockIdList, idList);
             }
         }
-        this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockList, this.redisStockList);
-        this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockHash, this.redisStockHash);
-        this.stockRedisUtil.lPushAll(cacheNamePre + this.redisStockIdList, this.redisStockIdList);
+        this.stockRedisUtil.rename(cacheNamePre + this.redisStockList, this.redisStockList);
+        this.stockRedisUtil.rename(cacheNamePre + this.redisStockHash, this.redisStockHash);
+        this.stockRedisUtil.rename(cacheNamePre + this.redisStockIdList, this.redisStockIdList);
     }
 }

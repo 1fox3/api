@@ -19,6 +19,7 @@ import java.util.*;
 
 /**
  * 股票按天成交信息
+ *
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
@@ -49,6 +50,7 @@ public class NetsDayLine extends NetsStockBaseApi {
 
     /**
      * 获取本地文件保存路径
+     *
      * @param params
      * @return
      */
@@ -79,6 +81,7 @@ public class NetsDayLine extends NetsStockBaseApi {
 
     /**
      * 获取线图数据
+     *
      * @param netsCodeInfoMap
      * @return
      */
@@ -157,7 +160,7 @@ public class NetsDayLine extends NetsStockBaseApi {
                 if (null != list && list.size() > 0) {
                     for (StockDealPo stockDayNodeEntity : list) {
                         Date currentDate = DateUtil.getDateFromStr(stockDayNodeEntity.getDateTime());
-                        if (startDate.compareTo(currentDate) <=0 && currentDate.compareTo(endDate) <= 0) {
+                        if (startDate.compareTo(currentDate) <= 0 && currentDate.compareTo(endDate) <= 0) {
                             filterList.add(stockDayNodeEntity);
                         }
                     }
@@ -182,6 +185,7 @@ public class NetsDayLine extends NetsStockBaseApi {
 
     /**
      * 解析数据返回
+     *
      * @param response
      * @return
      */
@@ -191,7 +195,7 @@ public class NetsDayLine extends NetsStockBaseApi {
             return stockDayLinePo;
         }
         try {
-            JSONObject responseObj = (JSONObject)JSONObject.fromObject(response);
+            JSONObject responseObj = (JSONObject) JSONObject.fromObject(response);
             if (responseObj.containsKey("symbol")) {
                 stockDayLinePo.setStockCode(responseObj.getString("symbol"));
             }
@@ -199,11 +203,11 @@ public class NetsDayLine extends NetsStockBaseApi {
                 stockDayLinePo.setStockName(responseObj.getString("name").replace(" ", ""));
             }
             if (responseObj.containsKey("data")) {
-                JSONArray dataArr = (JSONArray)responseObj.get("data");
+                JSONArray dataArr = (JSONArray) responseObj.get("data");
                 int dataLen = dataArr.size();
                 List<StockDealPo> nodeList = new LinkedList();
                 for (int i = 0; i < dataLen; i++) {
-                    JSONArray singleArr = (JSONArray)dataArr.get(i);
+                    JSONArray singleArr = (JSONArray) dataArr.get(i);
                     if (7 == singleArr.size()) {
                         StockDealPo stockDayNodeEntity = new StockDealPo();
                         stockDayNodeEntity.setDateTime(

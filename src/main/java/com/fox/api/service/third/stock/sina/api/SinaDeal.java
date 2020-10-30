@@ -16,12 +16,13 @@ import java.util.List;
 
 /**
  * 获取成交信息
+ *
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
 public class SinaDeal extends SinaStockBaseApi {
     /**
-     * 接口
+     * 样例链接 http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sz002095&scale=60&ma=no&datalen=1023
      */
     private static String apiUrl = "http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData";
     /**
@@ -31,6 +32,7 @@ public class SinaDeal extends SinaStockBaseApi {
 
     /**
      * 获取交易信息列表
+     *
      * @param stockEntity
      * @param scale
      * @param dataLen
@@ -59,6 +61,7 @@ public class SinaDeal extends SinaStockBaseApi {
 
     /**
      * 处理接口返回
+     *
      * @param response
      * @return
      */
@@ -67,7 +70,8 @@ public class SinaDeal extends SinaStockBaseApi {
         response = this.handleJsonStr(response);
         List<StockDealPo> list = new LinkedList<>();
         try {
-            JSONArray jsonArray = JSONArray.fromObject (response); //其中的这个data是接口传来的json数据
+            //其中的这个data是接口传来的json数据
+            JSONArray jsonArray = JSONArray.fromObject(response);
             int arrayLen = jsonArray.size();
             for (int i = 0; i < arrayLen; i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
