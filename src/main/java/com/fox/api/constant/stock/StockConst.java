@@ -1,10 +1,11 @@
-package com.fox.api.constant;
+package com.fox.api.constant.stock;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * 股票相关静态常量
+ *
  * @author lusongsong
  * @date 2020/10/8 11:02
  */

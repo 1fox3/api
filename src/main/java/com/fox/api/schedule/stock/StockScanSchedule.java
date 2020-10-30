@@ -1,13 +1,10 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.constant.StockConst;
+import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
-import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.property.stock.StockKindInfoProperty;
-import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
-import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.service.third.stock.sina.api.SinaStockBaseApi;
 import com.fox.api.util.StockUtil;

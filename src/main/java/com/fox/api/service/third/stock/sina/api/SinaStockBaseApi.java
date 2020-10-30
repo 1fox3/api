@@ -1,6 +1,6 @@
 package com.fox.api.service.third.stock.sina.api;
 
-import com.fox.api.constant.StockConst;
+import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 
 import java.util.Arrays;

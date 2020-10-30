@@ -1,6 +1,6 @@
 package com.fox.api.schedule.stock;
 
-import com.fox.api.constant.StockConst;
+import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;

@@ -1,7 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.constant.StockConst;
+import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockInfoEntity;
@@ -11,7 +11,6 @@ import com.fox.api.dao.stock.mapper.StockPriceDayMapper;
 import com.fox.api.entity.po.third.stock.StockDayLinePo;
 import com.fox.api.entity.po.third.stock.StockDealDayPo;
 import com.fox.api.entity.po.third.stock.StockDealPo;
-import com.fox.api.entity.property.stock.StockCodeProperty;
 import com.fox.api.service.third.stock.nets.api.NetsDayCsv;
 import com.fox.api.service.third.stock.nets.api.NetsDayLine;
 import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;

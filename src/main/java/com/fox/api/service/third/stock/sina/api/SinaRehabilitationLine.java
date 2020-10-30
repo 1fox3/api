@@ -7,6 +7,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -17,9 +18,9 @@ import java.util.*;
  */
 public class SinaRehabilitationLine extends SinaStockBaseApi {
     /**
-     * 样例链接 http://finance.sina.com.cn/realstock/company/sh603383/qianfuquan.js?d=20200330
+     * 样例链接 http://finance.sina.com.cn/realstock/company/sh603383/qianfuquan.js
      */
-    private static String demoUrl = "http://finance.sina.com.cn/realstock/company/{stockCode}/{rehabilitationType}.js?d={date}";
+    private static String demoUrl = "http://finance.sina.com.cn/realstock/company/{stockCode}/{rehabilitationType}.js";
     /**
      * 复权类型
      */
@@ -30,18 +31,16 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
      *
      * @param stockEntity
      * @param rehabilitationType
-     * @param date
      * @return
      */
-    public Map<String, Float> getRehabilitationLine(StockEntity stockEntity, String rehabilitationType, String date) {
-        Map<String, Float> map = new HashMap<>();
+    public Map<String, BigDecimal> getRehabilitationLine(StockEntity stockEntity, String rehabilitationType) {
+        Map<String, BigDecimal> map = new HashMap<>();
         try {
             if (!rehabilitationTypeList.contains(rehabilitationType)) {
                 return map;
             }
             String url = demoUrl.replace("{stockCode}", SinaStockBaseApi.getSinaStockCode(stockEntity))
-                    .replace("{rehabilitationType}", rehabilitationType)
-                    .replace("{date}", date);
+                    .replace("{rehabilitationType}", rehabilitationType);
             HttpUtil httpUtil = new HttpUtil();
             httpUtil.setUrl(url).setOriCharset("GBK");
             HttpResponseDto httpResponse = httpUtil.request();
@@ -59,7 +58,7 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
      * @param response
      * @return
      */
-    private Map<String, Float> handleResponse(String response) {
+    private Map<String, BigDecimal> handleResponse(String response) {
         //去掉返回数据中的注释信息
         response = this.clearAnnotation(response);
         //给json字符串的key加双引号
@@ -68,10 +67,10 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
         JSONObject jsonObject = (JSONObject) jsonArray.get(0);
         JSONObject dataObject = (JSONObject) jsonObject.get("data");
         Iterator<String> dataKeyIterator = dataObject.keys();
-        Map<String, Float> map = new TreeMap<>();
+        Map<String, BigDecimal> map = new TreeMap<>();
         while (dataKeyIterator.hasNext()) {
             String key = dataKeyIterator.next();
-            Float value = Float.valueOf(dataObject.getString(key));
+            BigDecimal value = new BigDecimal(dataObject.getString(key));
             if (key.startsWith("_")) {
                 key = key.substring(1);
             }

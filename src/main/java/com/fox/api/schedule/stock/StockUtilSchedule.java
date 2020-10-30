@@ -148,6 +148,5 @@ public class StockUtilSchedule extends StockBaseSchedule {
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
-
     }
 }

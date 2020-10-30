@@ -1,6 +1,6 @@
 package com.fox.api.service.third.stock.nets.api;
 
-import com.fox.api.constant.StockConst;
+import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 
 import java.util.HashMap;

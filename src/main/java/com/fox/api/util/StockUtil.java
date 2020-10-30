@@ -1,14 +1,20 @@
 package com.fox.api.util;
 
-import com.fox.api.constant.StockConst;
+import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.service.third.stock.sina.api.SinaRehabilitationLine;
 import com.fox.api.util.redis.StockRedisUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 股票工具类
+ *
  * @author lusongsong
  * @date 2020/3/30 11:26
  */
@@ -47,20 +53,22 @@ public class StockUtil {
 
     /**
      * 股票专用缓存
+     *
      * @param key
      * @return
      */
     private static String redisGet(String key) {
         String info = "";
-        StockRedisUtil stockRedisUtil = (StockRedisUtil)ApplicationContextUtil.getBean("stockRedisUtil");
+        StockRedisUtil stockRedisUtil = (StockRedisUtil) ApplicationContextUtil.getBean("stockRedisUtil");
         if (stockRedisUtil.hasKey(key)) {
-            info = (String)stockRedisUtil.get(key);
+            info = (String) stockRedisUtil.get(key);
         }
         return null == info ? "" : info;
     }
 
     /**
      * 获取最新交易日的缓存key
+     *
      * @param stockMarket
      * @return
      */
@@ -70,6 +78,7 @@ public class StockUtil {
 
     /**
      * 获取股市的最新交易日
+     *
      * @param stockMarket
      * @return
      */
@@ -80,6 +89,7 @@ public class StockUtil {
 
     /**
      * 获取上个交易日的缓存key
+     *
      * @param stockMarket
      * @return
      */
@@ -89,6 +99,7 @@ public class StockUtil {
 
     /**
      * 获取上个交易日
+     *
      * @param stockMarket
      * @return
      */
@@ -99,6 +110,7 @@ public class StockUtil {
 
     /**
      * 获取下个交易日的缓存key
+     *
      * @param stockMarket
      * @return
      */
@@ -108,6 +120,7 @@ public class StockUtil {
 
     /**
      * 获取下个交易日
+     *
      * @param stockMarket
      * @return
      */
@@ -118,6 +131,7 @@ public class StockUtil {
 
     /**
      * 判断今天是否为交易日
+     *
      * @param stockMarket
      * @return
      */
@@ -128,6 +142,7 @@ public class StockUtil {
 
     /**
      * 判定当前是否为交易时间
+     *
      * @param stockMarket
      * @return
      */
@@ -141,25 +156,25 @@ public class StockUtil {
         if (StockConst.SM_SH.equals(stockMarket) || StockConst.SM_SZ.equals(stockMarket)) {
             //上午交易时间
             if ((currentTime.compareTo(shMorningDealStartTime) >= 0
-                    && currentTime.compareTo(shMorningDealEndTime) <=0)) {
+                    && currentTime.compareTo(shMorningDealEndTime) <= 0)) {
                 return true;
             }
 
             //下午交易时间
             if (currentTime.compareTo(shAfternoonDealStartTime) >= 0
-                    && currentTime.compareTo(shAfternoonDealEndTime) <=0) {
+                    && currentTime.compareTo(shAfternoonDealEndTime) <= 0) {
                 return true;
             }
         }
 
         if (StockConst.SM_HK.equals(stockMarket)) {
             //上午交易时间
-            if ((currentTime.compareTo(hkMorningDealStartTime) >= 0 && currentTime.compareTo(hkMorningDealEndTime) <=0)) {
+            if ((currentTime.compareTo(hkMorningDealStartTime) >= 0 && currentTime.compareTo(hkMorningDealEndTime) <= 0)) {
                 return true;
             }
 
             //下午交易时间
-            if (currentTime.compareTo(hkAfternoonDealStartTime) >= 0 && currentTime.compareTo(hkAfternoonDealEndTime) <=0) {
+            if (currentTime.compareTo(hkAfternoonDealStartTime) >= 0 && currentTime.compareTo(hkAfternoonDealEndTime) <= 0) {
                 return true;
             }
         }
@@ -169,6 +184,7 @@ public class StockUtil {
 
     /**
      * 获取香港交易所token
+     *
      * @return
      */
     public static String hkStockMarketToken() {
@@ -177,6 +193,7 @@ public class StockUtil {
 
     /**
      * 获取股票涨跌幅限制
+     *
      * @param stockEntity
      * @return
      */
@@ -202,5 +219,31 @@ public class StockUtil {
         String stockName = stockEntity.getStockName();
         double limitRate = null != stockName && stockName.contains(StockConst.STOCK_NAME_ST) ? 0.5 : 0.1;
         return new BigDecimal(limitRate).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * 获取交易日列表
+     *
+     * @param stockMarket
+     * @param limit
+     * @return
+     */
+    public static List<String> getDealDateList(Integer stockMarket, Integer limit) {
+        SinaRehabilitationLine sinaRehabilitationLine = new SinaRehabilitationLine();
+        List<String> dateList = new ArrayList<>();
+        if (StockConst.SM_A_LIST.contains(stockMarket)) {
+            StockEntity stockEntity = new StockEntity();
+            stockEntity.setStockMarket(StockConst.SM_A);
+            stockEntity.setStockCode("600519");
+            Map<String, BigDecimal> dateMap = sinaRehabilitationLine.getRehabilitationLine(
+                    stockEntity, "houfuquan"
+            );
+            for (String dt : dateMap.keySet()) {
+                dateList.add(dt);
+            }
+            Collections.reverse(dateList);
+            dateList = dateList.subList(0, (limit > dateList.size() ? dateList.size() : limit) - 1);
+        }
+        return dateList;
     }
 }

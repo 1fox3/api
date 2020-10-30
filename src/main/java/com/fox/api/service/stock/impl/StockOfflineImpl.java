@@ -1,6 +1,6 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.constant.StockConst;
+import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.*;
 import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
 import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;

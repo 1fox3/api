@@ -4,6 +4,7 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.entity.po.third.stock.StockDealNumPo;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.regex.Pattern;
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
+@Component
 public class SinaDealRatio extends SinaStockBaseApi {
     /**
      * 样例链接 http://market.finance.sina.com.cn/pricehis.php?symbol=sh603383&startdate=2019-12-01&enddate=2019-12-13
