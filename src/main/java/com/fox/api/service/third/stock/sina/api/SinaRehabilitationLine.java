@@ -74,6 +74,7 @@ public class SinaRehabilitationLine extends SinaStockBaseApi {
             if (key.startsWith("_")) {
                 key = key.substring(1);
             }
+            key = key.replace("_", "-");
             map.put(key, value);
         }
         return map;

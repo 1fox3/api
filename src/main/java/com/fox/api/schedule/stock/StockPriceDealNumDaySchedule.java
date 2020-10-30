@@ -12,9 +12,13 @@ import com.fox.api.service.stock.StockTableDtService;
 import com.fox.api.service.third.stock.sina.api.SinaDealRatio;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,7 +27,13 @@ import java.util.List;
  * @author lusongsong
  * @date 2020/10/30 15:50
  */
+@Component
 public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements StockScheduleHandler {
+    private Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * 处理时间限制
+     */
+    private Integer requestTimeLimit = 300;
     /**
      * 每次备份记录条数
      */
@@ -51,32 +61,40 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
      */
     @Override
     public void handle(StockEntity stockEntity) {
-        if (null == dealDate || null == stockEntity
-                || null == stockEntity.getStockCode() || null == stockEntity.getStockMarket()) {
-            return;
-        }
-
-        List<StockDealNumPo> stockDealNumPoList = sinaDealRatio.getDealRatio(stockEntity, dealDate, dealDate);
-        if (null == stockDealNumPoList || stockDealNumPoList.isEmpty()) {
-            return;
-        }
-        List<StockPriceDealNumDayEntity> stockPriceDealNumDayEntityList = new ArrayList<>(stockDealNumPoList.size());
-        for (StockDealNumPo stockDealNumPo : stockDealNumPoList) {
-            if (null == stockDealNumPo || null == stockDealNumPo.getPrice() || null == stockDealNumPo.getDealNum()) {
-                continue;
+        try {
+            if (null == dealDate || null == stockEntity
+                    || null == stockEntity.getStockCode() || null == stockEntity.getStockMarket()) {
+                return;
             }
-            StockPriceDealNumDayEntity stockPriceDealNumDayEntity =  new StockPriceDealNumDayEntity();
-            stockPriceDealNumDayEntity.setStockId(stockEntity.getId());
-            stockPriceDealNumDayEntity.setDt(dealDate);
-            stockPriceDealNumDayEntity.setPrice(stockDealNumPo.getPrice());
-            stockPriceDealNumDayEntity.setDealNum(stockDealNumPo.getDealNum());
-            stockPriceDealNumDayEntityList.add(stockPriceDealNumDayEntity);
+
+            List<StockDealNumPo> stockDealNumPoList = sinaDealRatio.getDealRatio(stockEntity, dealDate, dealDate);
+
+            Thread.sleep(requestTimeLimit);
+
+            if (null == stockDealNumPoList || stockDealNumPoList.isEmpty()) {
+                return;
+            }
+
+            List<StockPriceDealNumDayEntity> stockPriceDealNumDayEntityList = new ArrayList<>(stockDealNumPoList.size());
+            for (StockDealNumPo stockDealNumPo : stockDealNumPoList) {
+                if (null == stockDealNumPo || null == stockDealNumPo.getPrice() || null == stockDealNumPo.getDealNum()) {
+                    continue;
+                }
+                StockPriceDealNumDayEntity stockPriceDealNumDayEntity =  new StockPriceDealNumDayEntity();
+                stockPriceDealNumDayEntity.setStockId(stockEntity.getId());
+                stockPriceDealNumDayEntity.setDt(dealDate);
+                stockPriceDealNumDayEntity.setPrice(stockDealNumPo.getPrice());
+                stockPriceDealNumDayEntity.setDealNum(stockDealNumPo.getDealNum());
+                stockPriceDealNumDayEntityList.add(stockPriceDealNumDayEntity);
+            }
+            if (stockPriceDealNumDayEntityList.isEmpty()) {
+                return;
+            }
+            stockPriceDealNumDayMapper.deleteByDate(stockEntity.getId(), dealDate);
+            stockPriceDealNumDayMapper.batchInsert(stockPriceDealNumDayEntityList);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
-        if (stockPriceDealNumDayEntityList.isEmpty()) {
-            return;
-        }
-        stockPriceDealNumDayMapper.deleteByDate(stockEntity.getId(), dealDate);
-        stockPriceDealNumDayMapper.batchInsert(stockPriceDealNumDayEntityList);
     }
 
     /**
@@ -111,6 +129,8 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
                 if (null == delNum || delNum < bakOneLimit) {
                     break;
                 }
+                stockTableDtEntity.setDt(dtList.get(i));
+                stockTableDtService.setBak(stockTableDtEntity);
             }
         }
     }
@@ -138,8 +158,9 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
         if (null == dateList || dateList.isEmpty()) {
             return;
         }
+        Collections.reverse(dateList);
         for (String dt : dateList) {
-            dealDate = DateUtil.getCurrentDate();
+            dealDate = dt;
             logDt();
             aStockMarketScan(this);
         }
