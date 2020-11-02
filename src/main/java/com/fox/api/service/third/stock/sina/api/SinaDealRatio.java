@@ -104,6 +104,10 @@ public class SinaDealRatio extends SinaStockBaseApi {
                 httpUtil.setParam("startdate", startDate);
                 httpUtil.setParam("enddate", endDate);
                 HttpResponseDto httpResponse = httpUtil.request();
+                if (SinaStockBaseApi.isForbidden(httpResponse.getContent())) {
+                    SinaStockBaseApi.handleForbidden();
+                    httpResponse = httpUtil.request();
+                }
                 stockDealNumPoList = this.handleResponse(httpResponse.getContent());
                 if (null != stockDealNumPoList && !stockDealNumPoList.isEmpty()
                         && null != filePath && !filePath.isEmpty()) {

@@ -91,4 +91,23 @@ public class SinaStockBaseApi {
         stringBuffer.append("/");
         return stringBuffer.toString().replace("//", "/");
     }
+
+    /**
+     * 判断是够已被拒绝
+     * @param httpResponse
+     * @return
+     */
+    public static Boolean isForbidden(String httpResponse) {
+        return null != httpResponse && -1 != httpResponse.indexOf("<title>拒绝访问</title>");
+    }
+
+    /**
+     * 处理拒绝
+     */
+    public static void handleForbidden() {
+        try {
+            Thread.sleep(600);
+        } catch (InterruptedException e) {
+        }
+    }
 }

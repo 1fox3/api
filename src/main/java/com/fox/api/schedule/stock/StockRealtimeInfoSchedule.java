@@ -24,7 +24,6 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
     /**
      * 获取实时交易信息
      */
-    @LogShowTimeAnt
     public void stockRealtimeInfo() {
         Integer onceLimit = 200;
         Long stockListSize = this.stockRedisUtil.lSize(this.redisStockList);

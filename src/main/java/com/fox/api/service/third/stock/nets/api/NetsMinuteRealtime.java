@@ -7,6 +7,8 @@ import com.fox.api.util.DateUtil;
 import com.fox.api.util.HttpUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.util.Map;
  */
 @Component
 public class NetsMinuteRealtime extends NetsStockBaseApi {
+    private Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * 样例链接
      * http://img1.money.126.net/data/hs/time/today/1399001.json
@@ -52,8 +55,7 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
             HttpResponseDto httpResponse = httpUtil.request();
             return this.handleResponse(httpResponse.getContent());
         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+            logger.error(e.getMessage());
         }
         return new StockRealtimeLinePo();
     }
@@ -115,10 +117,10 @@ public class NetsMinuteRealtime extends NetsStockBaseApi {
                     stockRealtimeLineEntity.setLineNode(nodeList);
                 }
             }
-            return stockRealtimeLineEntity;
         } catch (Exception e) {
-            return stockRealtimeLineEntity;
+            logger.error(e.getMessage());
         }
+        return stockRealtimeLineEntity;
     }
 
 }

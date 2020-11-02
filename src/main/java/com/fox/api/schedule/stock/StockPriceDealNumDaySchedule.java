@@ -33,7 +33,7 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
     /**
      * 处理时间限制
      */
-    private Integer requestTimeLimit = 300;
+    private Integer requestTimeLimit = 1000;
     /**
      * 每次备份记录条数
      */
@@ -116,7 +116,6 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
         StockTableDtEntity stockTableDtEntity = new StockTableDtEntity();
         stockTableDtEntity.setTable(StockTableDtConst.TABLE_PRICE_DEAL_NUM_DAY);
         stockTableDtEntity.setType(StockTableDtConst.TYPE_DEFAULT);
-        stockTableDtService.insert(stockTableDtEntity);
         List<String> dtList = stockTableDtService.getByType(stockTableDtEntity);
         if (null == dtList || dtList.isEmpty() || dtList.size() < totalDateNum) {
             return;

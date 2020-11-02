@@ -64,7 +64,6 @@ public class StockIntoListSchedule extends StockBaseSchedule {
     /**
      * 每5分钟检查一次,防止缓存失效或者重启导致的缓存数据丢失
      */
-    @LogShowTimeAnt
     public void stockIntoList() {
         if (this.stockRedisUtil.hasKey(this.redisStockList) && 0 != this.stockRedisUtil.lSize(this.redisStockList)) {
             return;

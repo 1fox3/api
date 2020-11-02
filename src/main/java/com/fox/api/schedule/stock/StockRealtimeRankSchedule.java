@@ -19,7 +19,6 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
     /**
      * 每分钟执行一次
      */
-    @LogShowTimeAnt
     public void stockRealtimeRank() {
         Long stockIdListSize = this.stockRedisUtil.lSize(this.redisStockIdList);
         int stopNum = 0;
@@ -112,7 +111,6 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
     /**
      * 实时增幅统计
      */
-    @LogShowTimeAnt
     public void stockRealtimeUptickRateStatistics() {
         Map<String, Integer> uptickRateStatisticsMap = new  LinkedHashMap<>();
         Map<String, List<Double>> scoreMap = new LinkedHashMap<String, List<Double>>(){{

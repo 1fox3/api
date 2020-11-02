@@ -1,7 +1,6 @@
 package com.fox.api.dao.stock.mapper;
 
 import com.fox.api.annotation.mapper.StockMapperConfig;
-import com.fox.api.dao.stock.entity.StockPriceMinuteDtEntity;
 import com.fox.api.dao.stock.entity.StockTableDtEntity;
 
 import java.util.List;

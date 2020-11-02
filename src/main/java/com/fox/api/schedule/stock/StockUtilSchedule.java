@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 /**
  * 股票工具类任务，提供基本信息
+ *
  * @author lusongsong
  * @date 2020/5/2 14:20
  */
@@ -38,7 +39,6 @@ public class StockUtilSchedule extends StockBaseSchedule {
     /**
      * 获取最新交易日,当发现交易日发生变化时，更新上个交易日
      */
-    @LogShowTimeAnt
     public void getStockMarketLastDealDate() {
         SinaRealtime sinaRealtime = new SinaRealtime();
         List<StockCodeProperty> stockCodePropertyList = stockProperty.getDemoIndex();
@@ -48,7 +48,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
                 String lastDealDateCacheKey = StockUtil.lastDealDateCacheKey(
                         stockCodeProperty.getStockMarket()
                 );
-                String currentDealDate = (String)this.stockRedisUtil.get(lastDealDateCacheKey);
+                String currentDealDate = (String) this.stockRedisUtil.get(lastDealDateCacheKey);
                 //如果日期是今天则无需刷新
                 if (null != currentDealDate && currentDealDate.equals(currentDate)) {
                     continue;
@@ -76,6 +76,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
 
     /**
      * 刷新上个交易日
+     *
      * @param stockMarket
      * @param preDealDate
      * @param lastDealDate
@@ -92,6 +93,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
 
     /**
      * 刷新下个交易日
+     *
      * @param stockMarket
      * @param lastDealDate
      */
@@ -105,6 +107,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
 
     /**
      * 获取最近的交易日
+     *
      * @param dealDate
      * @param stockMarket
      * @param isFuture
