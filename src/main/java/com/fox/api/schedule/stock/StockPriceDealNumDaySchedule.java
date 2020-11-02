@@ -41,7 +41,7 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
     /**
      * 需要保存的数据天数
      */
-    private Integer totalDateNum = 50;
+    private Integer totalDateNum = 100;
     /**
      * 需要处理的交易日
      */

@@ -57,6 +57,7 @@ stock:
       stock-kind: 4
       per-code:
         - "688"
+        - "689"
     sh-fund:
       stock-kind-name: 沪基
       stock-market: 1
@@ -118,6 +119,7 @@ stock:
         - "160"
         - "163"
         - "171"
+        - "173"
         - "175"
         - "182"
         - "190"
@@ -185,6 +187,7 @@ stock:
         - "131"
         - "149"
         - "190"
+        - "191"
     hk-stock:
       stock-kind-name: 港股
       stock-market: 3
