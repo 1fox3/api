@@ -71,7 +71,6 @@ public class SinaDealRatio extends SinaStockBaseApi {
             List<StockDealNumPo> stockDealNumPoList = new ArrayList<>();
             String resultStr = "";
             String filePath = getFilePath(stockEntity, startDate, endDate);
-            System.out.println(filePath);
             if (null != filePath && !filePath.isEmpty()) {
                 resultStr = FileUtil.read(filePath);
                 if (null != resultStr && !resultStr.isEmpty()) {
