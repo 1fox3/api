@@ -2,6 +2,7 @@ package com.fox.api.service.third.stock.sina.api;
 
 import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.entity.dto.http.HttpResponseDto;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -94,11 +95,12 @@ public class SinaStockBaseApi {
 
     /**
      * 判断是够已被拒绝
+     *
      * @param httpResponse
      * @return
      */
-    public static Boolean isForbidden(String httpResponse) {
-        return null != httpResponse && -1 != httpResponse.indexOf("<title>拒绝访问</title>");
+    public static Boolean isForbidden(HttpResponseDto httpResponse) {
+        return 456 == httpResponse.getCode();
     }
 
     /**
@@ -106,7 +108,7 @@ public class SinaStockBaseApi {
      */
     public static void handleForbidden() {
         try {
-            Thread.sleep(600);
+            Thread.sleep(600000);
         } catch (InterruptedException e) {
         }
     }

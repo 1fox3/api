@@ -33,7 +33,7 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
     /**
      * 处理时间限制
      */
-    private Integer requestTimeLimit = 1000;
+    private Integer requestTimeLimit = 1500;
     /**
      * 每次备份记录条数
      */

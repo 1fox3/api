@@ -10,45 +10,46 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * HTTP请求工具类
+ *
  * @author lusongsong
  */
 public class HttpUtil {
     /**
      * 请求方式
      */
-    private static final String METHOD_GET = "GET";
-    private static final String METHOD_POST = "POST";
+    public static final String METHOD_GET = "GET";
+    public static final String METHOD_POST = "POST";
     /**
      * 字符编码
      */
-    private static final String CHARSET_UTF8 = "UTF-8";
-    private static final String CHARSET_GBK = "GBK";
+    public static final String CHARSET_UTF8 = "UTF-8";
+    public static final String CHARSET_GBK = "GBK";
     /**
      * 请求头参数方式KEY
      */
-    private static final String CONTENT_TYPE="Content-Type";
+    public static final String CONTENT_TYPE = "Content-Type";
     /**
      * 请求头参数方式
      */
-    private static final String CONTENT_TYPE_JSON = "application/json";
-    private static final String CONTENT_TYPE_PARAM = "application/x-www-form-urlencoded";
-    private static final String CONTENT_TYPE_FORM = "multipart/form-data";
+    public static final String CONTENT_TYPE_JSON = "application/json";
+    public static final String CONTENT_TYPE_PARAM = "application/x-www-form-urlencoded";
+    public static final String CONTENT_TYPE_FORM = "multipart/form-data";
     /**
      * 请求参数方式
      */
-    private static final String PARAM_TYPE_JSON = "JSON";
-    private static final String PARAM_TYPE_PARAM = "PARAM";
-    private static final String PARAM_TYPE_FORM = "FORM";
+    public static final String PARAM_TYPE_JSON = "JSON";
+    public static final String PARAM_TYPE_PARAM = "PARAM";
+    public static final String PARAM_TYPE_FORM = "FORM";
     /**
      * 支持的请求方式
      */
     private static final ArrayList<String> methodScope = new ArrayList<>(
-        Arrays.asList(METHOD_GET, METHOD_POST)
+            Arrays.asList(METHOD_GET, METHOD_POST)
     );
     /**
      * 数据类型
      */
-    private static final Map<String, String> CONTENT_TYPE_MAP = new HashMap<String, String>(){{
+    private static final Map<String, String> CONTENT_TYPE_MAP = new HashMap<String, String>() {{
         put(PARAM_TYPE_JSON, CONTENT_TYPE_JSON);
         put(PARAM_TYPE_PARAM, CONTENT_TYPE_PARAM);
         put(PARAM_TYPE_FORM, CONTENT_TYPE_FORM);
@@ -78,13 +79,17 @@ public class HttpUtil {
      */
     private Map<String, String> headers = new HashMap<>();
     /**
-     * 请求返回数据的初始字符集
+     * 请求返回数据的目标字符集
      */
     private String desCharset = CHARSET_UTF8;
     /**
-     * 请求返回数据的目标字符集
+     * 请求返回数据的初始字符集
      */
     private String oriCharset = CHARSET_UTF8;
+    /**
+     * 请求出现非200请求时，错误返回数据的原始字符集
+     */
+    private String errorOriCharset = CHARSET_UTF8;
     /**
      * 连接超时时间
      */
@@ -104,6 +109,7 @@ public class HttpUtil {
 
     /**
      * 设置请求链接
+     *
      * @param url
      * @return
      */
@@ -114,6 +120,7 @@ public class HttpUtil {
 
     /**
      * 获取请求链接
+     *
      * @return
      */
     public String getUrl() {
@@ -122,6 +129,7 @@ public class HttpUtil {
 
     /**
      * 获取带参数的请求链接
+     *
      * @return
      */
     public String getRequestUrl(String requestBody) {
@@ -136,6 +144,7 @@ public class HttpUtil {
 
     /**
      * 设置请求方式
+     *
      * @param method
      * @return
      */
@@ -149,6 +158,7 @@ public class HttpUtil {
 
     /**
      * 获取请求方式
+     *
      * @return
      */
     public String getMethod() {
@@ -157,6 +167,7 @@ public class HttpUtil {
 
     /**
      * 设置请求参数方式
+     *
      * @param paramType
      * @return
      */
@@ -170,6 +181,7 @@ public class HttpUtil {
 
     /**
      * 获取请求参数方式
+     *
      * @return
      */
     public String getParamType() {
@@ -178,6 +190,7 @@ public class HttpUtil {
 
     /**
      * 获取请求头中需要的参数方式
+     *
      * @return
      */
     public String getContentType() {
@@ -189,6 +202,7 @@ public class HttpUtil {
 
     /**
      * 设置请求数据
+     *
      * @param body
      * @return
      */
@@ -199,6 +213,7 @@ public class HttpUtil {
 
     /**
      * 获取请求数据
+     *
      * @return
      */
     public String getBody() {
@@ -207,6 +222,7 @@ public class HttpUtil {
 
     /**
      * 获取请求体字符串
+     *
      * @return
      */
     public String bodyToStr() {
@@ -215,6 +231,7 @@ public class HttpUtil {
 
     /**
      * 设置请求参数
+     *
      * @param params
      * @return
      */
@@ -225,6 +242,7 @@ public class HttpUtil {
 
     /**
      * 设置请求参数
+     *
      * @param key
      * @param value
      * @return
@@ -236,6 +254,7 @@ public class HttpUtil {
 
     /**
      * 移除某个请求参数
+     *
      * @param key
      * @return
      */
@@ -246,6 +265,7 @@ public class HttpUtil {
 
     /**
      * 清除请求参数
+     *
      * @return
      */
     public HttpUtil clearParam() {
@@ -255,6 +275,7 @@ public class HttpUtil {
 
     /**
      * 获取消耗的时间
+     *
      * @return
      */
     public long getRequestTime() {
@@ -263,6 +284,7 @@ public class HttpUtil {
 
     /**
      * 获取请求参数
+     *
      * @return
      */
     public Map<String, String> getParams() {
@@ -271,6 +293,7 @@ public class HttpUtil {
 
     /**
      * 请求参数拼接
+     *
      * @return
      */
     public String paramsToUrlParams() {
@@ -286,6 +309,7 @@ public class HttpUtil {
 
     /**
      * 设置请求头
+     *
      * @param headers
      * @return
      */
@@ -296,6 +320,7 @@ public class HttpUtil {
 
     /**
      * 设置请求头
+     *
      * @param key
      * @param value
      * @return
@@ -307,6 +332,7 @@ public class HttpUtil {
 
     /**
      * 移除某个请求头
+     *
      * @param key
      * @return
      */
@@ -317,6 +343,7 @@ public class HttpUtil {
 
     /**
      * 清除请求头
+     *
      * @return
      */
     public HttpUtil clearHeader() {
@@ -326,6 +353,7 @@ public class HttpUtil {
 
     /**
      * 获取请求头
+     *
      * @return
      */
     public Map<String, String> getHeader() {
@@ -334,6 +362,7 @@ public class HttpUtil {
 
     /**
      * 设置请求返回初始字符集
+     *
      * @param charset
      * @return
      */
@@ -343,7 +372,19 @@ public class HttpUtil {
     }
 
     /**
+     * 请求出现非200请求时，错误返回数据的原始字符集
+     *
+     * @param charset
+     * @return
+     */
+    public HttpUtil setErrorOriCharset(String charset) {
+        this.errorOriCharset = charset;
+        return this;
+    }
+
+    /**
      * 获取请求返回初始字符集
+     *
      * @return
      */
     public String getOriCharset() {
@@ -352,6 +393,7 @@ public class HttpUtil {
 
     /**
      * 设置请求返回目标字符集
+     *
      * @param charset
      * @return
      */
@@ -362,6 +404,7 @@ public class HttpUtil {
 
     /**
      * 获取请求返回目标字符集
+     *
      * @return
      */
     public String getDesCharset() {
@@ -370,6 +413,7 @@ public class HttpUtil {
 
     /**
      * 处理HTTP请求
+     *
      * @return
      */
     public HttpResponseDto request() throws IOException {
@@ -418,13 +462,14 @@ public class HttpUtil {
 
     /**
      * 读取接口返回数据
+     *
      * @param urlCon
      * @return
      * @throws IOException
      */
     private HttpResponseDto readResponse(HttpURLConnection urlCon) throws IOException {
         try {
-            Map<String,List<String>> headerMap = urlCon.getHeaderFields();
+            Map<String, List<String>> headerMap = urlCon.getHeaderFields();
             String encodingTypeHeader = "Content-Encoding";
             boolean isGZip = false;
             if (null != headerMap && headerMap.containsKey(encodingTypeHeader)) {
@@ -434,12 +479,17 @@ public class HttpUtil {
                 }
             }
             BufferedReader br;
-            if (isGZip) {
-                GZIPInputStream gzin = new GZIPInputStream(urlCon.getInputStream());
-                br = new BufferedReader(new InputStreamReader(gzin, "GB2312"));
+            if (200 == urlCon.getResponseCode()) {
+                if (isGZip) {
+                    GZIPInputStream gzin = new GZIPInputStream(urlCon.getInputStream());
+                    br = new BufferedReader(new InputStreamReader(gzin, "GB2312"));
+                } else {
+                    br = new BufferedReader(new InputStreamReader(urlCon.getInputStream(), this.oriCharset));
+                }
             } else {
-                br = new BufferedReader(new InputStreamReader(urlCon.getInputStream(), this.oriCharset));
+                br = new BufferedReader(new InputStreamReader(urlCon.getErrorStream(), this.errorOriCharset));
             }
+
             StringBuilder sb = new StringBuilder();
             String read = null;
             while ((read = br.readLine()) != null) {
