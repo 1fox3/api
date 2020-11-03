@@ -22,6 +22,7 @@ import java.util.*;
 
 /**
  * 计划任务基类
+ *
  * @author lusongsong
  */
 public class StockBaseSchedule {
@@ -97,6 +98,7 @@ public class StockBaseSchedule {
 
     /**
      * 判断日期是否为一个交易日
+     *
      * @param stockMarket
      * @param dealDate
      * @return
@@ -122,6 +124,7 @@ public class StockBaseSchedule {
 
     /**
      * 遍历所有股票
+     *
      * @param stockScheduleHandler
      */
     public void allStockMarketScan(StockScheduleHandler stockScheduleHandler) {
@@ -130,6 +133,7 @@ public class StockBaseSchedule {
 
     /**
      * 遍历A股
+     *
      * @param stockScheduleHandler
      */
     public void aStockMarketScan(StockScheduleHandler stockScheduleHandler) {
@@ -138,6 +142,7 @@ public class StockBaseSchedule {
 
     /**
      * 遍历集市列表处理
+     *
      * @param stockMarketList
      * @param stockScheduleHandler
      */
@@ -149,13 +154,14 @@ public class StockBaseSchedule {
 
     /**
      * 遍历单集市股票
+     *
      * @param stockMarket
      * @param stockScheduleHandler
      */
     public void stockMarketScan(Integer stockMarket, StockScheduleHandler stockScheduleHandler) {
         Integer stockId = 0;
         Integer onceLimit = 100;
-        try{
+        try {
             while (true) {
                 List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
                         2,
@@ -184,7 +190,7 @@ public class StockBaseSchedule {
                     break;
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(Integer.toString(stockId));
             logger.error(e.getMessage());
         }
@@ -192,6 +198,7 @@ public class StockBaseSchedule {
 
     /**
      * 遍历A股TOP指数
+     *
      * @param stockScheduleHandler
      */
     public void aStockMarketTopIndexScan(StockScheduleHandler stockScheduleHandler) {
@@ -200,6 +207,7 @@ public class StockBaseSchedule {
 
     /**
      * 遍历集市TOP指数处理
+     *
      * @param stockMarketList
      * @param stockScheduleHandler
      */
@@ -211,11 +219,12 @@ public class StockBaseSchedule {
 
     /**
      * 遍历单集市TOP指数
+     *
      * @param stockMarket
      * @param stockScheduleHandler
      */
     public void stockMarketTopIndexScan(Integer stockMarket, StockScheduleHandler stockScheduleHandler) {
-        try{
+        try {
             List<StockCodeProperty> topIndexList = stockProperty.getTopIndex();
             for (StockCodeProperty stockCodeProperty : topIndexList) {
                 if (stockCodeProperty.getStockMarket().equals(stockMarket)) {
@@ -228,13 +237,14 @@ public class StockBaseSchedule {
                     }
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
         }
     }
 
     /**
      * 遍历全部股票
+     *
      * @param stockScheduleHandler
      */
     public void totalStockScan(StockScheduleHandler stockScheduleHandler) {
@@ -263,6 +273,7 @@ public class StockBaseSchedule {
 
     /**
      * 获取周月范围列表
+     *
      * @param statisticsType
      * @param map
      * @return
@@ -281,29 +292,29 @@ public class StockBaseSchedule {
         Calendar eCalendar = Calendar.getInstance();
         eCalendar.setFirstDayOfWeek(Calendar.MONDAY);
         eCalendar.setTime(eDate);
-        boolean bool =true;
-        if(statisticsType.equals("week")){
-            while(sCalendar.getTime().getTime()<eCalendar.getTime().getTime()){
-                if(bool||sCalendar.get(Calendar.DAY_OF_WEEK)==2||sCalendar.get(Calendar.DAY_OF_WEEK)==1){
+        boolean bool = true;
+        if (statisticsType.equals("week")) {
+            while (sCalendar.getTime().getTime() < eCalendar.getTime().getTime()) {
+                if (bool || sCalendar.get(Calendar.DAY_OF_WEEK) == 2 || sCalendar.get(Calendar.DAY_OF_WEEK) == 1) {
                     listWeekOrMonth.add(dateFormat.format(sCalendar.getTime()));
                     bool = false;
                 }
                 sCalendar.add(Calendar.DAY_OF_MONTH, 1);
             }
             listWeekOrMonth.add(dateFormat.format(eCalendar.getTime()));
-            if(listWeekOrMonth.size()%2!=0){
+            if (listWeekOrMonth.size() % 2 != 0) {
                 listWeekOrMonth.add(dateFormat.format(eCalendar.getTime()));
             }
-        }else{
-            while(sCalendar.getTime().getTime()<eCalendar.getTime().getTime()){
-                if(bool||sCalendar.get(Calendar.DAY_OF_MONTH)==1||sCalendar.get(Calendar.DAY_OF_MONTH)==sCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+        } else {
+            while (sCalendar.getTime().getTime() < eCalendar.getTime().getTime()) {
+                if (bool || sCalendar.get(Calendar.DAY_OF_MONTH) == 1 || sCalendar.get(Calendar.DAY_OF_MONTH) == sCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
                     listWeekOrMonth.add(dateFormat.format(sCalendar.getTime()));
                     bool = false;
                 }
                 sCalendar.add(Calendar.DAY_OF_MONTH, 1);
             }
             listWeekOrMonth.add(dateFormat.format(eCalendar.getTime()));
-            if(listWeekOrMonth.size()%2!=0){
+            if (listWeekOrMonth.size() % 2 != 0) {
                 listWeekOrMonth.add(dateFormat.format(eCalendar.getTime()));
             }
         }

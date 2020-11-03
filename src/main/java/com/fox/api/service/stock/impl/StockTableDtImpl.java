@@ -31,7 +31,17 @@ public class StockTableDtImpl implements StockTableDtService {
         if (null == stockTableDtEntity) {
             return null;
         }
-        return stockTableDtMapper.insert(stockTableDtEntity);
+        StockTableDtEntity dbStockTableDtEntity = stockTableDtMapper.getByTableDt(stockTableDtEntity);
+        if (null != dbStockTableDtEntity && null != dbStockTableDtEntity.getId()) {
+            stockTableDtEntity.setId(dbStockTableDtEntity.getId());
+            if (stockTableDtMapper.update(stockTableDtEntity)) {
+                return dbStockTableDtEntity.getId();
+            } else {
+                return null;
+            }
+        } else {
+            return stockTableDtMapper.insert(stockTableDtEntity);
+        }
     }
 
     /**
@@ -61,5 +71,19 @@ public class StockTableDtImpl implements StockTableDtService {
             return null;
         }
         return stockTableDtMapper.getDtByType(stockTableDtEntity);
+    }
+
+    /**
+     * 根据数据表和日期查询记录
+     *
+     * @param stockTableDtEntity
+     * @return
+     */
+    @Override
+    public StockTableDtEntity getByTableDt(StockTableDtEntity stockTableDtEntity) {
+        if (null == stockTableDtEntity) {
+            return null;
+        }
+        return stockTableDtMapper.getByTableDt(stockTableDtEntity);
     }
 }

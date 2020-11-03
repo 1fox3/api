@@ -33,4 +33,12 @@ public interface StockTableDtService {
      * @return
      */
     List<String> getByType(StockTableDtEntity stockTableDtEntity);
+
+    /**
+     * 根据数据表和日期查询记录
+     *
+     * @param stockTableDtEntity
+     * @return
+     */
+    StockTableDtEntity getByTableDt(StockTableDtEntity stockTableDtEntity);
 }

@@ -108,7 +108,7 @@ public class SinaStockBaseApi {
      */
     public static void handleForbidden() {
         try {
-            Thread.sleep(600000);
+            Thread.sleep(300000);
         } catch (InterruptedException e) {
         }
     }

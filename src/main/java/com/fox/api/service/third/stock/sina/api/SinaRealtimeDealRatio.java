@@ -3,6 +3,7 @@ package com.fox.api.service.third.stock.sina.api;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.entity.po.third.stock.StockDealNumPo;
+import com.fox.api.util.DateUtil;
 import com.fox.api.util.FileUtil;
 import com.fox.api.util.HttpUtil;
 import net.sf.json.JSONArray;
@@ -19,40 +20,36 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 获取成交占比信息
+ * 实时交易价格成交占比
  *
  * @author lusongsong
- * @date 2020/3/5 18:13
+ * @date 2020/11/3 14:40
  */
 @Component
-public class SinaDealRatio extends SinaStockBaseApi {
+public class SinaRealtimeDealRatio extends SinaStockBaseApi {
     /**
-     * 样例链接 http://market.finance.sina.com.cn/iframe/pricehis.php?symbol=sh603383&startdate=2019-12-01&enddate=2019-12-13
+     * 样例链接 https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_price.php?symbol=sh603383
      */
-    private static String apiUrl = "http://market.finance.sina.com.cn/iframe/pricehis.php";
+    private static String apiUrl = "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_price.php";
 
     /**
      * 获取结果保存路径
      *
      * @param stockEntity
-     * @param startDate
-     * @param endDate
      * @return
      */
-    private String getFilePath(StockEntity stockEntity, String startDate, String endDate) {
-        if (null == startDate || null == endDate || !startDate.equals(endDate)) {
-            return "";
-        }
+    private String getFilePath(StockEntity stockEntity) {
         String filePath = saveFilePath(stockEntity, getClass().getSimpleName());
         if (null == filePath || filePath.isEmpty()) {
             return "";
         }
+        String currentDate = DateUtil.getCurrentDate();
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(filePath);
         stringBuffer.append("/");
-        stringBuffer.append(startDate.substring(0, 4));
+        stringBuffer.append(currentDate.substring(0, 4));
         stringBuffer.append("/");
-        stringBuffer.append(startDate.substring(4).replace("-", ""));
+        stringBuffer.append(currentDate.substring(4).replace("-", ""));
         stringBuffer.append(".txt");
         return stringBuffer.toString().replace("//", "/");
     }
@@ -61,16 +58,14 @@ public class SinaDealRatio extends SinaStockBaseApi {
      * 获取成交占比信息
      *
      * @param stockEntity
-     * @param startDate
-     * @param endDate
      * @return
      */
-    public List<StockDealNumPo> getDealRatio(StockEntity stockEntity, String startDate, String endDate) {
+    public List<StockDealNumPo> getDealRatio(StockEntity stockEntity) {
         List<StockDealNumPo> list = new LinkedList<>();
         try {
             List<StockDealNumPo> stockDealNumPoList = new ArrayList<>();
             String resultStr = "";
-            String filePath = getFilePath(stockEntity, startDate, endDate);
+            String filePath = getFilePath(stockEntity);
             if (null != filePath && !filePath.isEmpty()) {
                 resultStr = FileUtil.read(filePath);
                 if (null != resultStr && !resultStr.isEmpty()) {
@@ -101,8 +96,6 @@ public class SinaDealRatio extends SinaStockBaseApi {
                 HttpUtil httpUtil = new HttpUtil();
                 httpUtil.setUrl(apiUrl).setOriCharset(HttpUtil.CHARSET_GBK).setErrorOriCharset(HttpUtil.CHARSET_UTF8);
                 httpUtil.setParam("symbol", SinaStockBaseApi.getSinaStockCode(stockEntity));
-                httpUtil.setParam("startdate", startDate);
-                httpUtil.setParam("enddate", endDate);
                 HttpResponseDto httpResponse = httpUtil.request();
                 if (SinaStockBaseApi.isForbidden(httpResponse)) {
                     SinaStockBaseApi.handleForbidden();
@@ -130,6 +123,14 @@ public class SinaDealRatio extends SinaStockBaseApi {
      */
     private List<StockDealNumPo> handleResponse(String response) {
         List<StockDealNumPo> list = new LinkedList<>();
+        int divStartIndex = response.indexOf("<div id=\"divListTemplate\" class=\"divList\">");
+        if (0 <= divStartIndex) {
+            response = response.substring(divStartIndex);
+        }
+        int divEndIndex = response.indexOf("</table");
+        if (0 <= divEndIndex) {
+            response = response.substring(0, divEndIndex);
+        }
         //截取表格内容
         int bodyStartIndex = response.indexOf("<tbody");
         int bodyEndIndex = response.lastIndexOf("</tbody");
@@ -138,7 +139,7 @@ public class SinaDealRatio extends SinaStockBaseApi {
         }
         response = response.substring(bodyStartIndex, bodyEndIndex);
         //匹配没一行的tb属性
-        String patternStr = "<td>(.*)<\\/td>*?";
+        String patternStr = "<td>(.*)<\\/*?";
         Pattern pattern = Pattern.compile(patternStr);
         Matcher matcher = pattern.matcher(response);
         StockDealNumPo stockDealNumPo = new StockDealNumPo();

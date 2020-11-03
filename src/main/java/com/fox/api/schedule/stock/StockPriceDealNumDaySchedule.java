@@ -9,7 +9,7 @@ import com.fox.api.dao.stock.entity.StockTableDtEntity;
 import com.fox.api.dao.stock.mapper.StockPriceDealNumDayMapper;
 import com.fox.api.entity.po.third.stock.StockDealNumPo;
 import com.fox.api.service.stock.StockTableDtService;
-import com.fox.api.service.third.stock.sina.api.SinaDealRatio;
+import com.fox.api.service.third.stock.sina.api.SinaRealtimeDealRatio;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
 import org.slf4j.Logger;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,10 +29,6 @@ import java.util.List;
 @Component
 public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements StockScheduleHandler {
     private Logger logger = LoggerFactory.getLogger(getClass());
-    /**
-     * 处理时间限制
-     */
-    private Integer requestTimeLimit = 1500;
     /**
      * 每次备份记录条数
      */
@@ -48,7 +43,7 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
     private String dealDate;
 
     @Autowired
-    SinaDealRatio sinaDealRatio;
+    SinaRealtimeDealRatio sinaRealtimeDealRatio;
     @Autowired
     StockPriceDealNumDayMapper stockPriceDealNumDayMapper;
     @Autowired
@@ -67,9 +62,7 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
                 return;
             }
 
-            List<StockDealNumPo> stockDealNumPoList = sinaDealRatio.getDealRatio(stockEntity, dealDate, dealDate);
-
-            Thread.sleep(requestTimeLimit);
+            List<StockDealNumPo> stockDealNumPoList = sinaRealtimeDealRatio.getDealRatio(stockEntity);
 
             if (null == stockDealNumPoList || stockDealNumPoList.isEmpty()) {
                 return;
@@ -141,28 +134,16 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
     public void syncLastDealDatePriceDealNumDayInfo() {
         if (StockUtil.todayIsDealDate(StockConst.SM_A)) {
             dealDate = DateUtil.getCurrentDate();
-            logDt();
-            aStockMarketScan(this);
-            bakPriceDealNumDayInfo();
-            stockPriceDealNumDayMapper.optimize();
+            StockTableDtEntity stockTableDtEntity = new StockTableDtEntity();
+            stockTableDtEntity.setTable(StockTableDtConst.TABLE_PRICE_DEAL_NUM_DAY);
+            stockTableDtEntity.setDt(dealDate);
+            StockTableDtEntity dbStockTableDtEntity = stockTableDtService.getByTableDt(stockTableDtEntity);
+            if (null == dbStockTableDtEntity || null == dbStockTableDtEntity.getId()) {
+                logDt();
+                aStockMarketScan(this);
+                bakPriceDealNumDayInfo();
+                stockPriceDealNumDayMapper.optimize();
+            }
         }
-    }
-
-    /**
-     * 同步全部的价格成交量数据
-     */
-    @LogShowTimeAnt
-    public void syncTotalPriceDealNumDayInfo() {
-        List<String> dateList = StockUtil.getDealDateList(StockConst.SM_A, totalDateNum);
-        if (null == dateList || dateList.isEmpty()) {
-            return;
-        }
-        Collections.reverse(dateList);
-        for (String dt : dateList) {
-            dealDate = dt;
-            logDt();
-            aStockMarketScan(this);
-        }
-        stockPriceDealNumDayMapper.optimize();
     }
 }

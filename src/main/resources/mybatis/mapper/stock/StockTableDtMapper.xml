@@ -19,7 +19,7 @@
             #{table},
             #{dt},
             #{type}
-        ) ON DUPLICATE KEY UPDATE `type` = #{type};
+        );
     </insert>
 
     <update id="update" parameterType="com.fox.api.dao.stock.entity.StockTableDtEntity">
@@ -44,5 +44,16 @@
             `type` = #{type}
         ORDER BY
             dt ASC;
+    </select>
+
+    <select id="getByTableDt" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_table_dt
+        WHERE
+            `table` = #{table}
+            AND
+            `dt` = #{dt};
     </select>
 </mapper>

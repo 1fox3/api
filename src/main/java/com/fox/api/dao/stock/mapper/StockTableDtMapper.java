@@ -36,4 +36,12 @@ public interface StockTableDtMapper {
      * @return
      */
     List<String> getDtByType(StockTableDtEntity stockTableDtEntity);
+
+    /**
+     * 根据数据表和日期查询记录
+     *
+     * @param stockTableDtEntity
+     * @return
+     */
+    StockTableDtEntity getByTableDt(StockTableDtEntity stockTableDtEntity);
 }
