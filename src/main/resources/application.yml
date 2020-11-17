@@ -9,9 +9,9 @@ spring:
   redis: # redis配置
     main:
       database: 1
-      host: 47.104.29.59
+      host: 39.99.226.98
       port: 6380
-      password: lss19890228
+      password: Lyx20170212
       timeout: 2s
       lettuce:
         pool:
@@ -21,9 +21,9 @@ spring:
           max-wait: 1000ms
     stock:
       database: 2
-      host: 47.104.29.59
+      host: 39.99.226.98
       port: 6380
-      password: lss19890228
+      password: Lyx20170212
       timeout: 2s
       lettuce:
         pool:
@@ -33,9 +33,9 @@ spring:
           max-wait: 1000ms
     user:
       database: 3
-      host: 47.104.29.59
+      host: 39.99.226.98
       port: 6380
-      password: lss19890228
+      password: Lyx20170212
       timeout: 2s
       lettuce:
         pool:
@@ -57,7 +57,7 @@ spring:
   mail:
     host: smtp.mxhichina.com
     username: lusongsong@1fox3.com
-    password: "`lss19890228"
+    password: Lyx20170212
     protocol: smtp
     default-encoding: UTF-8
     properties:

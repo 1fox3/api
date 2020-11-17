@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 //@EnableScheduling
 @EnableCaching
-@ComponentScan(basePackages = {"com.fox.api.*"})
+@ComponentScan(basePackages = {"com.fox.spider.stock.*", "com.fox.api.*"})
 public class ApiApplication {
 
     /**

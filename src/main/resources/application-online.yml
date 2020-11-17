@@ -3,35 +3,35 @@ server:
 
 spring:
   datasource: #数据库配置
-    url: jdbc:mysql://47.104.29.59:3306/api?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://39.99.226.98:3306/api?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
     username: root
-    password: "`Lss19890228"
+    password: "Lyx20170212"
     driver-class-name: com.mysql.cj.jdbc.Driver
     # 不同的数据源配置
     stock:
-      url: jdbc:mysql://47.104.29.59:3306/stock?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://39.99.226.98:3306/stock?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
       username: root
-      password: "`Lss19890228"
+      password: "Lyx20170212"
       driver-class-name: com.mysql.cj.jdbc.Driver
     user:
-      url: jdbc:mysql://47.104.29.59:3306/user?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://39.99.226.98:3306/user?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
       username: root
-      password: "`Lss19890228"
+      password: "Lyx20170212"
       driver-class-name: com.mysql.cj.jdbc.Driver
     api:
-      url: jdbc:mysql://47.104.29.59:3306/api?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://39.99.226.98:3306/api?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
       username: root
-      password: "`Lss19890228"
+      password: "Lyx20170212"
       driver-class-name: com.mysql.cj.jdbc.Driver
     quartz:
-      url: jdbc:mysql://47.104.29.59:3306/quartz?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://39.99.226.98:3306/quartz?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
       username: root
-      password: "`Lss19890228"
+      password: "Lyx20170212"
       driver-class-name: com.mysql.cj.jdbc.Driver
     admin:
-      url: jdbc:mysql://47.104.29.59:3306/admin?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://39.99.226.98:3306/admin?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
       username: root
-      password: "`Lss19890228"
+      password: "Lyx20170212"
       driver-class-name: com.mysql.cj.jdbc.Driver
 
 # 阿里接口账号信息

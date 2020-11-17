@@ -1,6 +1,5 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.realtime.StockRealtimeInfoDto;
 import com.fox.api.entity.property.stock.StockCodeProperty;
@@ -9,6 +8,8 @@ import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
 import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
+import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.vo.StockVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -62,14 +63,11 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
     @Override
     public List<StockRealtimeInfoDto> topIndex() {
         List<StockRealtimeInfoDto> list = new LinkedList<>();
-        List<StockCodeProperty> topIndexList = this.stockProperty.getTopIndex();
-        for (StockCodeProperty stockCodeProperty : topIndexList) {
-            if (!StockConst.SM_A_LIST.contains(stockCodeProperty.getStockMarket())) {
-                continue;
-            }
+        List<StockVo> topIndexList = StockConst.stockMarketTopIndex(StockConst.SM_A);
+        for (StockVo stockVo : topIndexList) {
             StockEntity stockEntity = this.stockMapper.getByStockCode(
-                    stockCodeProperty.getStockCode(),
-                    stockCodeProperty.getStockMarket()
+                    stockVo.getStockCode(),
+                    stockVo.getStockMarket()
             );
             if (null != stockEntity && null != stockEntity.getId()) {
                 Integer stockId = stockEntity.getId();

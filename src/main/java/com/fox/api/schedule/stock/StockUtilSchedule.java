@@ -9,6 +9,8 @@ import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StockUtil;
+import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.vo.StockVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,12 +43,12 @@ public class StockUtilSchedule extends StockBaseSchedule {
      */
     public void getStockMarketLastDealDate() {
         SinaRealtime sinaRealtime = new SinaRealtime();
-        List<StockCodeProperty> stockCodePropertyList = stockProperty.getDemoIndex();
+        List<StockVo> stockCodePropertyList = StockConst.stockMarketTopIndex(StockConst.SM_A);
         String currentDate = DateUtil.getCurrentDate();
-        for (StockCodeProperty stockCodeProperty : stockCodePropertyList) {
+        for (StockVo stockVo : stockCodePropertyList) {
             try {
                 String lastDealDateCacheKey = StockUtil.lastDealDateCacheKey(
-                        stockCodeProperty.getStockMarket()
+                        stockVo.getStockMarket()
                 );
                 String currentDealDate = (String) this.stockRedisUtil.get(lastDealDateCacheKey);
                 //如果日期是今天则无需刷新
@@ -54,7 +56,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
                     continue;
                 }
                 StockEntity stockEntity = stockMapper.getByStockCode(
-                        stockCodeProperty.getStockCode(), stockCodeProperty.getStockMarket()
+                        stockVo.getStockCode(), stockVo.getStockMarket()
                 );
                 if (null != stockEntity && null != stockEntity.getStockCode()) {
                     StockRealtimePo stockRealtimeEntity = sinaRealtime.getRealtimeData(stockEntity);
@@ -63,8 +65,8 @@ public class StockUtilSchedule extends StockBaseSchedule {
                         if (null != lastDealDate && !lastDealDate.equals("") && !lastDealDate.equals(currentDealDate)) {
                             //设置最新交易日期
                             this.stockRedisUtil.set(lastDealDateCacheKey, lastDealDate);
-                            refreshPreDealDate(stockCodeProperty.getStockMarket(), currentDealDate, lastDealDate);
-                            refreshNextDealDate(stockCodeProperty.getStockMarket(), lastDealDate);
+                            refreshPreDealDate(stockVo.getStockMarket(), currentDealDate, lastDealDate);
+                            refreshNextDealDate(stockVo.getStockMarket(), lastDealDate);
                         }
                     }
                 }

@@ -1,15 +1,13 @@
 package com.fox.api.schedule.stock;
 
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
-import com.fox.api.entity.property.stock.StockCodeProperty;
-import com.fox.api.property.stock.StockProperty;
 import com.fox.api.service.admin.DateTypeService;
-import com.fox.api.service.stock.StockUtilService;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.redis.StockRedisUtil;
+import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.vo.StockVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +30,6 @@ public class StockBaseSchedule {
 
     @Autowired
     protected StockInfoMapper stockInfoMapper;
-
-    @Autowired
-    protected StockProperty stockProperty;
 
     @Value("${stock.type.stock.stock-type}")
     protected int stockType;
@@ -83,12 +78,6 @@ public class StockBaseSchedule {
 
     @Autowired
     protected StockRedisUtil stockRedisUtil;
-
-    @Autowired
-    protected StockUtilService stockUtilService;
-
-    @Autowired
-    protected StockProperty stockConfig;
 
     /**
      * 日期类型
@@ -225,16 +214,14 @@ public class StockBaseSchedule {
      */
     public void stockMarketTopIndexScan(Integer stockMarket, StockScheduleHandler stockScheduleHandler) {
         try {
-            List<StockCodeProperty> topIndexList = stockProperty.getTopIndex();
-            for (StockCodeProperty stockCodeProperty : topIndexList) {
-                if (stockCodeProperty.getStockMarket().equals(stockMarket)) {
-                    StockEntity stockEntity = this.stockMapper.getByStockCode(
-                            stockCodeProperty.getStockCode(),
-                            stockCodeProperty.getStockMarket()
-                    );
-                    if (null != stockEntity && null != stockEntity.getId()) {
-                        stockScheduleHandler.handle(stockEntity);
-                    }
+            List<StockVo> topIndexList = StockConst.stockMarketTopIndex(stockMarket);
+            for (StockVo stockVo : topIndexList) {
+                StockEntity stockEntity = this.stockMapper.getByStockCode(
+                        stockVo.getStockCode(),
+                        stockVo.getStockMarket()
+                );
+                if (null != stockEntity && null != stockEntity.getId()) {
+                    stockScheduleHandler.handle(stockEntity);
                 }
             }
         } catch (Exception e) {

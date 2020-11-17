@@ -1,11 +1,11 @@
 package com.fox.api.schedule.stock;
 
-import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.property.stock.StockCodeProperty;
 import com.fox.api.service.third.stock.sina.api.SinaRealtime;
+import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.vo.StockVo;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -36,16 +36,14 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
             }
             //重要指数也更新
             if (0 == i) {
-                List<StockCodeProperty> topIndexList = this.stockProperty.getTopIndex();
-                for (StockCodeProperty stockCodeProperty : topIndexList) {
-                    if (StockConst.SM_A_LIST.contains(stockCodeProperty.getStockMarket())) {
-                        StockEntity stockEntity = this.stockMapper.getByStockCode(
-                                stockCodeProperty.getStockCode(),
-                                stockCodeProperty.getStockMarket()
-                        );
-                        if (null != stockEntity && null != stockEntity.getId()) {
-                            stockEntityList.add(stockEntity);
-                        }
+                List<StockVo> topIndexList = StockConst.stockMarketTopIndex(StockConst.SM_A);
+                for (StockVo stockVo : topIndexList) {
+                    StockEntity stockEntity = this.stockMapper.getByStockCode(
+                            stockVo.getStockCode(),
+                            stockVo.getStockMarket()
+                    );
+                    if (null != stockEntity && null != stockEntity.getId()) {
+                        stockEntityList.add(stockEntity);
                     }
                 }
             }
