@@ -22,6 +22,7 @@ import java.util.*;
  * 计划任务基类
  *
  * @author lusongsong
+ * @date 2020/3/27 17:56
  */
 public class StockBaseSchedule {
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -31,14 +32,11 @@ public class StockBaseSchedule {
     @Autowired
     protected StockInfoMapper stockInfoMapper;
 
-    @Value("${stock.type.stock.stock-type}")
-    protected int stockType;
+    protected int stockType = 2;
 
-    @Value("${stock.market.sh.stock-market}")
-    protected int shStockMarket;
+    protected int shStockMarket = 1;
 
-    @Value("${stock.market.sz.stock-market}")
-    protected int szStockMarket;
+    protected int szStockMarket = 2;
 
     @Value("${redis.stock.stock.list}")
     protected String redisStockList;

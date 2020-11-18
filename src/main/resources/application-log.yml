@@ -2,4 +2,4 @@ logging:
   level:
     root: info #日志记录级别
   file:
-    name: "/huafan/java/code/log/api.log" #日志名
+    name: "/export/code/java/log/api.log" #日志名

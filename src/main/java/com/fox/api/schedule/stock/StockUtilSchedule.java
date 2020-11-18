@@ -1,22 +1,20 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
-import com.fox.api.entity.property.stock.StockCodeProperty;
-import com.fox.api.service.third.stock.sina.api.SinaRealtime;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StockUtil;
+import com.fox.spider.stock.api.sina.SinaRealtimeDealInfo;
 import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import com.fox.spider.stock.entity.vo.StockVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +26,15 @@ import java.util.regex.Pattern;
  */
 @Component
 public class StockUtilSchedule extends StockBaseSchedule {
+    /**
+     * 日志
+     */
     private Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * 新浪实时交易信息
+     */
+    @Autowired
+    SinaRealtimeDealInfo sinaRealtimeDealInfo;
     /**
      * 香港交易所token匹配正则
      */
@@ -42,32 +48,26 @@ public class StockUtilSchedule extends StockBaseSchedule {
      * 获取最新交易日,当发现交易日发生变化时，更新上个交易日
      */
     public void getStockMarketLastDealDate() {
-        SinaRealtime sinaRealtime = new SinaRealtime();
-        List<StockVo> stockCodePropertyList = StockConst.stockMarketTopIndex(StockConst.SM_A);
         String currentDate = DateUtil.getCurrentDate();
-        for (StockVo stockVo : stockCodePropertyList) {
+        for (StockVo stockVo : StockConst.DEMO_STOCK.values()) {
+            if (null == stockVo || null == stockVo.getStockCode() || null == stockVo.getStockMarket()) {
+                continue;
+            }
             try {
-                String lastDealDateCacheKey = StockUtil.lastDealDateCacheKey(
-                        stockVo.getStockMarket()
-                );
-                String currentDealDate = (String) this.stockRedisUtil.get(lastDealDateCacheKey);
+                String currentDealDate = StockUtil.lastDealDate(stockVo.getStockMarket());
                 //如果日期是今天则无需刷新
                 if (null != currentDealDate && currentDealDate.equals(currentDate)) {
                     continue;
                 }
-                StockEntity stockEntity = stockMapper.getByStockCode(
-                        stockVo.getStockCode(), stockVo.getStockMarket()
-                );
-                if (null != stockEntity && null != stockEntity.getStockCode()) {
-                    StockRealtimePo stockRealtimeEntity = sinaRealtime.getRealtimeData(stockEntity);
-                    if (null != stockRealtimeEntity) {
-                        String lastDealDate = stockRealtimeEntity.getCurrentDate();
-                        if (null != lastDealDate && !lastDealDate.equals("") && !lastDealDate.equals(currentDealDate)) {
-                            //设置最新交易日期
-                            this.stockRedisUtil.set(lastDealDateCacheKey, lastDealDate);
-                            refreshPreDealDate(stockVo.getStockMarket(), currentDealDate, lastDealDate);
-                            refreshNextDealDate(stockVo.getStockMarket(), lastDealDate);
-                        }
+                SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = sinaRealtimeDealInfo.realtimeDealInfo(stockVo);
+                if (null != sinaRealtimeDealInfoPo) {
+                    String lastDealDate = sinaRealtimeDealInfoPo.getDt();
+                    if (null != lastDealDate && !lastDealDate.equals("") && !lastDealDate.equals(currentDealDate)) {
+                        logger.error(stockVo.getStockMarket() + ":" + lastDealDate);
+                        //设置最新交易日期
+                        stockRedisUtil.set(StockUtil.lastDealDateCacheKey(stockVo.getStockMarket()), lastDealDate);
+                        refreshPreDealDate(stockVo.getStockMarket(), currentDealDate, lastDealDate);
+                        refreshNextDealDate(stockVo.getStockMarket(), lastDealDate);
                     }
                 }
             } catch (Exception e) {
@@ -87,7 +87,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
         if (null == preDealDate || 0 == preDealDate.length()) {
             preDealDate = getCloselyDealDate(lastDealDate, stockMarket, false);
         }
-        this.stockRedisUtil.set(
+        stockRedisUtil.set(
                 StockUtil.preDealDateCacheKey(stockMarket),
                 null == preDealDate || 0 == preDealDate.length() ? "" : preDealDate
         );
@@ -101,7 +101,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
      */
     private void refreshNextDealDate(Integer stockMarket, String lastDealDate) {
         String nextDealDate = getCloselyDealDate(lastDealDate, stockMarket, true);
-        this.stockRedisUtil.set(
+        stockRedisUtil.set(
                 StockUtil.nextDealDateCacheKey(stockMarket),
                 null == nextDealDate || 0 == nextDealDate.length() ? "" : nextDealDate
         );
