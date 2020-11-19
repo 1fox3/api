@@ -72,6 +72,12 @@ public class StockScanSchedule extends StockBaseSchedule {
     private void scanStockCodeList(List<StockVo> stockVoList) {
         Map<String, SinaRealtimeDealInfoPo> stringSinaRealtimeDealInfoPoMap =
                 sinaRealtimeDealInfo.batchRealtimeDealInfo(stockVoList);
+        //当列表全部为空的股票代码时，休眠一段时间
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage());
+        }
         for (StockVo stockVo : stockVoList) {
             if (stringSinaRealtimeDealInfoPoMap.containsKey(stockVo.getStockCode())) {
                 SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo =
@@ -83,7 +89,6 @@ public class StockScanSchedule extends StockBaseSchedule {
                 }
             }
         }
-        stockVoList.clear();
     }
 
     /**
@@ -111,6 +116,7 @@ public class StockScanSchedule extends StockBaseSchedule {
             if (stockVoList.size() >= SCAN_ONCE_LIMIT || maxLimit.equals(i)) {
                 try {
                     this.scanStockCodeList(stockVoList);
+                    stockVoList.clear();
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                 }
@@ -155,67 +161,81 @@ public class StockScanSchedule extends StockBaseSchedule {
     }
 
     /**
-     * 扫描已经扫描出来的股票代码，同步当前交易状态
-     * 补网易股票代码
+     * 同步股市交易状态
+     * @param stockMarket
      */
-    @LogShowTimeAnt
-    public void stockDealStatusScan() {
-        for (Integer stockMarket : StockConst.SM_ALL) {
-            Integer stockId = 0;
-            List<StockVo> stockVoList = new ArrayList<>();
-            lastDealDate = StockUtil.lastDealDate(stockMarket);
-            try {
-                while (true) {
-                    stockVoList.clear();
-                    List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
-                            StockConst.ST_STOCK,
-                            stockId,
-                            stockMarket,
-                            SCAN_ONCE_LIMIT.toString()
-                    );
-                    if (null == stockEntityList || stockEntityList.isEmpty()) {
-                        break;
-                    }
-                    for (StockEntity stockEntity : stockEntityList) {
-                        if (null == stockEntity) {
-                            continue;
-                        }
-                        StockVo stockVo = new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket());
-                        stockVoList.add(stockVo);
-                    }
-                    Map<String, SinaRealtimeDealInfoPo> stringSinaRealtimeDealInfoPoMap =
-                            sinaRealtimeDealInfo.batchRealtimeDealInfo(stockVoList);
-                    for (StockEntity stockEntity : stockEntityList) {
-                        if (null == stockEntity) {
-                            continue;
-                        }
-                        stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
-                        String stockCode = stockEntity.getStockCode();
-                        if (stringSinaRealtimeDealInfoPoMap.containsKey(stockCode)) {
-                            SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = stringSinaRealtimeDealInfoPoMap.get(stockCode);
-                            //本地标记当前无交易或者接口获取的交易状态不正常则更新
-                            if (1 == stockEntity.getStockStatus()
-                                    || !"00".equals(sinaRealtimeDealInfoPo.getDealStatus())) {
-                                try {
-                                    syncEntityStockDealStatus(stockEntity, sinaRealtimeDealInfoPo);
-                                } catch (Exception e) {
-                                    logger.error(Integer.toString(stockId));
-                                    logger.error(e.getMessage());
-                                }
-                            }
-                        }
-
-                    }
-                    if (stockEntityList.size() < SCAN_ONCE_LIMIT) {
-                        break;
-                    }
+    public void syncStockDealStatus(Integer stockMarket) {
+        if (StockConst.SM_ALL.contains(stockMarket)) {
+            if (StockConst.SM_A.equals(stockMarket)) {
+                for (Integer sm : StockConst.SM_A_LIST) {
+                    stockDealStatusScan(sm);
                 }
-            } catch (Exception e) {
-                logger.error(Integer.toString(stockId));
-                logger.error(e.getMessage());
+            } else {
+                stockDealStatusScan(stockMarket);
             }
         }
-        stockIntoListSchedule.refreshStockCacheInfo();
+        stockIntoListSchedule.stockCacheInfoRefresh(stockMarket);
+    }
+
+    /**
+     * 同步交易状态
+     */
+    private void stockDealStatusScan(Integer stockMarket) {
+        if (!StockUtil.todayIsDealDate(stockMarket)) {
+            return;
+        }
+        Integer stockId = 0;
+        List<StockVo> stockVoList = new ArrayList<>();
+        lastDealDate = StockUtil.lastDealDate(stockMarket);
+        try {
+            while (true) {
+                stockVoList.clear();
+                List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
+                        StockConst.ST_STOCK,
+                        stockId,
+                        stockMarket,
+                        SCAN_ONCE_LIMIT.toString()
+                );
+                if (null == stockEntityList || stockEntityList.isEmpty()) {
+                    break;
+                }
+                for (StockEntity stockEntity : stockEntityList) {
+                    if (null == stockEntity) {
+                        continue;
+                    }
+                    StockVo stockVo = new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket());
+                    stockVoList.add(stockVo);
+                }
+                Map<String, SinaRealtimeDealInfoPo> stringSinaRealtimeDealInfoPoMap =
+                        sinaRealtimeDealInfo.batchRealtimeDealInfo(stockVoList);
+                for (StockEntity stockEntity : stockEntityList) {
+                    if (null == stockEntity) {
+                        continue;
+                    }
+                    stockId = null == stockEntity.getId() ? stockId + 1 : stockEntity.getId();
+                    String stockCode = stockEntity.getStockCode();
+                    if (stringSinaRealtimeDealInfoPoMap.containsKey(stockCode)) {
+                        SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = stringSinaRealtimeDealInfoPoMap.get(stockCode);
+                        //本地标记当前无交易或者接口获取的交易状态不正常则更新
+                        if (1 == stockEntity.getStockStatus()
+                                || !"00".equals(sinaRealtimeDealInfoPo.getDealStatus())) {
+                            try {
+                                syncEntityStockDealStatus(stockEntity, sinaRealtimeDealInfoPo);
+                            } catch (Exception e) {
+                                logger.error(Integer.toString(stockId));
+                                logger.error(e.getMessage());
+                            }
+                        }
+                    }
+                }
+                if (stockEntityList.size() < SCAN_ONCE_LIMIT) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            logger.error(Integer.toString(stockId));
+            logger.error(e.getMessage());
+        }
     }
 
     /**
