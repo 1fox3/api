@@ -46,18 +46,22 @@ public class StockUtilSchedule extends StockBaseSchedule {
 
     /**
      * 获取最新交易日,当发现交易日发生变化时，更新上个交易日
+     * A股一般在9:05更新
+     * 港股在9:35更新
      */
-    public void getStockMarketLastDealDate() {
-        String currentDate = DateUtil.getCurrentDate();
-        for (StockVo stockVo : StockConst.DEMO_STOCK.values()) {
+    public void syncStockMarketLastDealDate(Integer stockMarket) {
+        logger.error(stockMarket.toString());
+        if (StockConst.SM_ALL.contains(stockMarket)) {
+            String currentDate = DateUtil.getCurrentDate();
+            StockVo stockVo = StockConst.DEMO_STOCK.get(stockMarket);
             if (null == stockVo || null == stockVo.getStockCode() || null == stockVo.getStockMarket()) {
-                continue;
+                return;
             }
             try {
                 String currentDealDate = StockUtil.lastDealDate(stockVo.getStockMarket());
                 //如果日期是今天则无需刷新
                 if (null != currentDealDate && currentDealDate.equals(currentDate)) {
-                    continue;
+                    return;
                 }
                 SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = sinaRealtimeDealInfo.realtimeDealInfo(stockVo);
                 if (null != sinaRealtimeDealInfoPo) {

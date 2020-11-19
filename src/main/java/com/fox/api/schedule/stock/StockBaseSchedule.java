@@ -34,10 +34,6 @@ public class StockBaseSchedule {
 
     protected int stockType = 2;
 
-    protected int shStockMarket = 1;
-
-    protected int szStockMarket = 2;
-
     @Value("${redis.stock.stock.list}")
     protected String redisStockList;
 
