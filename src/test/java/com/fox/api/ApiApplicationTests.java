@@ -9,8 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class ApiApplicationTests {
-    @Autowired
-    StockInfoService stockInfoService;
     /**
      * 沪市测试股票（顶点软件）
      */
@@ -26,8 +24,5 @@ class ApiApplicationTests {
 
     @Test
     void contextLoads() {
-        System.out.println(stockInfoService.getInfoFromStockExchange(
-                TEST_SH_STOCK
-        ));
     }
 }

@@ -40,8 +40,8 @@ public class StockBaseSchedule {
     @Value("${redis.stock.stock.hash}")
     protected String redisStockHash;
 
-    @Value("${redis.stock.stock.id-list}")
-    protected String redisStockIdList;
+    @Value("${redis.stock.stock.code-list}")
+    protected String redisStockCodeList;
 
     @Value("${redis.stock.realtime.stock.info.hash}")
     protected String redisRealtimeStockInfoHash;

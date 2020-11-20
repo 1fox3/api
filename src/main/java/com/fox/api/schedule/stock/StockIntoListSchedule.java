@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 将需要频繁处理的股票信息放入缓存列表中，方便以后使用，不用在查询数据库
@@ -57,6 +54,7 @@ public class StockIntoListSchedule extends StockBaseSchedule {
                 this.stockRedisUtil.delete(this.redisRealtimeRankDealNumZSet + ":" + stockMarket);
                 this.stockRedisUtil.delete(this.redisRealtimeRankDealMoneyZSet + ":" + stockMarket);
                 this.stockRedisUtil.delete(this.stockRealtimeStockUptickRateStatistics + ":" + stockMarket);
+                this.stockRedisUtil.delete(this.stockRealtimeStockStopStatistics + ":" + stockMarket);
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -77,25 +75,31 @@ public class StockIntoListSchedule extends StockBaseSchedule {
         }
         List<StockEntity> stockEntityList;
         Integer startId = 0;
-        String limit = "500";
+        Integer limit = 300;
         Map<String, StockEntity> stockEntityMap = new LinkedHashMap<>();
-        String listCacheKey = cacheNamePre + this.redisStockList + ":" + stockMarket;
-        String hashCacheKey = cacheNamePre + this.redisStockHash + ":" + stockMarket;
+        List<String> codeList = new ArrayList<>(limit);
+        String idCacheKey = cacheNamePre + redisStockCodeList + ":" + stockMarket;
+        String listCacheKey = cacheNamePre + redisStockList + ":" + stockMarket;
+        String hashCacheKey = cacheNamePre + redisStockHash + ":" + stockMarket;
         for (Integer sm : stockMarketList) {
             while (true) {
-                stockEntityList = stockMapper.getListByType(this.stockType, startId, sm, limit);
+                stockEntityList = stockMapper.getListByType(this.stockType, startId, sm, limit.toString());
                 if (null == stockEntityList || stockEntityList.isEmpty()) {
                     break;
                 }
                 startId = stockEntityList.get(stockEntityList.size() - 1).getId();
                 this.stockRedisUtil.lPushAll(listCacheKey, stockEntityList);
                 stockEntityMap.clear();
+                codeList.clear();
                 for (StockEntity stockEntity : stockEntityList) {
                     stockEntityMap.put(String.valueOf(stockEntity.getId()), stockEntity);
+                    codeList.add(stockEntity.getStockCode());
                 }
+                this.stockRedisUtil.lPushAll(idCacheKey, stockEntityList);
                 this.stockRedisUtil.hPutAll(hashCacheKey, stockEntityMap);
             }
         }
+        this.stockRedisUtil.rename(idCacheKey, idCacheKey.replace(cacheNamePre, ""));
         this.stockRedisUtil.rename(listCacheKey, listCacheKey.replace(cacheNamePre, ""));
         this.stockRedisUtil.rename(hashCacheKey, hashCacheKey.replace(cacheNamePre, ""));
     }

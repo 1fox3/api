@@ -164,7 +164,7 @@ public class StockScanSchedule extends StockBaseSchedule {
      * 同步股市交易状态
      * @param stockMarket
      */
-    public void syncStockDealStatus(Integer stockMarket) {
+    public void syncStockMarketDealStatus(Integer stockMarket) {
         if (StockConst.SM_ALL.contains(stockMarket)) {
             if (StockConst.SM_A == stockMarket) {
                 for (Integer sm : StockConst.SM_A_LIST) {
