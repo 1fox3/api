@@ -143,7 +143,7 @@ public class StockBaseSchedule {
      */
     public void stockMarketScan(Integer stockMarket, StockScheduleHandler stockScheduleHandler) {
         Integer stockId = 0;
-        Integer onceLimit = 100;
+        Integer onceLimit = 300;
         try {
             while (true) {
                 List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
@@ -232,21 +232,26 @@ public class StockBaseSchedule {
         Integer stockId = 0;
         Integer limit = 500;
         while (true) {
-            List<StockEntity> stockEntityList = stockMapper.getListById(stockId, limit);
-            if (null == stockEntityList || stockEntityList.isEmpty()) {
-                break;
-            }
-
-            for (StockEntity stockEntity : stockEntityList) {
-                if (null != stockEntity && null != stockEntity.getId()) {
-                    stockId = stockEntity.getId();
-                    stockScheduleHandler.handle(stockEntity);
-                } else {
-                    stockId++;
+            try {
+                List<StockEntity> stockEntityList = stockMapper.getListById(stockId, limit);
+                if (null == stockEntityList || stockEntityList.isEmpty()) {
+                    break;
                 }
-            }
 
-            if (stockEntityList.size() < limit) {
+                for (StockEntity stockEntity : stockEntityList) {
+                    if (null != stockEntity && null != stockEntity.getId()) {
+                        stockId = stockEntity.getId();
+                        stockScheduleHandler.handle(stockEntity);
+                    } else {
+                        stockId++;
+                    }
+                }
+
+                if (stockEntityList.size() < limit) {
+                    break;
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage());
                 break;
             }
         }

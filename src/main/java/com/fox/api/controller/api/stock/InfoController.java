@@ -2,8 +2,6 @@ package com.fox.api.controller.api.stock;
 
 import com.fox.api.entity.dto.result.ResultDto;
 import com.fox.api.entity.vo.stock.StockVo;
-import com.fox.api.entity.vo.stock.offline.StockOfflineLineVo;
-import com.fox.api.service.stock.StockFollowService;
 import com.fox.api.service.stock.StockInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,7 +24,7 @@ public class InfoController {
      */
     @RequestMapping("/stock/info/exchange")
     public ResultDto getInfoFromStockExchange(@Valid StockVo stockVo) {
-        return ResultDto.success(stockInfoService.getInfoFromStockExchange(stockVo.getStockId()));
+        return ResultDto.success(stockInfoService.getInfoFromStockExchange(null));
     }
 
     /**

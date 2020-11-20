@@ -1,11 +1,10 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.util.DateUtil;
-import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StockUtil;
-import com.fox.spider.stock.api.sina.SinaRealtimeDealInfo;
+import com.fox.spider.stock.api.hk.HKStockInfoApi;
+import com.fox.spider.stock.api.sina.SinaRealtimeDealInfoApi;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import com.fox.spider.stock.entity.vo.StockVo;
@@ -15,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 股票工具类任务，提供基本信息
@@ -34,11 +31,12 @@ public class StockUtilSchedule extends StockBaseSchedule {
      * 新浪实时交易信息
      */
     @Autowired
-    SinaRealtimeDealInfo sinaRealtimeDealInfo;
+    SinaRealtimeDealInfoApi sinaRealtimeDealInfoApi;
     /**
-     * 香港交易所token匹配正则
+     * 港股股票信息类
      */
-    Pattern hkStockMarketTokenPattern = Pattern.compile("^return \"(.*)\";$");
+    @Autowired
+    HKStockInfoApi hkStockInfoApi;
     /**
      * 寻找最近交易日的日期扫描范围
      */
@@ -63,7 +61,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
                 if (null != currentDealDate && currentDealDate.equals(currentDate)) {
                     return;
                 }
-                SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = sinaRealtimeDealInfo.realtimeDealInfo(stockVo);
+                SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = sinaRealtimeDealInfoApi.realtimeDealInfo(stockVo);
                 if (null != sinaRealtimeDealInfoPo) {
                     String lastDealDate = sinaRealtimeDealInfoPo.getDt();
                     if (null != lastDealDate && !lastDealDate.equals("") && !lastDealDate.equals(currentDealDate)) {
@@ -142,17 +140,9 @@ public class StockUtilSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     public void hkStockMarketToken() {
         try {
-            HttpUtil httpUtil = new HttpUtil();
-            httpUtil.setUrl("https://sc.hkex.com.hk/TuniS/www.hkex.com.hk/Market-Data/Securities-Prices/Equities/Equities-Quote?sym=700&sc_lang=zh-cn");
-            HttpResponseDto httpResponse = httpUtil.request();
-            String[] strings = httpResponse.getContent().split("\n");
-            for (String string : strings) {
-                string = string.trim();
-                // 现在创建 matcher 对象
-                Matcher matcher = hkStockMarketTokenPattern.matcher(string);
-                if (matcher.find() && !matcher.group(1).equals("chn")) {
-                    stockRedisUtil.set(StockUtil.HK_STOCK_MARKET_TOKEN, matcher.group(1));
-                }
+            String token = hkStockInfoApi.apiToken();
+            if (null != token && !token.isEmpty()) {
+                stockRedisUtil.set(StockUtil.HK_STOCK_MARKET_TOKEN, token);
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

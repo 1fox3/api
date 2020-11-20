@@ -4,7 +4,7 @@ import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.service.third.stock.sina.api.SinaStockBaseApi;
 import com.fox.api.util.StockUtil;
-import com.fox.spider.stock.api.sina.SinaRealtimeDealInfo;
+import com.fox.spider.stock.api.sina.SinaRealtimeDealInfoApi;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import com.fox.spider.stock.entity.vo.StockCategoryVo;
@@ -32,7 +32,7 @@ public class StockScanSchedule extends StockBaseSchedule {
      * 新浪实时交易数据接口
      */
     @Autowired
-    SinaRealtimeDealInfo sinaRealtimeDealInfo;
+    SinaRealtimeDealInfoApi sinaRealtimeDealInfoApi;
     /**
      * 股票缓存数据同步任务
      */
@@ -71,7 +71,7 @@ public class StockScanSchedule extends StockBaseSchedule {
      */
     private void scanStockCodeList(List<StockVo> stockVoList) {
         Map<String, SinaRealtimeDealInfoPo> stringSinaRealtimeDealInfoPoMap =
-                sinaRealtimeDealInfo.batchRealtimeDealInfo(stockVoList);
+                sinaRealtimeDealInfoApi.batchRealtimeDealInfo(stockVoList);
         //当列表全部为空的股票代码时，休眠一段时间
         try {
             Thread.sleep(100);
@@ -166,7 +166,7 @@ public class StockScanSchedule extends StockBaseSchedule {
      */
     public void syncStockDealStatus(Integer stockMarket) {
         if (StockConst.SM_ALL.contains(stockMarket)) {
-            if (StockConst.SM_A.equals(stockMarket)) {
+            if (StockConst.SM_A == stockMarket) {
                 for (Integer sm : StockConst.SM_A_LIST) {
                     stockDealStatusScan(sm);
                 }
@@ -207,7 +207,7 @@ public class StockScanSchedule extends StockBaseSchedule {
                     stockVoList.add(stockVo);
                 }
                 Map<String, SinaRealtimeDealInfoPo> stringSinaRealtimeDealInfoPoMap =
-                        sinaRealtimeDealInfo.batchRealtimeDealInfo(stockVoList);
+                        sinaRealtimeDealInfoApi.batchRealtimeDealInfo(stockVoList);
                 for (StockEntity stockEntity : stockEntityList) {
                     if (null == stockEntity) {
                         continue;
