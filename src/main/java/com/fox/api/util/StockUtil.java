@@ -1,9 +1,9 @@
 package com.fox.api.util;
 
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.service.third.stock.sina.api.SinaRehabilitationLine;
 import com.fox.api.util.redis.StockRedisUtil;
+import com.fox.spider.stock.constant.StockConst;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -153,7 +153,7 @@ public class StockUtil {
 
         String currentTime = DateUtil.getCurrentTime(DateUtil.TIME_FORMAT_2);
 
-        if (StockConst.SM_SH.equals(stockMarket) || StockConst.SM_SZ.equals(stockMarket)) {
+        if (StockConst.SM_SH == stockMarket || StockConst.SM_SZ == stockMarket) {
             //上午交易时间
             if ((currentTime.compareTo(shMorningDealStartTime) >= 0
                     && currentTime.compareTo(shMorningDealEndTime) <= 0)) {
@@ -167,7 +167,7 @@ public class StockUtil {
             }
         }
 
-        if (StockConst.SM_HK.equals(stockMarket)) {
+        if (StockConst.SM_HK == stockMarket) {
             //上午交易时间
             if ((currentTime.compareTo(hkMorningDealStartTime) >= 0 && currentTime.compareTo(hkMorningDealEndTime) <= 0)) {
                 return true;
@@ -203,16 +203,16 @@ public class StockUtil {
         }
         //港股不设涨跌幅限制
         Integer stockMarket = stockEntity.getStockMarket();
-        if (StockConst.SM_HK.equals(stockMarket)) {
+        if (StockConst.SM_HK == stockMarket) {
             return BigDecimal.ZERO;
         }
         //科创板不设涨跌幅限制
         Integer stockKind = stockEntity.getStockKind();
-        if (StockConst.SK_STAR.equals(stockKind)) {
+        if (StockConst.SK_SH_STOCK_STAR == stockKind) {
             return BigDecimal.ZERO;
         }
         //创业版涨跌幅限制为20%
-        if (StockConst.SK_GEM.equals(stockKind)) {
+        if (StockConst.SK_SZ_STOCK_GEM == stockKind) {
             return new BigDecimal(0.2).setScale(2, RoundingMode.HALF_UP);
         }
         //非ST的股票涨跌幅限制为10%，ST的股票涨跌幅限制为5%

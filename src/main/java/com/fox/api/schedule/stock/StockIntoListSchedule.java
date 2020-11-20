@@ -1,15 +1,17 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.util.DateUtil;
-import com.fox.spider.stock.entity.vo.StockVo;
+import com.fox.spider.stock.constant.StockConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 将需要频繁处理的股票信息放入缓存列表中，方便以后使用，不用在查询数据库
@@ -70,7 +72,7 @@ public class StockIntoListSchedule extends StockBaseSchedule {
             return;
         }
         List<Integer> stockMarketList = Arrays.asList(stockMarket);
-        if (StockConst.SM_A.equals(stockMarket)) {
+        if (StockConst.SM_A == stockMarket) {
             stockMarketList = StockConst.SM_A_LIST;
         }
         List<StockEntity> stockEntityList;

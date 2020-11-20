@@ -1,6 +1,5 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.*;
 import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
 import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
@@ -11,6 +10,7 @@ import com.fox.api.service.third.stock.nets.api.NetsDayLine;
 import com.fox.api.service.third.stock.sina.api.SinaDealRatio;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
+import com.fox.spider.stock.constant.StockConst;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

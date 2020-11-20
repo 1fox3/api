@@ -1,7 +1,6 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockLimitUpDownEntity;
 import com.fox.api.dao.stock.entity.StockUpDownEntity;
@@ -12,6 +11,7 @@ import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
 import com.fox.api.service.stock.StockOfflineService;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
+import com.fox.spider.stock.constant.StockConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

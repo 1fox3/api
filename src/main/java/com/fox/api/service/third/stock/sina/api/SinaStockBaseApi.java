@@ -1,8 +1,8 @@
 package com.fox.api.service.third.stock.sina.api;
 
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
+import com.fox.spider.stock.constant.StockConst;
 
 import java.util.Arrays;
 import java.util.HashMap;

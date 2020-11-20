@@ -1,11 +1,11 @@
 package com.fox.api.service.third.stock.sina.api;
 
-import com.fox.api.constant.stock.StockConst;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.http.HttpResponseDto;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.util.HttpUtil;
 import com.fox.api.util.StringUtil;
+import com.fox.spider.stock.constant.StockConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -165,7 +165,7 @@ public class SinaRealtime extends SinaStockBaseApi {
             response = response.substring(startIndex + 1, endIndex);
             if (response.contains(",")) {
                 String[] responseArr = response.split(",");
-                if (StockConst.SM_HK.equals(getStockMarket(stockCodeStr))) {
+                if (StockConst.SM_HK == getStockMarket(stockCodeStr)) {
                     stockRealtimePo = buildHkStockRealtimeEntity(responseArr);
                 } else {
                     stockRealtimePo = buildCnStockRealtimeEntity(responseArr);
