@@ -1,8 +1,5 @@
 package com.fox.api.configuration.cache;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fox.api.property.redis.ClassCacheTimeProperty;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +12,6 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -25,8 +21,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -34,6 +28,9 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 主缓存
+ */
 @Configuration
 @EnableCaching
 public class RedisCacheConfig extends CachingConfigurerSupport {
@@ -76,39 +73,24 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
     private RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory factory) {
         RedisTemplate template = new RedisTemplate();
         RedisSerializer stringSerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = this.getValueSerializer();
         // key采用String的序列化方式
         template.setKeySerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);
-        template.setValueSerializer(jackson2JsonRedisSerializer);
-        template.setHashValueSerializer(jackson2JsonRedisSerializer);
         template.setConnectionFactory(factory);
         template.afterPropertiesSet();
         return template;
     }
 
-    /**
-     * 获取缓存值的序列化方法
-     * @return
-     */
-    private Jackson2JsonRedisSerializer getValueSerializer() {
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-        ObjectMapper om = new ObjectMapper();
-        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(om);
-        return jackson2JsonRedisSerializer;
-    }
-
     //自定义key生成器
+    @Override
     @Bean("keyGenerator")
     @Primary
-    public KeyGenerator keyGenerator(){
-        return (o, method, params) ->{
+    public KeyGenerator keyGenerator() {
+        return (o, method, params) -> {
             StringBuilder sb = new StringBuilder();
             sb.append(o.getClass().getName()); // 类目
             sb.append(method.getName()); // 方法名
-            for(Object param: params){
+            for (Object param : params) {
                 sb.append(param.toString()); // 参数名
             }
             return sb.toString();
@@ -120,14 +102,8 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
     @Primary
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         RedisSerializer stringSerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = this.getValueSerializer();
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(3600)) // 1小时缓存失效
-                // 设置key的序列化方式
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
-                // 设置value的序列化方式
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))
-                // 不缓存null值
+                .entryTtl(Duration.ofSeconds(3600)) // 1小时缓存失效// 不缓存null值
                 .disableCachingNullValues();
 
         RedisCacheManager redisCacheManager = RedisCacheManager.builder(connectionFactory)
@@ -141,7 +117,7 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
     private Map<String, RedisCacheConfiguration> getRedisCacheConfigurationMap() {
         Map<String, RedisCacheConfiguration> redisCacheConfigurationMap = new HashMap<>();
 
-        for(Map.Entry<String, Integer> entry : this.classCacheTimeProperty.getTime().entrySet()){
+        for (Map.Entry<String, Integer> entry : this.classCacheTimeProperty.getTime().entrySet()) {
             String mapKey = entry.getKey();
             Integer mapValue = entry.getValue();
             redisCacheConfigurationMap.put(mapKey, this.getRedisCacheConfigurationWithTtl(mapValue));
@@ -150,15 +126,7 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
     }
 
     private RedisCacheConfiguration getRedisCacheConfigurationWithTtl(Integer seconds) {
-        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = this.getValueSerializer();
-
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig();
-        redisCacheConfiguration = redisCacheConfiguration.serializeValuesWith(
-                RedisSerializationContext
-                        .SerializationPair
-                        .fromSerializer(jackson2JsonRedisSerializer)
-        ).entryTtl(Duration.ofSeconds(seconds));
-
         return redisCacheConfiguration;
     }
 }

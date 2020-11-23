@@ -1,7 +1,10 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
+import com.fox.spider.stock.api.sina.SinaRealtimeDealInfoApi;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.stereotype.Component;
 
@@ -16,13 +19,15 @@ import java.util.*;
  */
 @Component
 public class StockRealtimeRankSchedule extends StockBaseSchedule {
-
     /**
      * 排行统计
      */
     public void syncStockRealtimeRank() {
+        Long onceLimit = (long) 200;
+        List hashKeyList = new ArrayList();
         for (Integer stockMarket : StockConst.SM_CODE_ALL) {
             String codeListCacheKey = redisStockCodeList + ":" + stockMarket;
+            String infoHashCacheKey = redisRealtimeStockInfoHash + ":" + stockMarket;
             String priceZSetKey = redisRealtimeRankPriceZSet + ":" + stockMarket;
             String uptickRateZSetKey = redisRealtimeRankUptickRateZSet + ":" + stockMarket;
             String surgeRateZSetKey = redisRealtimeRankSurgeRateZSet + ":" + stockMarket;
@@ -31,8 +36,6 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
             String stopStatisticsCacheKey = stockRealtimeStockStopStatistics + ":" + stockMarket;
             Long codeListSize = stockRedisUtil.lSize(codeListCacheKey);
             int stopNum = 0;
-            Long onceLimit = (long) 600;
-            List hashKeyList = new ArrayList();
             for (Long i = Long.valueOf(0); i < codeListSize; i += onceLimit) {
                 List<Object> stockCodeList = stockRedisUtil.lRange(codeListCacheKey, i, i + onceLimit - (long) 1);
                 if (null == stockCodeList || 0 >= stockCodeList.size()) {
@@ -43,10 +46,9 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                     hashKeyList.add(stockCode.toString());
                 }
                 List<Object> stockInfoList = stockRedisUtil.hMultiGet(
-                        redisRealtimeStockInfoHash,
+                        infoHashCacheKey,
                         hashKeyList
                 );
-
                 Set<DefaultTypedTuple> priceSet = new HashSet<>();
                 Set<DefaultTypedTuple> uptickRateSet = new HashSet<>();
                 Set<DefaultTypedTuple> surgeRateSet = new HashSet<>();

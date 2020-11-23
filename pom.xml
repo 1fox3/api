@@ -129,6 +129,11 @@
             <version>0.0.1-SNAPSHOT</version>
             <systemPath>${pom.basedir}/lib/spiderStock.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.75</version>
+        </dependency>
     </dependencies>
 
     <build>

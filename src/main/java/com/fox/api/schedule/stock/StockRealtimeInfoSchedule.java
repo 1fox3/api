@@ -46,7 +46,7 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
                             ((StockEntity) stockEntity).getStockMarket()
                     ));
                 }
-                if (!stockVoList.isEmpty()) {
+                if (stockVoList.isEmpty()) {
                     continue;
                 }
                 sinaRealtimeDealInfoPoMap = sinaRealtimeDealInfoApi.batchRealtimeDealInfo(stockVoList);

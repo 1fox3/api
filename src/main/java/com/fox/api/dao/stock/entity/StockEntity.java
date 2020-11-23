@@ -3,13 +3,16 @@ package com.fox.api.dao.stock.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 股票基本信息
+ *
  * @author lusongsong
  * @date 2020/3/5 16:13
  */
 @Data
-public class StockEntity {
+public class StockEntity implements Serializable {
     /**
      * 记录id
      */

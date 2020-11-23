@@ -1,14 +1,10 @@
 package com.fox.api.configuration.cache;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fox.api.entity.property.redis.RedisLettuceProperty;
 import com.fox.api.property.redis.ClassCacheTimeProperty;
 import lombok.Data;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
@@ -19,8 +15,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -28,6 +22,9 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * redis配置基类
+ */
 @Data
 public abstract class AbstractRedisCacheConfig {
     @Autowired
@@ -73,29 +70,12 @@ public abstract class AbstractRedisCacheConfig {
     protected RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         RedisSerializer stringSerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = this.getValueSerializer();
         // key采用String的序列化方式
         template.setKeySerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);
-        // value序列化方式采用jdk
-        template.setValueSerializer(jackson2JsonRedisSerializer);
-        template.setHashValueSerializer(jackson2JsonRedisSerializer);
         template.setConnectionFactory(factory);
         template.afterPropertiesSet();
         return template;
-    }
-
-    /**
-     * 获取缓存值的序列化方法
-     * @return
-     */
-    private Jackson2JsonRedisSerializer getValueSerializer() {
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-        ObjectMapper om = new ObjectMapper();
-        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(om);
-        return jackson2JsonRedisSerializer;
     }
 
     protected StringRedisTemplate getStringRedisTemplate(RedisConnectionFactory factory) {
@@ -105,12 +85,12 @@ public abstract class AbstractRedisCacheConfig {
         return template;
     }
 
-    public KeyGenerator keyGenerator(){
-        return (o, method, params) ->{
+    public KeyGenerator keyGenerator() {
+        return (o, method, params) -> {
             StringBuilder sb = new StringBuilder();
             sb.append(o.getClass().getName()); // 类目
             sb.append(method.getName()); // 方法名
-            for(Object param: params){
+            for (Object param : params) {
                 sb.append(param.toString()); // 参数名
             }
             return sb.toString();
@@ -119,14 +99,8 @@ public abstract class AbstractRedisCacheConfig {
 
     public RedisCacheManager cacheManager() {
         RedisConnectionFactory connectionFactory = this.factory();
-        RedisSerializer stringSerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = this.getValueSerializer();
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofSeconds(3600)) // 1小时缓存失效
-                // 设置key的序列化方式
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
-                // 设置value的序列化方式
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))
                 // 不缓存null值
                 .disableCachingNullValues();
 
@@ -140,7 +114,7 @@ public abstract class AbstractRedisCacheConfig {
 
     private Map<String, RedisCacheConfiguration> getRedisCacheConfigurationMap() {
         Map<String, RedisCacheConfiguration> redisCacheConfigurationMap = new HashMap<>();
-        for(Map.Entry<String, Integer> entry : this.classCacheTimeProperty.getTime().entrySet()){
+        for (Map.Entry<String, Integer> entry : this.classCacheTimeProperty.getTime().entrySet()) {
             String mapKey = entry.getKey();
             Integer mapValue = entry.getValue();
             redisCacheConfigurationMap.put(mapKey, this.getRedisCacheConfigurationWithTtl(mapValue));
@@ -149,15 +123,7 @@ public abstract class AbstractRedisCacheConfig {
     }
 
     private RedisCacheConfiguration getRedisCacheConfigurationWithTtl(Integer seconds) {
-        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = this.getValueSerializer();
-
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig();
-        redisCacheConfiguration = redisCacheConfiguration.serializeValuesWith(
-                RedisSerializationContext
-                        .SerializationPair
-                        .fromSerializer(jackson2JsonRedisSerializer)
-        ).entryTtl(Duration.ofSeconds(seconds));
-
         return redisCacheConfiguration;
     }
 }
