@@ -1,10 +1,8 @@
 package com.fox.api;
 
-import com.fox.api.service.stock.StockInfoService;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.entity.vo.StockVo;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest

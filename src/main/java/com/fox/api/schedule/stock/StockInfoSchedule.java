@@ -51,7 +51,8 @@ public class StockInfoSchedule extends StockBaseSchedule implements StockSchedul
             StockInfoEntity shStockInfoEntity = stockInfoService.getInfoFromStockExchange(
                     new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket())
             );
-            if (null == shStockInfoEntity.getStockOnDate() || "".equals(shStockInfoEntity.getStockOnDate())) {
+            if (null == shStockInfoEntity || null == shStockInfoEntity.getStockOnDate()
+                    || "".equals(shStockInfoEntity.getStockOnDate())) {
                 return;
             }
             StockInfoEntity dbSHStockInfoEntity = stockInfoMapper.getByStockId(stockEntity.getId());

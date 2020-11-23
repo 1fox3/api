@@ -95,7 +95,7 @@ public class StockIntoListSchedule extends StockBaseSchedule {
                     stockEntityMap.put(String.valueOf(stockEntity.getId()), stockEntity);
                     codeList.add(stockEntity.getStockCode());
                 }
-                this.stockRedisUtil.lPushAll(idCacheKey, stockEntityList);
+                this.stockRedisUtil.lPushAll(idCacheKey, codeList);
                 this.stockRedisUtil.hPutAll(hashCacheKey, stockEntityMap);
             }
         }

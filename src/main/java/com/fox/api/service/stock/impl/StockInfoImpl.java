@@ -64,16 +64,25 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
         switch (stockVo.getStockMarket()) {
             case StockConst.SM_SH:
                 SHStockInfoPo shStockInfoPo = shStockInfoApi.stockInfo(stockVo.getStockCode());
+                if (null == shStockInfoPo) {
+                    return null;
+                }
                 BeanUtils.copyProperties(shStockInfoPo, stockInfoEntity);
                 break;
             case StockConst.SM_SZ:
                 SZStockInfoPo szStockInfoPo = szStockInfoApi.stockInfo(stockVo.getStockCode());
+                if (null == szStockInfoPo) {
+                    return null;
+                }
                 BeanUtils.copyProperties(szStockInfoPo, stockInfoEntity);
                 break;
             case StockConst.SM_HK:
                 HKStockInfoPo hkStockInfoPo = hkStockInfoApi.stockInfo(
                         StockUtil.hkStockMarketToken(), stockVo.getStockCode()
                 );
+                if (null == hkStockInfoPo) {
+                    return null;
+                }
                 BeanUtils.copyProperties(hkStockInfoPo, stockInfoEntity);
                 break;
             default:
