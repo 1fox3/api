@@ -5,8 +5,10 @@ import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
 import com.fox.api.service.admin.DateTypeService;
 import com.fox.api.util.DateUtil;
+import com.fox.api.util.StockUtil;
 import com.fox.api.util.redis.StockRedisUtil;
 import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.constant.StockMarketStatusConst;
 import com.fox.spider.stock.entity.vo.StockVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,9 @@ import java.util.*;
  * @date 2020/3/27 17:56
  */
 public class StockBaseSchedule {
+    /**
+     * 日志
+     */
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     protected StockMapper stockMapper;
@@ -78,6 +83,10 @@ public class StockBaseSchedule {
      */
     @Autowired
     DateTypeService dateTypeService;
+    /**
+     * 实时交易任务是否有执行下一次权限
+     */
+    protected static final String REALTIME_SCHEDULE_HAS_NEXT = "rtScheduleHasNext";
 
     /**
      * 判断日期是否为一个交易日
@@ -306,5 +315,43 @@ public class StockBaseSchedule {
         }
 
         return listWeekOrMonth;
+    }
+
+    /**
+     * 交易相关实时任务是可以执行
+     *
+     * @param stockMarket
+     * @param schedule
+     * @return
+     */
+    public Boolean realtimeDealScheduleCanRun(Integer stockMarket, String schedule) {
+        if (null == stockMarket || !StockConst.SM_ALL.contains(stockMarket) || null == schedule || schedule.isEmpty()) {
+            return false;
+        }
+
+        Integer smStatus = StockUtil.smDealStatus(stockMarket);
+        if (null == smStatus) {
+            return false;
+        }
+
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(REALTIME_SCHEDULE_HAS_NEXT);
+        stringBuffer.append(":");
+        stringBuffer.append(schedule);
+        stringBuffer.append(":");
+        stringBuffer.append(stockMarket);
+        String hasNextKey = stringBuffer.toString();
+
+        if (StockMarketStatusConst.CAN_DEAL_STATUS_LIST.contains(smStatus)) {
+            stockRedisUtil.set(hasNextKey, 1, 36000L);
+            return true;
+        }
+
+        if (stockRedisUtil.get(hasNextKey).equals(1)) {
+            stockRedisUtil.set(hasNextKey, 0, 36000L);
+            return true;
+        }
+
+        return false;
     }
 }

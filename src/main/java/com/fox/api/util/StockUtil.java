@@ -4,6 +4,7 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.service.third.stock.sina.api.SinaRehabilitationLine;
 import com.fox.api.util.redis.StockRedisUtil;
 import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.constant.StockMarketStatusConst;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,6 +36,10 @@ public class StockUtil {
      * 下个交易日缓存key
      */
     private static String stockMarketNextDealDateCacheKey = "stockMarketNextDealDate";
+    /**
+     * 交易所交易状态缓存key
+     */
+    public static String SM_DEAL_STATUS = "stockMarketDealStatus";
 
     /**
      * 沪深交易起止时间
@@ -57,13 +62,9 @@ public class StockUtil {
      * @param key
      * @return
      */
-    private static String redisGet(String key) {
-        String info = "";
+    private static Object redisGet(String key) {
         StockRedisUtil stockRedisUtil = (StockRedisUtil) ApplicationContextUtil.getBean("stockRedisUtil");
-        if (stockRedisUtil.hasKey(key)) {
-            info = (String) stockRedisUtil.get(key);
-        }
-        return null == info ? "" : info;
+        return stockRedisUtil.get(key);
     }
 
     /**
@@ -84,7 +85,7 @@ public class StockUtil {
      */
     public static String lastDealDate(Integer stockMarket) {
         String cacheKey = StockUtil.lastDealDateCacheKey(stockMarket);
-        return redisGet(cacheKey);
+        return (String) redisGet(cacheKey);
     }
 
     /**
@@ -105,7 +106,7 @@ public class StockUtil {
      */
     public static String preDealDate(Integer stockMarket) {
         String cacheKey = StockUtil.preDealDateCacheKey(stockMarket);
-        return redisGet(cacheKey);
+        return (String) redisGet(cacheKey);
     }
 
     /**
@@ -126,7 +127,7 @@ public class StockUtil {
      */
     public static String nextDealDate(Integer stockMarket) {
         String cacheKey = StockUtil.nextDealDateCacheKey(stockMarket);
-        return redisGet(cacheKey);
+        return (String) redisGet(cacheKey);
     }
 
     /**
@@ -137,7 +138,7 @@ public class StockUtil {
      */
     public static Boolean todayIsDealDate(Integer stockMarket) {
         String today = DateUtil.getCurrentDate();
-        return today.equals(StockUtil.lastDealDate(stockMarket));
+        return today.equals(StockUtil.lastDealDate(stockMarket)) || today.equals(StockUtil.nextDealDate(stockMarket));
     }
 
     /**
@@ -188,7 +189,7 @@ public class StockUtil {
      * @return
      */
     public static String hkStockMarketToken() {
-        return redisGet(StockUtil.HK_STOCK_MARKET_TOKEN);
+        return (String) redisGet(StockUtil.HK_STOCK_MARKET_TOKEN);
     }
 
     /**
@@ -245,5 +246,29 @@ public class StockUtil {
             dateList = dateList.subList(0, (limit > dateList.size() ? dateList.size() : limit) - 1);
         }
         return dateList;
+    }
+
+    /**
+     * 获取股市交易状态
+     *
+     * @param stockMarket
+     * @return
+     */
+    public static Integer smDealStatus(Integer stockMarket) {
+        if (null != stockMarket && StockConst.SM_ALL.contains(stockMarket)) {
+            return (Integer) redisGet(SM_DEAL_STATUS + ":" + stockMarket);
+        }
+        return null;
+    }
+
+    /**
+     * 判断股市是否处于可交易状态
+     *
+     * @param stockMarket
+     * @return
+     */
+    public static Boolean inDealStatus(Integer stockMarket) {
+        Integer dealStatus = smDealStatus(stockMarket);
+        return null != dealStatus && StockMarketStatusConst.CAN_DEAL_STATUS_LIST.contains(dealStatus);
     }
 }

@@ -25,7 +25,11 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
     public void syncStockRealtimeRank() {
         Long onceLimit = (long) 200;
         List hashKeyList = new ArrayList();
+        String schedule = "StockRealtimeRankSchedule:syncStockRealtimeRank";
         for (Integer stockMarket : StockConst.SM_CODE_ALL) {
+            if (!realtimeDealScheduleCanRun(stockMarket, schedule)) {
+                continue;
+            }
             String codeListCacheKey = redisStockCodeList + ":" + stockMarket;
             String infoHashCacheKey = redisRealtimeStockInfoHash + ":" + stockMarket;
             String priceZSetKey = redisRealtimeRankPriceZSet + ":" + stockMarket;
@@ -125,7 +129,11 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
      * 实时增幅统计
      */
     public void syncStockRealtimeUptickRateStatistics() {
+        String schedule = "StockRealtimeRankSchedule:syncStockRealtimeUptickRateStatistics";
         for (Integer stockMarket : StockConst.SM_CODE_ALL) {
+            if (!realtimeDealScheduleCanRun(stockMarket, schedule)) {
+                continue;
+            }
             Map<String, Integer> uptickRateStatisticsMap = new LinkedHashMap<>();
             Map<String, List<Double>> scoreMap = new LinkedHashMap<String, List<Double>>() {{
                 put("up", Arrays.asList(0.00001, 100.0));

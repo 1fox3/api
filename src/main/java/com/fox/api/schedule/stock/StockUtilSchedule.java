@@ -4,10 +4,9 @@ import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
 import com.fox.spider.stock.api.hk.HKStockInfoApi;
-import com.fox.spider.stock.api.sina.SinaRealtimeDealInfoApi;
 import com.fox.spider.stock.constant.StockConst;
-import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
-import com.fox.spider.stock.entity.vo.StockVo;
+import com.fox.spider.stock.constant.StockMarketStatusConst;
+import com.fox.spider.stock.service.StockToolService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ public class StockUtilSchedule extends StockBaseSchedule {
      * 新浪实时交易信息
      */
     @Autowired
-    SinaRealtimeDealInfoApi sinaRealtimeDealInfoApi;
+    StockToolService stockToolService;
     /**
      * 港股股票信息类
      */
@@ -48,29 +47,21 @@ public class StockUtilSchedule extends StockBaseSchedule {
      * 港股在9:35更新
      */
     public void syncStockMarketLastDealDate(Integer stockMarket) {
-        logger.error(stockMarket.toString());
         if (StockConst.SM_ALL.contains(stockMarket)) {
             String currentDate = DateUtil.getCurrentDate();
-            StockVo stockVo = StockConst.DEMO_STOCK.get(stockMarket);
-            if (null == stockVo || null == stockVo.getStockCode() || null == stockVo.getStockMarket()) {
-                return;
-            }
             try {
-                String currentDealDate = StockUtil.lastDealDate(stockVo.getStockMarket());
+                String currentDealDate = StockUtil.lastDealDate(stockMarket);
                 //如果日期是今天则无需刷新
                 if (null != currentDealDate && currentDealDate.equals(currentDate)) {
                     return;
                 }
-                SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = sinaRealtimeDealInfoApi.realtimeDealInfo(stockVo);
-                if (null != sinaRealtimeDealInfoPo) {
-                    String lastDealDate = sinaRealtimeDealInfoPo.getDt();
-                    if (null != lastDealDate && !lastDealDate.equals("") && !lastDealDate.equals(currentDealDate)) {
-                        logger.error(stockVo.getStockMarket() + ":" + lastDealDate);
-                        //设置最新交易日期
-                        stockRedisUtil.set(StockUtil.lastDealDateCacheKey(stockVo.getStockMarket()), lastDealDate);
-                        refreshPreDealDate(stockVo.getStockMarket(), currentDealDate, lastDealDate);
-                        refreshNextDealDate(stockVo.getStockMarket(), lastDealDate);
-                    }
+                String lastDealDate = stockToolService.lastDealDate(stockMarket);
+                if (null != lastDealDate && !lastDealDate.equals("") && !lastDealDate.equals(currentDealDate)) {
+                    logger.error(stockMarket + ":" + lastDealDate);
+                    //设置最新交易日期
+                    stockRedisUtil.set(StockUtil.lastDealDateCacheKey(stockMarket), lastDealDate);
+                    refreshPreDealDate(stockMarket, currentDealDate, lastDealDate);
+                    refreshNextDealDate(stockMarket, lastDealDate);
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage());
@@ -146,6 +137,19 @@ public class StockUtilSchedule extends StockBaseSchedule {
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 同步股市交易状态
+     */
+    public void syncSMDealStatus() {
+        for (Integer stockMarket : StockConst.SM_ALL) {
+            int dealStatus = StockMarketStatusConst.REST;
+            if (StockUtil.todayIsDealDate(stockMarket)) {
+                dealStatus = StockMarketStatusConst.timeSMStatus(stockMarket);
+            }
+            stockRedisUtil.set(StockUtil.SM_DEAL_STATUS + ":" + stockMarket, dealStatus);
         }
     }
 }

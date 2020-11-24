@@ -1,6 +1,7 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.util.StockUtil;
 import com.fox.spider.stock.api.sina.SinaRealtimeDealInfoApi;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
@@ -28,7 +29,11 @@ public class StockRealtimeInfoSchedule extends StockBaseSchedule {
      */
     public void syncStockRealtimeDealInfo() {
         Integer onceLimit = 200;
+        String schedule = "StockRealtimeInfoSchedule:syncStockRealtimeDealInfo";
         for (Integer stockMarket : StockConst.SM_CODE_ALL) {
+            if (!realtimeDealScheduleCanRun(stockMarket, schedule)) {
+                continue;
+            }
             String listCacheKey = redisStockList + ":" + stockMarket;
             String hashCacheKey = redisRealtimeStockInfoHash + ":" + stockMarket;
             Long stockListSize = stockRedisUtil.lSize(listCacheKey);
