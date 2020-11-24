@@ -6,15 +6,12 @@ import java.math.BigDecimal;
 
 /**
  * 股票实时排行信息
+ *
  * @author lusongsong
  * @date 2020/3/31 17:45
  */
 @Data
 public class StockRealtimeRankInfoDto {
-    /**
-     * 股票id
-     */
-    Integer stockId;
     /**
      * 股票代码
      */

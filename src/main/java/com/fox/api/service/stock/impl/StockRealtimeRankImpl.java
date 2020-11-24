@@ -5,6 +5,7 @@ import com.fox.api.entity.dto.stock.realtime.rank.StockRealtimeRankInfoDto;
 import com.fox.api.entity.po.PageInfoPo;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.stock.StockRealtimeRankService;
+import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.*;
 
 /**
  * 股票实时数据排行
+ *
  * @author lusongsong
  */
 @Service
@@ -45,29 +47,32 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
 
     /**
      * 获取排行数据
+     *
+     * @param stockMarket
      * @param type
+     * @param sortType
      * @param pageInfo
      * @return
      */
     @Override
-    public List<StockRealtimeRankInfoDto> rank(String type, String sortType, PageInfoPo pageInfo) {
+    public List<StockRealtimeRankInfoDto> rank(Integer stockMarket, String type, String sortType, PageInfoPo pageInfo) {
         List<StockRealtimeRankInfoDto> list = new LinkedList<>();
         //排序类型错误直接返回空列表
-        if (!this.supportRankTypeList.contains(type)) {
+        if (!supportRankTypeList.contains(type)) {
             return list;
         }
         //根据排序类型获取列表
         Integer start = (pageInfo.getPageNum() - 1) * pageInfo.getPageSize();
         Integer end = pageInfo.getPageNum() * pageInfo.getPageSize() - 1;
         Set<Object> set;
-        String redisZSetKey = this.getRedisZSetKey(type);
-        if (this.asc.equals(sortType)) {
-            set = this.stockRedisUtil.zRangeWithScores(
-                    redisZSetKey, (long)start, (long)end
+        String redisZSetKey = getRedisZSetKey(stockMarket, type);
+        if (asc.equals(sortType)) {
+            set = stockRedisUtil.zRangeWithScores(
+                    redisZSetKey, (long) start, (long) end
             );
         } else {
-            set = this.stockRedisUtil.zReverseRangeWithScores(
-                    redisZSetKey, (long)start, (long)end
+            set = stockRedisUtil.zReverseRangeWithScores(
+                    redisZSetKey, (long) start, (long) end
             );
         }
 
@@ -76,35 +81,37 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
         }
 
         //获取股票id列表
-        List stockIdList = new LinkedList();
-        for(Object object : set) {
-            Integer value = (Integer) ((DefaultTypedTuple)object).getValue();
-            stockIdList.add(value.toString());
+        List stockCodeList = new LinkedList();
+        for (Object object : set) {
+            String value = (String) ((DefaultTypedTuple) object).getValue();
+            stockCodeList.add(value);
         }
 
         //获取股票实时信息
-        List<Object> stockRealtimePoList = this.stockRedisUtil.hMultiGet(this.redisRealtimeStockInfoHash, stockIdList);
-        Map<Integer, StockRealtimePo> stockRealtimePoMap = new HashMap<>(stockRealtimePoList.size());
-        for (Object stockRealtimePo : stockRealtimePoList) {
-            stockRealtimePoMap.put(
-                    ((StockRealtimePo) stockRealtimePo).getStockId(),
-                    (StockRealtimePo) stockRealtimePo
+        List<Object> inaRealtimeDealInfoPoList = stockRedisUtil.hMultiGet(
+                redisRealtimeStockInfoHash + ":" + stockMarket,
+                stockCodeList
+        );
+        Map<String, SinaRealtimeDealInfoPo> sinaRealtimeDealInfoPoMap = new HashMap<>(inaRealtimeDealInfoPoList.size());
+        for (Object sinaRealtimeDealInfoPo : inaRealtimeDealInfoPoList) {
+            sinaRealtimeDealInfoPoMap.put(
+                    ((SinaRealtimeDealInfoPo) sinaRealtimeDealInfoPo).getStockCode(),
+                    (SinaRealtimeDealInfoPo) sinaRealtimeDealInfoPo
             );
         }
 
         //根据排序结果遍历补充数据
-        for(Object object : set) {
-            Integer stockId = (Integer)((DefaultTypedTuple)object).getValue();
-            StockRealtimePo stockRealtimePo = stockRealtimePoMap.get(stockId);
+        for (Object object : set) {
+            String stockCode = (String) ((DefaultTypedTuple) object).getValue();
+            SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = sinaRealtimeDealInfoPoMap.get(stockCode);
             StockRealtimeRankInfoDto stockRealtimeRankInfoDto = new StockRealtimeRankInfoDto();
-            stockRealtimeRankInfoDto.setStockId(stockRealtimePo.getStockId());
-            stockRealtimeRankInfoDto.setStockCode(stockRealtimePo.getStockCode());
-            stockRealtimeRankInfoDto.setStockName(stockRealtimePo.getStockName());
-            stockRealtimeRankInfoDto.setCurrentPrice(stockRealtimePo.getCurrentPrice());
-            stockRealtimeRankInfoDto.setUptickRate(stockRealtimePo.getUptickRate());
-            stockRealtimeRankInfoDto.setSurgeRate(stockRealtimePo.getSurgeRate());
-            stockRealtimeRankInfoDto.setDealNum(stockRealtimePo.getDealNum());
-            stockRealtimeRankInfoDto.setDealMoney(stockRealtimePo.getDealMoney());
+            stockRealtimeRankInfoDto.setStockCode(sinaRealtimeDealInfoPo.getStockCode());
+            stockRealtimeRankInfoDto.setStockName(sinaRealtimeDealInfoPo.getStockName());
+            stockRealtimeRankInfoDto.setCurrentPrice(sinaRealtimeDealInfoPo.getCurrentPrice());
+            stockRealtimeRankInfoDto.setUptickRate(sinaRealtimeDealInfoPo.getUptickRate());
+            stockRealtimeRankInfoDto.setSurgeRate(sinaRealtimeDealInfoPo.getSurgeRate());
+            stockRealtimeRankInfoDto.setDealNum(sinaRealtimeDealInfoPo.getDealNum());
+            stockRealtimeRankInfoDto.setDealMoney(sinaRealtimeDealInfoPo.getDealMoney());
             list.add(stockRealtimeRankInfoDto);
         }
 
@@ -113,29 +120,30 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
 
     /**
      * 获取排行的缓存key
+     *
      * @param type
      * @return
      */
-    public String getRedisZSetKey(String type) {
+    public String getRedisZSetKey(Integer stockMarket, String type) {
         if (StockRealtimeRankImpl.RANK_TYPE_PRICE.equals(type)) {
-            return this.redisRealtimeRankPriceZSet;
+            return redisRealtimeRankPriceZSet + ":" + stockMarket;
         }
 
         if (StockRealtimeRankImpl.RANK_TYPE_UPTICK_RATE.equals(type)) {
-            return this.redisRealtimeRankUptickRateZSet;
+            return redisRealtimeRankUptickRateZSet + ":" + stockMarket;
         }
 
         if (StockRealtimeRankImpl.RANK_TYPE_SURGE_RATE.equals(type)) {
-            return this.redisRealtimeRankSurgeRateZSet;
+            return redisRealtimeRankSurgeRateZSet + ":" + stockMarket;
         }
 
         if (StockRealtimeRankImpl.RANK_TYPE_DEAL_NUM.equals(type)) {
-            return this.redisRealtimeRankDealNumZSet;
+            return redisRealtimeRankDealNumZSet + ":" + stockMarket;
         }
 
         if (StockRealtimeRankImpl.RANK_TYPE_DEAL_MONEY.equals(type)) {
-            return this.redisRealtimeRankDealMoneyZSet;
+            return redisRealtimeRankDealMoneyZSet + ":" + stockMarket;
         }
-        return this.redisRealtimeRankUptickRateZSet;
+        return redisRealtimeRankUptickRateZSet + ":" + stockMarket;
     }
 }

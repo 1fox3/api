@@ -75,6 +75,12 @@ public class StockBaseSchedule {
     @Value("${redis.stock.realtime.stock.rank.uptick-statistics}")
     protected String stockRealtimeStockUptickRateStatistics;
 
+    @Value("${redis.stock.realtime.stock.rank.up-limit.list}")
+    protected String stockRealtimeStockRankUpLimitList;
+
+    @Value("${redis.stock.realtime.stock.rank.down-limit.list}")
+    protected String stockRealtimeStockRankDownLimitList;
+
     @Autowired
     protected StockRedisUtil stockRedisUtil;
 

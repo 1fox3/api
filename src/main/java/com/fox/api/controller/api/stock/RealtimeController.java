@@ -59,8 +59,8 @@ public class RealtimeController {
     }
 
     @RequestMapping("/stock/realtime/rank")
-    public ResultDto rank(String type, String sortType, PageInfoPo pageInfo) {
-        List<StockRealtimeRankInfoDto> list = this.stockRealtimeRankService.rank(type, sortType, pageInfo);
+    public ResultDto rank(Integer stockMarket, String type, String sortType, PageInfoPo pageInfo) {
+        List<StockRealtimeRankInfoDto> list = this.stockRealtimeRankService.rank(stockMarket, type, sortType, pageInfo);
         if (null == list) {
             return ResultDto.fail(ReturnCode.FAIL);
         }
@@ -77,8 +77,8 @@ public class RealtimeController {
     }
 
     @RequestMapping("/stock/realtime/uptickRateStatistics")
-    public ResultDto uptickRateStatistics() {
-        Map<String, Integer> map = this.stockRealtimeService.uptickRateStatistics();
+    public ResultDto uptickRateStatistics(Integer stockMarket) {
+        Map<String, Integer> map = this.stockRealtimeService.uptickRateStatistics(stockMarket);
         if (null == map) {
             return ResultDto.fail(ReturnCode.FAIL);
         }

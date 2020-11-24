@@ -11,6 +11,10 @@ redis:
     realtime:
       stock:
         rank:
+          up-limit:
+            list: stockRealtimeUpLimitList
+          down-limit:
+            list: stockRealtimeDownLimitList
           stop: stockRealtimeStockStopStatistics
           uptick-statistics: stockRealtimeStockUptickRateStatistics
           price: stockRealtimeStockPriceZSet

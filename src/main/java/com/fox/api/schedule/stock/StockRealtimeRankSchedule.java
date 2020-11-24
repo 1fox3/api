@@ -1,14 +1,15 @@
 package com.fox.api.schedule.stock;
 
-import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.spider.stock.api.sina.SinaRealtimeDealInfoApi;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
+import com.fox.spider.stock.entity.vo.StockVo;
+import com.fox.spider.stock.service.StockToolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -20,12 +21,18 @@ import java.util.*;
 @Component
 public class StockRealtimeRankSchedule extends StockBaseSchedule {
     /**
+     * 股票工具类
+     */
+    @Autowired
+    StockToolService stockToolService;
+    /**
      * 排行统计
      */
     public void syncStockRealtimeRank() {
         Long onceLimit = (long) 200;
         List hashKeyList = new ArrayList();
         String schedule = "StockRealtimeRankSchedule:syncStockRealtimeRank";
+        String cacheNamePre = "pre";
         for (Integer stockMarket : StockConst.SM_CODE_ALL) {
             if (!realtimeDealScheduleCanRun(stockMarket, schedule)) {
                 continue;
@@ -37,9 +44,10 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
             String surgeRateZSetKey = redisRealtimeRankSurgeRateZSet + ":" + stockMarket;
             String dealNumZSetKey = redisRealtimeRankDealNumZSet + ":" + stockMarket;
             String dealMoneyZSetKey = redisRealtimeRankDealMoneyZSet + ":" + stockMarket;
-            String stopStatisticsCacheKey = stockRealtimeStockStopStatistics + ":" + stockMarket;
             Long codeListSize = stockRedisUtil.lSize(codeListCacheKey);
-            int stopNum = 0;
+            List<String> upLimitStockCodeList = new ArrayList<>();
+            List<String> downLimitStockCodeList = new ArrayList<>();
+            BigDecimal upRateLimit = null;
             for (Long i = Long.valueOf(0); i < codeListSize; i += onceLimit) {
                 List<Object> stockCodeList = stockRedisUtil.lRange(codeListCacheKey, i, i + onceLimit - (long) 1);
                 if (null == stockCodeList || 0 >= stockCodeList.size()) {
@@ -67,14 +75,15 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
 
                     //今日开盘价
                     BigDecimal openPrice = sinaRealtimeDealInfoPo.getOpenPrice();
-                    //昨日收盘价
+                    //上个交易日收盘价
                     BigDecimal preClosePrice = sinaRealtimeDealInfoPo.getPreClosePrice();
                     if (0 == openPrice.compareTo(BigDecimal.ZERO)
                             || 0 == preClosePrice.compareTo(BigDecimal.ZERO)) {
                         continue;
                     }
-                    //增幅
+                    //当前价
                     BigDecimal currentPrice = sinaRealtimeDealInfoPo.getCurrentPrice();
+                    //增幅
                     BigDecimal uptickRate = sinaRealtimeDealInfoPo.getUptickRate();
                     //波动
                     BigDecimal surgeRate = sinaRealtimeDealInfoPo.getSurgeRate();
@@ -82,11 +91,23 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                     Long dealNum = sinaRealtimeDealInfoPo.getDealNum();
                     //成交金额
                     BigDecimal dealMoney = sinaRealtimeDealInfoPo.getDealMoney();
-                    //交易状态
-                    String dealStatus = sinaRealtimeDealInfoPo.getDealStatus();
-                    //统计停牌数
-                    if (!("00").equals(dealStatus)) {
-                        stopNum++;
+
+                    upRateLimit = stockToolService.limitRate(
+                            new StockVo(sinaRealtimeDealInfoPo.getStockCode(), stockMarket),
+                            sinaRealtimeDealInfoPo.getStockName()
+                    );
+
+                    //判断是否涨跌停
+                    if (null != upRateLimit
+                            && 0 >= preClosePrice.multiply(upRateLimit)
+                            .setScale(2, RoundingMode.HALF_UP)
+                            .compareTo(preClosePrice.subtract(currentPrice).abs())
+                    ) {
+                        if (0 < preClosePrice.compareTo(currentPrice)) {
+                            downLimitStockCodeList.add(sinaRealtimeDealInfoPo.getStockCode());
+                        } else {
+                            upLimitStockCodeList.add(sinaRealtimeDealInfoPo.getStockCode());
+                        }
                     }
 
                     if (null != currentPrice) {
@@ -121,7 +142,22 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                     stockRedisUtil.zAdd(dealMoneyZSetKey, dealMoneySet);
                 }
             }
-            stockRedisUtil.set(stopStatisticsCacheKey, stopNum);
+            stockRedisUtil.lPushAll(
+                    cacheNamePre + stockRealtimeStockRankUpLimitList,
+                    upLimitStockCodeList
+            );
+            stockRedisUtil.lPushAll(
+                    cacheNamePre + stockRealtimeStockRankDownLimitList,
+                    downLimitStockCodeList
+            );
+            stockRedisUtil.rename(
+                    cacheNamePre + stockRealtimeStockRankUpLimitList,
+                    stockRealtimeStockRankUpLimitList
+            );
+            stockRedisUtil.rename(
+                    cacheNamePre + stockRealtimeStockRankDownLimitList,
+                    stockRealtimeStockRankDownLimitList
+            );
         }
     }
 
@@ -136,19 +172,9 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
             }
             Map<String, Integer> uptickRateStatisticsMap = new LinkedHashMap<>();
             Map<String, List<Double>> scoreMap = new LinkedHashMap<String, List<Double>>() {{
-                put("up", Arrays.asList(0.00001, 100.0));
-                put("upLimit", Arrays.asList(0.09700, 100.0));
-                put("down", Arrays.asList(-1.0, -0.00001));
-                put("downLimit", Arrays.asList(-1.0, -0.09701));
+                put("up", Arrays.asList(0.00001, 100000.0));
+                put("down", Arrays.asList(-100.0, -0.00001));
                 put("flat", Arrays.asList(-0.00001, 0.00001));
-//            put("scopeOne", Arrays.asList(-1.0, -0.07000));
-//            put("scopeTwo", Arrays.asList(-0.06999, -0.05000));
-//            put("scopeThree", Arrays.asList(-0.04999, -0.03000));
-//            put("scopeFour", Arrays.asList(-0.02999, -0.00001));
-//            put("scopeFive", Arrays.asList(0.00001, 0.02999));
-//            put("scopeSix", Arrays.asList(0.03000, 0.04999));
-//            put("scopeSeven", Arrays.asList(0.05000, 0.06999));
-//            put("scopeEight", Arrays.asList(0.07000, 100.0));
             }};
 
             Double startScore;
@@ -164,7 +190,10 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                 );
                 uptickRateStatisticsMap.put(key, set.size());
             }
-            uptickRateStatisticsMap.put("stop", (int) stockRedisUtil.get(stockRealtimeStockStopStatistics + ":" + stockMarket));
+            Long upLimit = stockRedisUtil.lSize(stockRealtimeStockRankUpLimitList);
+            uptickRateStatisticsMap.put("upLimit", null == upLimit ? 0 : upLimit.intValue());
+            Long downLimit = stockRedisUtil.lSize(stockRealtimeStockRankDownLimitList);
+            uptickRateStatisticsMap.put("downLimit", null == downLimit ? 0 : downLimit.intValue());
             stockRedisUtil.set(stockRealtimeStockUptickRateStatistics + ":" + stockMarket, uptickRateStatisticsMap);
         }
     }
