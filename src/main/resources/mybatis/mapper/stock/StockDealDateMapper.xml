@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.stock.mapper.StockDealDateMapper">
+    <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockDealDateEntity">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="dt" property="dt" jdbcType="DATE" />
+        <result column="stock_market" property="stockMarket" jdbcType="INTEGER" />
+        <result column="type" property="type" jdbcType="INTEGER" />
+        <result column="is_locked" property="isLocked" jdbcType="INTEGER" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockDealDateEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_stock_deal_date (
+            dt,
+            stock_market,
+            `type`,
+            is_locked
+        ) VALUES (
+            #{dt},
+            #{stockMarket},
+            #{type},
+            #{isLocked}
+        );
+    </insert>
+
+    <update id="update" parameterType="com.fox.api.dao.stock.entity.StockDealDateEntity">
+        UPDATE t_stock_deal_date
+        SET
+            dt = #{dt},
+            stock_market = #{stockMarket},
+            `type` = #{type},
+            is_locked = #{isLocked}
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="get" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_date
+        WHERE
+            stock_market = #{stockMarket}
+            AND
+            dt = #{dt}
+        LIMIT 1;
+    </select>
+
+    <select id="pre" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_date
+        WHERE
+            stock_market = #{stockMarket}
+            AND
+            dt &lt;= #{dt}
+            AND
+            `type` = 1
+        ORDER BY
+            dt DESC
+        LIMIT 1, 1;
+    </select>
+
+    <select id="last" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_date
+        WHERE
+            stock_market = #{stockMarket}
+            AND
+            dt &lt;= #{dt}
+            AND
+            `type` = 1
+        ORDER BY
+            dt DESC
+        LIMIT 1;
+    </select>
+
+    <select id="next" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_date
+        WHERE
+            stock_market = #{stockMarket}
+            AND
+            dt > #{dt}
+            AND
+            `type` = 1
+        ORDER BY
+            dt ASC
+        LIMIT 1;
+    </select>
+</mapper>

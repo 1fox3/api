@@ -7,13 +7,14 @@ import java.util.*;
 
 /**
  * 日期时间工具
+ *
  * @author lusongsong
  */
 public class DateUtil {
     /**
      * 星期列表
      */
-    private static final List weekList = Arrays.asList("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
+    private static final List weekList = Arrays.asList("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
     /**
      * 年期格式
      */
@@ -43,6 +44,7 @@ public class DateUtil {
 
     /**
      * 获取当前年份
+     *
      * @return
      */
     public static String getCurrentYear() {
@@ -53,6 +55,7 @@ public class DateUtil {
 
     /**
      * 获取当前日期
+     *
      * @return
      */
     public static String getCurrentDate() {
@@ -61,6 +64,7 @@ public class DateUtil {
 
     /**
      * 获取当前日期
+     *
      * @param format
      * @return
      */
@@ -72,6 +76,7 @@ public class DateUtil {
 
     /**
      * 获取当前时间
+     *
      * @return
      */
     public static String getCurrentTime() {
@@ -80,6 +85,7 @@ public class DateUtil {
 
     /**
      * 获取当前时间
+     *
      * @param format
      * @return
      */
@@ -91,6 +97,7 @@ public class DateUtil {
 
     /**
      * 日期字符串转换格式
+     *
      * @param str
      * @param oldFormat
      * @param newFormat
@@ -104,6 +111,7 @@ public class DateUtil {
 
     /**
      * 将特定格式的时间字符串转化为Date类型
+     *
      * @param str
      * @param format
      * @return
@@ -116,6 +124,7 @@ public class DateUtil {
 
     /**
      * 将日期转成其他格式
+     *
      * @param date
      * @param format
      * @return
@@ -127,6 +136,7 @@ public class DateUtil {
 
     /**
      * 获取相对日期
+     *
      * @param diffYear
      * @param diffMonth
      * @param diffDay
@@ -141,6 +151,7 @@ public class DateUtil {
 
     /**
      * 获取相对日期
+     *
      * @param dateStr
      * @param diffYear
      * @param diffMonth
@@ -162,6 +173,7 @@ public class DateUtil {
 
     /**
      * 根据日期字符串获取日期
+     *
      * @param dateStr
      * @return
      */
@@ -171,6 +183,7 @@ public class DateUtil {
 
     /**
      * 根据日期字符串获取日期
+     *
      * @param dateStr
      * @param format
      * @return
@@ -181,6 +194,7 @@ public class DateUtil {
 
     /**
      * 根据日期字符串获取日期
+     *
      * @param dateStr
      * @param format
      * @param defaultDate
@@ -199,6 +213,7 @@ public class DateUtil {
 
     /**
      * 时间比较
+     *
      * @param first
      * @param second
      * @param format
@@ -215,6 +230,7 @@ public class DateUtil {
 
     /**
      * 获取星期的字符串
+     *
      * @param dateStr
      * @param format
      * @return
@@ -229,6 +245,7 @@ public class DateUtil {
 
     /**
      * 获取星期的序号
+     *
      * @param dateStr
      * @param format
      * @return

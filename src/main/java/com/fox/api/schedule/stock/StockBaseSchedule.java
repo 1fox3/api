@@ -100,23 +100,28 @@ public class StockBaseSchedule {
      * @param stockMarket
      * @param dealDate
      * @return
-     * @throws ParseException
      */
-    public Boolean isDealDate(Integer stockMarket, String dealDate) throws ParseException {
-        Integer dayInWeekNum = DateUtil.getDayInWeekNum(dealDate, DateUtil.DATE_FORMAT_1);
-        if (1 <= dayInWeekNum && 5 >= dayInWeekNum) {
-            Integer dateType = dateTypeService.getByDate(dealDate);
-            if (stockMarket.equals(StockConst.SM_HK)) {
-                if (DateTypeService.DATE_TYPE_WORKDAY.equals(dateType)
-                        || DateTypeService.DATE_TYPE_WEEKEND.equals(dateType)) {
-                    return true;
-                }
-            } else {
-                if (DateTypeService.DATE_TYPE_WORKDAY.equals(dateType)) {
-                    return true;
+    public Boolean isDealDate(Integer stockMarket, String dealDate) {
+        try {
+            Integer dayInWeekNum = DateUtil.getDayInWeekNum(dealDate, DateUtil.DATE_FORMAT_1);
+            if (1 <= dayInWeekNum && 5 >= dayInWeekNum) {
+                Integer dateType = dateTypeService.getByDate(dealDate);
+                if (stockMarket.equals(StockConst.SM_HK)) {
+                    if (DateTypeService.DATE_TYPE_WORKDAY == dateType
+                            || DateTypeService.DATE_TYPE_WEEKEND == dateType) {
+                        return true;
+                    }
+                } else {
+                    if (DateTypeService.DATE_TYPE_WORKDAY == dateType) {
+                        return true;
+                    }
                 }
             }
+        } catch (ParseException e) {
+            logger.error(dealDate);
+            logger.error(e.getMessage());
         }
+
         return false;
     }
 

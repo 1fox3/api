@@ -138,7 +138,7 @@ public class StockUtil {
      */
     public static Boolean todayIsDealDate(Integer stockMarket) {
         String today = DateUtil.getCurrentDate();
-        return today.equals(StockUtil.lastDealDate(stockMarket)) || today.equals(StockUtil.nextDealDate(stockMarket));
+        return today.equals(StockUtil.lastDealDate(stockMarket));
     }
 
     /**
