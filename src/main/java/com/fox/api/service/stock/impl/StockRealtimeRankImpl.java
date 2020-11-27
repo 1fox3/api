@@ -1,9 +1,7 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.realtime.rank.StockRealtimeRankInfoDto;
 import com.fox.api.entity.po.PageInfoPo;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.stock.StockRealtimeRankService;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import org.springframework.data.redis.core.DefaultTypedTuple;

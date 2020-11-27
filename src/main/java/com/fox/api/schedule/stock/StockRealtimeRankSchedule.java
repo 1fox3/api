@@ -44,6 +44,8 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
             String surgeRateZSetKey = redisRealtimeRankSurgeRateZSet + ":" + stockMarket;
             String dealNumZSetKey = redisRealtimeRankDealNumZSet + ":" + stockMarket;
             String dealMoneyZSetKey = redisRealtimeRankDealMoneyZSet + ":" + stockMarket;
+            String upLimitListKey = stockRealtimeStockRankUpLimitList + ":" + stockMarket;
+            String downLimitListKey = stockRealtimeStockRankDownLimitList + ":" + stockMarket;
             Long codeListSize = stockRedisUtil.lSize(codeListCacheKey);
             List<String> upLimitStockCodeList = new ArrayList<>();
             List<String> downLimitStockCodeList = new ArrayList<>();
@@ -142,22 +144,26 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                     stockRedisUtil.zAdd(dealMoneyZSetKey, dealMoneySet);
                 }
             }
-            stockRedisUtil.lPushAll(
-                    cacheNamePre + stockRealtimeStockRankUpLimitList,
-                    upLimitStockCodeList
-            );
-            stockRedisUtil.lPushAll(
-                    cacheNamePre + stockRealtimeStockRankDownLimitList,
-                    downLimitStockCodeList
-            );
-            stockRedisUtil.rename(
-                    cacheNamePre + stockRealtimeStockRankUpLimitList,
-                    stockRealtimeStockRankUpLimitList
-            );
-            stockRedisUtil.rename(
-                    cacheNamePre + stockRealtimeStockRankDownLimitList,
-                    stockRealtimeStockRankDownLimitList
-            );
+            if (null != upLimitStockCodeList && !upLimitStockCodeList.isEmpty()) {
+                stockRedisUtil.lPushAll(
+                        cacheNamePre + upLimitListKey,
+                        upLimitStockCodeList
+                );
+                stockRedisUtil.rename(
+                        cacheNamePre + upLimitListKey,
+                        upLimitListKey
+                );
+            }
+            if (null != downLimitStockCodeList && !downLimitStockCodeList.isEmpty()) {
+                stockRedisUtil.lPushAll(
+                        cacheNamePre + downLimitListKey,
+                        downLimitStockCodeList
+                );
+                stockRedisUtil.rename(
+                        cacheNamePre + downLimitListKey,
+                        downLimitListKey
+                );
+            }
         }
     }
 
