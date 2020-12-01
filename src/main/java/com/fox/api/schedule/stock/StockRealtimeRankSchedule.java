@@ -196,9 +196,9 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
                 );
                 uptickRateStatisticsMap.put(key, set.size());
             }
-            Long upLimit = stockRedisUtil.lSize(stockRealtimeStockRankUpLimitList);
+            Long upLimit = stockRedisUtil.lSize(stockRealtimeStockRankUpLimitList + ":" + stockMarket);
             uptickRateStatisticsMap.put("upLimit", null == upLimit ? 0 : upLimit.intValue());
-            Long downLimit = stockRedisUtil.lSize(stockRealtimeStockRankDownLimitList);
+            Long downLimit = stockRedisUtil.lSize(stockRealtimeStockRankDownLimitList + ":" + stockMarket);
             uptickRateStatisticsMap.put("downLimit", null == downLimit ? 0 : downLimit.intValue());
             stockRedisUtil.set(stockRealtimeStockUptickRateStatistics + ":" + stockMarket, uptickRateStatisticsMap);
         }
