@@ -103,6 +103,7 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
             String stockCode = (String) ((DefaultTypedTuple) object).getValue();
             SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = sinaRealtimeDealInfoPoMap.get(stockCode);
             StockRealtimeRankInfoDto stockRealtimeRankInfoDto = new StockRealtimeRankInfoDto();
+            stockRealtimeRankInfoDto.setStockMarket(sinaRealtimeDealInfoPo.getStockMarket());
             stockRealtimeRankInfoDto.setStockCode(sinaRealtimeDealInfoPo.getStockCode());
             stockRealtimeRankInfoDto.setStockName(sinaRealtimeDealInfoPo.getStockName());
             stockRealtimeRankInfoDto.setCurrentPrice(sinaRealtimeDealInfoPo.getCurrentPrice());

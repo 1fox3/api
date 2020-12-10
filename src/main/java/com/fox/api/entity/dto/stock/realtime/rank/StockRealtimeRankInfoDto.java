@@ -13,6 +13,10 @@ import java.math.BigDecimal;
 @Data
 public class StockRealtimeRankInfoDto {
     /**
+     * 股票交易所
+     */
+    Integer stockMarket;
+    /**
      * 股票代码
      */
     String stockCode;
