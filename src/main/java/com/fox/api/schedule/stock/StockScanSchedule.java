@@ -153,7 +153,8 @@ public class StockScanSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     public void stockCodeScan() {
         for (Integer stockMarket : StockScanSchedule.STOCK_SCAN_SCOPE_CONFIG.keySet()) {
-            lastDealDate = StockUtil.lastDealDate(stockMarket);
+            //任务执行时数据中的交易日期还未更新
+            lastDealDate = StockUtil.preDealDate(stockMarket);
             this.scanStockMarket(stockMarket, StockScanSchedule.STOCK_SCAN_SCOPE_CONFIG.get(stockMarket));
             this.scanSpecialStockCode(stockMarket);
         }

@@ -5,6 +5,7 @@ import com.fox.api.dao.stock.entity.StockDealDateEntity;
 import com.fox.api.dao.stock.mapper.StockDealDateMapper;
 import com.fox.api.service.stock.StockDealDateService;
 import com.fox.api.util.DateUtil;
+import com.fox.api.util.StockUtil;
 import com.fox.spider.stock.constant.StockConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,5 +125,37 @@ public class StockDealDateSchedule extends StockBaseSchedule {
             logger.error(e.getMessage());
         }
         return StockDealDateService.DEAL_DATE_NO;
+    }
+
+    /**
+     * 更新股市近的3个交易日期
+     */
+    @LogShowTimeAnt
+    public void syncStockMarketAroundDealDate() {
+        String currentDate = DateUtil.getCurrentDate();
+        StockDealDateEntity stockDealDateEntity = new StockDealDateEntity();
+        stockDealDateEntity.setDt(currentDate);
+        for (Integer stockMarket : StockConst.SM_ALL) {
+            stockDealDateEntity.setStockMarket(stockMarket);
+            if (StockConst.SM_A_LIST.contains(stockMarket)) {
+                stockDealDateEntity.setStockMarket(StockConst.SM_A);
+            }
+
+            //更新上个交易日
+            StockDealDateEntity preStockDealDateEntity = stockDealDateMapper.pre(stockDealDateEntity);
+            if (null != preStockDealDateEntity) {
+                stockRedisUtil.set(StockUtil.preDealDateCacheKey(stockMarket), preStockDealDateEntity.getDt());
+            }
+            //更新当前交易日
+            StockDealDateEntity lastStockDealDateEntity = stockDealDateMapper.last(stockDealDateEntity);
+            if (null != lastStockDealDateEntity) {
+                stockRedisUtil.set(StockUtil.lastDealDateCacheKey(stockMarket), lastStockDealDateEntity.getDt());
+            }
+            //更新下一个交易日
+            StockDealDateEntity nextStockDealDateEntity = stockDealDateMapper.next(stockDealDateEntity);
+            if (null != nextStockDealDateEntity) {
+                stockRedisUtil.set(StockUtil.nextDealDateCacheKey(stockMarket), nextStockDealDateEntity.getDt());
+            }
+        }
     }
 }

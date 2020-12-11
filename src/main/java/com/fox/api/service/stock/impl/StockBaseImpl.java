@@ -63,7 +63,7 @@ public class StockBaseImpl {
     protected StockPriceMonthMapper stockPriceMonthMapper;
 
     @Autowired
-    protected StockPriceMinuteMapper stockPriceMinuteMapper;
+    protected StockDealMinuteMapper stockDealMinuteMapper;
 
     @Autowired
     protected StockInfoMapper stockInfoMapper;

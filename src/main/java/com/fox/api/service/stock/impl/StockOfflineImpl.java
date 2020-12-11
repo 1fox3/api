@@ -233,17 +233,20 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
      */
     @Override
     public List<List<Object>> fiveDayMin(Integer stockId) {
-        List<StockPriceMinuteEntity> stockPriceMinuteEntityList = stockPriceMinuteMapper.fiveDay(stockId);
-        stockPriceMinuteEntityList = null == stockPriceMinuteEntityList ?
-                new LinkedList<>() : stockPriceMinuteEntityList;
+        List<StockDealMinuteEntity> stockDealMinuteEntityList = stockDealMinuteMapper.len(stockId, 1210);
+
+        Collections.reverse(stockDealMinuteEntityList);
+
+        stockDealMinuteEntityList = null == stockDealMinuteEntityList ?
+                new ArrayList<>() : stockDealMinuteEntityList;
         Boolean getRealtime = true;
         String lastDealDate = StockUtil.lastDealDate(StockConst.SM_A);
-        if (stockPriceMinuteEntityList.size() > 0) {
-            StockPriceMinuteEntity stockPriceMinuteEntity = stockPriceMinuteEntityList.get(
-                    stockPriceMinuteEntityList.size() - 1
+        if (stockDealMinuteEntityList.size() > 0) {
+            StockDealMinuteEntity stockDealMinuteEntity = stockDealMinuteEntityList.get(
+                    stockDealMinuteEntityList.size() - 1
             );
-            if (null != stockPriceMinuteEntity && null != stockPriceMinuteEntity.getDt()
-                    && stockPriceMinuteEntity.getDt().equals(lastDealDate)) {
+            if (null != stockDealMinuteEntity && null != stockDealMinuteEntity.getDt()
+                    && stockDealMinuteEntity.getDt().equals(lastDealDate)) {
                 getRealtime = false;
             }
         }
@@ -253,36 +256,36 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
             if (null != stockRealtimeLinePo && null != stockRealtimeLinePo.getLineNode()) {
                 List<StockRealtimeNodePo> lineNodeList = stockRealtimeLinePo.getLineNode();
                 for (StockRealtimeNodePo stockRealtimeNodePo : lineNodeList) {
-                    StockPriceMinuteEntity stockPriceMinuteEntity = new StockPriceMinuteEntity();
-                    stockPriceMinuteEntity.setDt(lastDealDate);
-                    stockPriceMinuteEntity.setTime(stockRealtimeNodePo.getTime());
-                    stockPriceMinuteEntity.setPrice(stockRealtimeNodePo.getPrice());
-                    stockPriceMinuteEntity.setAvgPrice(stockRealtimeNodePo.getAvgPrice());
-                    stockPriceMinuteEntity.setDealNum(stockRealtimeNodePo.getDealNum());
+                    StockDealMinuteEntity stockDealMinuteEntity = new StockDealMinuteEntity();
+                    stockDealMinuteEntity.setDt(lastDealDate);
+                    stockDealMinuteEntity.setTime(stockRealtimeNodePo.getTime());
+                    stockDealMinuteEntity.setPrice(stockRealtimeNodePo.getPrice());
+                    stockDealMinuteEntity.setAvgPrice(stockRealtimeNodePo.getAvgPrice());
+                    stockDealMinuteEntity.setDealNum(stockRealtimeNodePo.getDealNum());
                 }
             }
         }
 
-        Collections.reverse(stockPriceMinuteEntityList);
+        Collections.reverse(stockDealMinuteEntityList);
 
         List<String> dtList = new LinkedList<>();
         List<List<Object>> fiveDayList = new LinkedList<>();
-        for (StockPriceMinuteEntity stockPriceMinuteEntity : stockPriceMinuteEntityList) {
-            if (null == stockPriceMinuteEntity) {
+        for (StockDealMinuteEntity stockDealMinuteEntity : stockDealMinuteEntityList) {
+            if (null == stockDealMinuteEntity) {
                 continue;
             }
-            if (!dtList.contains(stockPriceMinuteEntity.getDt())) {
-                dtList.add(stockPriceMinuteEntity.getDt());
+            if (!dtList.contains(stockDealMinuteEntity.getDt())) {
+                dtList.add(stockDealMinuteEntity.getDt());
             }
             if (dtList.size() > 5) {
                 break;
             }
             List<Object> oneMinList = new LinkedList<>();
-            oneMinList.add(stockPriceMinuteEntity.getDt());
-            oneMinList.add(stockPriceMinuteEntity.getTime());
-            oneMinList.add(stockPriceMinuteEntity.getPrice());
-            oneMinList.add(stockPriceMinuteEntity.getAvgPrice());
-            oneMinList.add(stockPriceMinuteEntity.getDealNum());
+            oneMinList.add(stockDealMinuteEntity.getDt());
+            oneMinList.add(stockDealMinuteEntity.getTime());
+            oneMinList.add(stockDealMinuteEntity.getPrice());
+            oneMinList.add(stockDealMinuteEntity.getAvgPrice());
+            oneMinList.add(stockDealMinuteEntity.getDealNum());
             fiveDayList.add(oneMinList);
         }
 

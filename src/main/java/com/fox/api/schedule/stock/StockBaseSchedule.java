@@ -244,40 +244,6 @@ public class StockBaseSchedule {
     }
 
     /**
-     * 遍历全部股票
-     *
-     * @param stockScheduleHandler
-     */
-    public void totalStockScan(StockScheduleHandler stockScheduleHandler) {
-        Integer stockId = 0;
-        Integer limit = 500;
-        while (true) {
-            try {
-                List<StockEntity> stockEntityList = stockMapper.getListById(stockId, limit);
-                if (null == stockEntityList || stockEntityList.isEmpty()) {
-                    break;
-                }
-
-                for (StockEntity stockEntity : stockEntityList) {
-                    if (null != stockEntity && null != stockEntity.getId()) {
-                        stockId = stockEntity.getId();
-                        stockScheduleHandler.handle(stockEntity);
-                    } else {
-                        stockId++;
-                    }
-                }
-
-                if (stockEntityList.size() < limit) {
-                    break;
-                }
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-                break;
-            }
-        }
-    }
-
-    /**
      * 获取周月范围列表
      *
      * @param statisticsType
