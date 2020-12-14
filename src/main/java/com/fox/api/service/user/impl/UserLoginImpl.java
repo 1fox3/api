@@ -35,7 +35,7 @@ public class UserLoginImpl implements UserLoginService {
             //不返回登录id
             userLoginEntity.setId(null);
             if (null == userLoginEntity.getExpireTime()
-                    || DateUtil.compare(userLoginEntity.getExpireTime(), DateUtil.getCurrentTime(), DateUtil.TIME_FORMAT_1)) {
+                    || DateUtil.compare(userLoginEntity.getExpireTime(), DateUtil.getCurrentTime(), DateUtil.TIME_FORMAT_1) <= 0) {
                 return null;
             }
             return userLoginEntity;

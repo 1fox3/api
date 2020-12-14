@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fox.api.dao.stock.StockTableBackMapper">
+
+    <update id="createBakTable">
+        CREATE TABLE IF NOT EXISTS ${table}_bak LIKE ${table};
+    </update>
+
+    <update id="bakData">
+        INSERT INTO
+            ${table}_bak
+        SELECT
+            *
+        FROM
+            ${table}
+        WHERE
+            dt = #{dt}
+        LIMIT ${limit};
+    </update>
+
+    <delete id="clearOriData">
+        DELETE
+        FROM
+            ${table}
+        WHERE
+            dt = #{dt}
+        LIMIT ${limit};
+    </delete>
+
+    <update id="optimizeOriTable">
+        OPTIMIZE TABLE ${table};
+    </update>
+
+
+</mapper>

@@ -62,7 +62,7 @@ public class NetsDayLine extends NetsStockBaseApi {
         }
         String stableDate = DateUtil.getRelateDate(0, 0, -stableDay, DateUtil.DATE_FORMAT_1);
         try {
-            if (DateUtil.compare(year + "-12-31", stableDate, DateUtil.DATE_FORMAT_1)) {
+            if (DateUtil.compare(year + "-12-31", stableDate, DateUtil.DATE_FORMAT_1) <= 0) {
                 String filePath = saveFilePath(params, getClass().getSimpleName());
                 StringBuffer stringBuffer = new StringBuffer();
                 stringBuffer.append(filePath);

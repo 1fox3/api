@@ -1,5 +1,8 @@
 package com.fox.api.constant.stock;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 股票数据表枚举值
  *
@@ -28,4 +31,10 @@ public class StockTableDtConst {
      * 按天价格交易量信息表
      */
     public static final int TABLE_PRICE_DEAL_NUM_DAY = 2;
+    /**
+     * 数据表id和表名对应
+     */
+    public static final Map<Integer, String> TABLE_DT_MAP = new HashMap<Integer, String>() {{
+        put(TABLE_KEY_DEAL_MINUTE, TABLE_NAME_DEAL_MINUTE);
+    }};
 }

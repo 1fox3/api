@@ -55,7 +55,11 @@ public class StockTableDtImpl implements StockTableDtService {
         if (null == stockTableDtEntity) {
             return false;
         }
-        stockTableDtEntity.setTable(StockTableDtConst.TYPE_BAK);
+        stockTableDtEntity = stockTableDtMapper.getByTableDt(stockTableDtEntity);
+        if (null == stockTableDtEntity) {
+            return false;
+        }
+        stockTableDtEntity.setType(StockTableDtConst.TYPE_BAK);
         return stockTableDtMapper.update(stockTableDtEntity);
     }
 

@@ -127,7 +127,7 @@ public class DateTypeServiceImpl implements DateTypeService {
             String limitDt = DateUtil.getRelateDate(
                     0, 0, DateTypeService.DB_SAVE_DATE_NUM, DateUtil.DATE_FORMAT_1
             );
-            return DateUtil.compare(dt, limitDt, DateUtil.DATE_FORMAT_1);
+            return DateUtil.compare(dt, limitDt, DateUtil.DATE_FORMAT_1) <= 0;
         } catch (ParseException e) {
             logger.error(dt);
             logger.error(e.getMessage());

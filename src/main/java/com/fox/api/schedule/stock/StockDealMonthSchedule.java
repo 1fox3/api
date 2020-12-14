@@ -140,7 +140,7 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
                 }
                 try {
                     while (null == monthStartDate || null == monthEndDate
-                            || DateUtil.compare(monthEndDate, stockPriceDayEntity.getDt(), DateUtil.DATE_FORMAT_1)) {
+                            || DateUtil.compare(monthEndDate, stockPriceDayEntity.getDt(), DateUtil.DATE_FORMAT_1) <= 0) {
                         changeMonth = true;
                         if (monthPos > monthList.size() - 1) {
                             break;
@@ -219,7 +219,7 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
                             String lastDt = dbStockPriceMonthEntity.getDt();
                             try {
                                 stockPriceMonthEntity.setPreClosePrice(dbStockPriceMonthEntity.getClosePrice());
-                                if (DateUtil.compare(lastDt, currentMonthStartDate, DateUtil.DATE_FORMAT_1)) {
+                                if (DateUtil.compare(lastDt, currentMonthStartDate, DateUtil.DATE_FORMAT_1) <= 0) {
                                     stockPriceMonthMapper.insert(stockPriceMonthEntity);
                                 } else {
                                     stockPriceMonthEntity.setId(dbStockPriceMonthEntity.getId());
@@ -270,7 +270,7 @@ public class StockDealMonthSchedule extends StockBaseSchedule implements StockSc
             }
             try {
                 while (null == monthStartDate || null == monthEndDate
-                        || DateUtil.compare(monthEndDate, stockDealDayEntity.getDt(), DateUtil.DATE_FORMAT_1)) {
+                        || DateUtil.compare(monthEndDate, stockDealDayEntity.getDt(), DateUtil.DATE_FORMAT_1) <= 0) {
                     changeMonth = true;
                     if (monthPos > monthList.size() - 1) {
                         break;

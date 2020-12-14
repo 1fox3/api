@@ -67,7 +67,7 @@ public class NetsDayCsv extends NetsStockBaseApi {
         }
         String stableDate = DateUtil.getRelateDate(0, 0, -stableDay, DateUtil.DATE_FORMAT_1);
         try {
-            if (DateUtil.compare(endDate, stableDate, DateUtil.DATE_FORMAT_1)) {
+            if (DateUtil.compare(endDate, stableDate, DateUtil.DATE_FORMAT_1) <= 0) {
                 String filePath = saveFilePath(params, getClass().getSimpleName());
                 StringBuffer stringBuffer = new StringBuffer();
                 stringBuffer.append(filePath);

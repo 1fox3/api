@@ -140,7 +140,7 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
                 }
                 try {
                     while (null == weekStartDate || null == weekEndDate
-                            || DateUtil.compare(weekEndDate, stockPriceDayEntity.getDt(), DateUtil.DATE_FORMAT_1)) {
+                            || DateUtil.compare(weekEndDate, stockPriceDayEntity.getDt(), DateUtil.DATE_FORMAT_1) <= 0) {
                         changeWeek = true;
                         if (weekPos > weekList.size() - 1) {
                             break;
@@ -219,7 +219,7 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
                             String lastDt = dbStockPriceWeekEntity.getDt();
                             try {
                                 stockPriceWeekEntity.setPreClosePrice(dbStockPriceWeekEntity.getClosePrice());
-                                if (DateUtil.compare(lastDt, currentWeekStartDate, DateUtil.DATE_FORMAT_1)) {
+                                if (DateUtil.compare(lastDt, currentWeekStartDate, DateUtil.DATE_FORMAT_1) <= 0) {
                                     stockPriceWeekMapper.insert(stockPriceWeekEntity);
                                 } else {
                                     stockPriceWeekEntity.setId(dbStockPriceWeekEntity.getId());
@@ -270,7 +270,7 @@ public class StockDealWeekSchedule extends StockBaseSchedule implements StockSch
             }
             try {
                 while (null == weekStartDate || null == weekEndDate
-                        || DateUtil.compare(weekEndDate, stockDealDayEntity.getDt(), DateUtil.DATE_FORMAT_1)) {
+                        || DateUtil.compare(weekEndDate, stockDealDayEntity.getDt(), DateUtil.DATE_FORMAT_1) <= 0) {
                     changeWeek = true;
                     if (weekPos > weekList.size() - 1) {
                         break;
