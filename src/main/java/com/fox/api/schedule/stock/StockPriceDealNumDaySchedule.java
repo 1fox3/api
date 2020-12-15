@@ -11,7 +11,11 @@ import com.fox.api.service.stock.StockTableDtService;
 import com.fox.api.service.third.stock.sina.api.SinaRealtimeDealRatio;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
+import com.fox.spider.stock.api.sina.SinaPriceDealNumRatioApi;
+import com.fox.spider.stock.api.sina.SinaRealtimePriceDealNumRatioApi;
 import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.po.sina.SinaPriceDealNumRatioPo;
+import com.fox.spider.stock.entity.vo.StockVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,24 +32,27 @@ import java.util.List;
  */
 @Component
 public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements StockScheduleHandler {
+    /**
+     * 日志
+     */
     private Logger logger = LoggerFactory.getLogger(getClass());
     /**
-     * 每次备份记录条数
+     * 当前交易日
      */
-    private Integer bakOneLimit = 100000;
+    private String lastDealDate;
     /**
-     * 需要保存的数据天数
+     * 新浪股票交易日当天价格成交量占比接口
      */
-    private Integer totalDateNum = 100;
-    /**
-     * 需要处理的交易日
-     */
-    private String dealDate;
-
     @Autowired
-    SinaRealtimeDealRatio sinaRealtimeDealRatio;
+    SinaRealtimePriceDealNumRatioApi sinaRealtimePriceDealNumRatioApi;
+    /**
+     * 股票价格成交量数据库操作类
+     */
     @Autowired
     StockPriceDealNumDayMapper stockPriceDealNumDayMapper;
+    /**
+     * 数据库数据日期维护服务
+     */
     @Autowired
     StockTableDtService stockTableDtService;
 
@@ -57,33 +64,38 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
     @Override
     public void handle(StockEntity stockEntity) {
         try {
-            if (null == dealDate || null == stockEntity
+            if (null == lastDealDate || null == stockEntity
                     || null == stockEntity.getStockCode() || null == stockEntity.getStockMarket()) {
                 return;
             }
 
-            List<StockDealNumPo> stockDealNumPoList = sinaRealtimeDealRatio.getDealRatio(stockEntity);
+            List<SinaPriceDealNumRatioPo> sinaPriceDealNumRatioPoList =
+                    sinaRealtimePriceDealNumRatioApi.priceDealNumRatio(
+                            new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket())
+                    );
 
-            if (null == stockDealNumPoList || stockDealNumPoList.isEmpty()) {
+            if (null == sinaPriceDealNumRatioPoList || sinaPriceDealNumRatioPoList.isEmpty()) {
                 return;
             }
 
-            List<StockPriceDealNumDayEntity> stockPriceDealNumDayEntityList = new ArrayList<>(stockDealNumPoList.size());
-            for (StockDealNumPo stockDealNumPo : stockDealNumPoList) {
-                if (null == stockDealNumPo || null == stockDealNumPo.getPrice() || null == stockDealNumPo.getDealNum()) {
+            List<StockPriceDealNumDayEntity> stockPriceDealNumDayEntityList =
+                    new ArrayList<>(sinaPriceDealNumRatioPoList.size());
+            for (SinaPriceDealNumRatioPo sinaPriceDealNumRatioPo : sinaPriceDealNumRatioPoList) {
+                if (null == sinaPriceDealNumRatioPo || null == sinaPriceDealNumRatioPo.getPrice()
+                        || null == sinaPriceDealNumRatioPo.getDealNum()) {
                     continue;
                 }
-                StockPriceDealNumDayEntity stockPriceDealNumDayEntity =  new StockPriceDealNumDayEntity();
+                StockPriceDealNumDayEntity stockPriceDealNumDayEntity = new StockPriceDealNumDayEntity();
                 stockPriceDealNumDayEntity.setStockId(stockEntity.getId());
-                stockPriceDealNumDayEntity.setDt(dealDate);
-                stockPriceDealNumDayEntity.setPrice(stockDealNumPo.getPrice());
-                stockPriceDealNumDayEntity.setDealNum(stockDealNumPo.getDealNum());
+                stockPriceDealNumDayEntity.setDt(lastDealDate);
+                stockPriceDealNumDayEntity.setPrice(sinaPriceDealNumRatioPo.getPrice());
+                stockPriceDealNumDayEntity.setDealNum(sinaPriceDealNumRatioPo.getDealNum());
                 stockPriceDealNumDayEntityList.add(stockPriceDealNumDayEntity);
             }
             if (stockPriceDealNumDayEntityList.isEmpty()) {
                 return;
             }
-            stockPriceDealNumDayMapper.deleteByDate(stockEntity.getId(), dealDate);
+            stockPriceDealNumDayMapper.deleteByDate(stockEntity.getId(), lastDealDate);
             stockPriceDealNumDayMapper.batchInsert(stockPriceDealNumDayEntityList);
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -96,54 +108,40 @@ public class StockPriceDealNumDaySchedule extends StockBaseSchedule implements S
     private void logDt() {
         StockTableDtEntity stockTableDtEntity = new StockTableDtEntity();
         stockTableDtEntity.setTable(StockTableDtConst.TABLE_PRICE_DEAL_NUM_DAY);
-        stockTableDtEntity.setDt(dealDate);
+        stockTableDtEntity.setDt(lastDealDate);
         stockTableDtEntity.setType(StockTableDtConst.TYPE_DEFAULT);
         stockTableDtService.insert(stockTableDtEntity);
     }
 
     /**
-     * 备份数据
+     * 同步数据
+     *
+     * @param stockMarket
      */
-    private void bakPriceDealNumDayInfo() {
-        stockPriceDealNumDayMapper.createBak();
-        StockTableDtEntity stockTableDtEntity = new StockTableDtEntity();
-        stockTableDtEntity.setTable(StockTableDtConst.TABLE_PRICE_DEAL_NUM_DAY);
-        stockTableDtEntity.setType(StockTableDtConst.TYPE_DEFAULT);
-        List<String> dtList = stockTableDtService.getByType(stockTableDtEntity);
-        if (null == dtList || dtList.isEmpty() || dtList.size() < totalDateNum) {
+    private void syncStockMarketData(Integer stockMarket) {
+        if (null == stockMarket || !StockConst.SM_ALL.contains(stockMarket)) {
             return;
         }
-        Integer bakDtNum = dtList.size() - totalDateNum;
-        for (int i = 0; i < bakDtNum; i++) {
-            while (true) {
-                stockPriceDealNumDayMapper.bakByDate(dtList.get(i), bakOneLimit);
-                Integer delNum = stockPriceDealNumDayMapper.clearByDate(dtList.get(i), bakOneLimit);
-                if (null == delNum || delNum < bakOneLimit) {
-                    break;
-                }
-                stockTableDtEntity.setDt(dtList.get(i));
-                stockTableDtService.setBak(stockTableDtEntity);
-            }
-        }
+        //同步股票
+        stockMarketScan(stockMarket, this);
     }
 
     /**
      * 同步交易日当天的价格成交量数据
      */
     @LogShowTimeAnt
-    public void syncLastDealDatePriceDealNumDayInfo() {
-        if (StockUtil.todayIsDealDate(StockConst.SM_A)) {
-            dealDate = DateUtil.getCurrentDate();
-            StockTableDtEntity stockTableDtEntity = new StockTableDtEntity();
-            stockTableDtEntity.setTable(StockTableDtConst.TABLE_PRICE_DEAL_NUM_DAY);
-            stockTableDtEntity.setDt(dealDate);
-            StockTableDtEntity dbStockTableDtEntity = stockTableDtService.getByTableDt(stockTableDtEntity);
-            if (null == dbStockTableDtEntity || null == dbStockTableDtEntity.getId()) {
-                logDt();
-                aStockMarketScan(this);
-                bakPriceDealNumDayInfo();
-                stockPriceDealNumDayMapper.optimize();
+    public void syncLastDealDatePriceDealNumDayInfo(Integer stockMarket) {
+        if (StockConst.SM_ALL.contains(stockMarket) && StockUtil.todayIsDealDate(stockMarket)) {
+            lastDealDate = StockUtil.lastDealDate(stockMarket);
+            logDt();
+            if (StockConst.SM_A == stockMarket) {
+                for (Integer sm : StockConst.SM_A_LIST) {
+                    syncStockMarketData(sm);
+                }
+            } else {
+                syncStockMarketData(stockMarket);
             }
+            stockPriceDealNumDayMapper.optimize();
         }
     }
 }

@@ -44,19 +44,25 @@ public class StockTableBackSchedule {
      * 股票数据备份
      *
      * @param tableId
-     * @param dt
+     * @param diffDay
      */
     @LogShowTimeAnt
-    public void syncStockTableBak(Integer tableId, String dt) {
-        if (null == tableId || null == dt) {
+    public void syncStockTableBak(Integer tableId, Integer diffDay) {
+        if (null == tableId || null == diffDay) {
             return;
         }
 
         if (!StockTableDtConst.TABLE_DT_MAP.containsKey(tableId)) {
             return;
         }
+
         String table = StockTableDtConst.TABLE_DT_MAP.get(tableId);
         if (null == table || table.isEmpty()) {
+            return;
+        }
+
+        String dt = DateUtil.getRelateDate(0, 0, diffDay, DateUtil.DATE_FORMAT_1);
+        if (null == dt || dt.isEmpty()) {
             return;
         }
 

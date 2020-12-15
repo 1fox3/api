@@ -119,8 +119,6 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
         if (null == stockMarket || !StockConst.SM_ALL.contains(stockMarket)) {
             return;
         }
-        lastDealDate = StockUtil.lastDealDate(StockConst.SM_A);
-        logDt();
         //同步TOP指数
         stockMarketTopIndexScan(stockMarket, this);
         //同步股票

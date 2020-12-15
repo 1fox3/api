@@ -88,6 +88,12 @@ public class StockInfoImpl extends StockBaseImpl implements StockInfoService {
             default:
                 return null;
         }
+        if (null == stockInfoEntity.getStockWebsite()) {
+            stockInfoEntity.setStockWebsite("");
+        }
+        if (null == stockInfoEntity.getStockLegal()) {
+            stockInfoEntity.setStockLegal("");
+        }
         StockEntity stockEntity = stockMapper.getByStockCode(stockVo.getStockCode(), stockVo.getStockMarket());
         if (null == stockInfoEntity.getStockNameEn() || stockInfoEntity.getStockNameEn().isEmpty()) {
             stockInfoEntity.setStockNameEn(stockEntity.getStockNameEn());
