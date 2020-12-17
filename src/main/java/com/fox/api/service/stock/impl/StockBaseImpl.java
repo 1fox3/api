@@ -48,19 +48,10 @@ public class StockBaseImpl {
     protected StockDealDayMapper stockDealDayMapper;
 
     @Autowired
-    protected StockPriceDayMapper stockPriceDayMapper;
-
-    @Autowired
     protected StockDealWeekMapper stockDealWeekMapper;
 
     @Autowired
-    protected StockPriceWeekMapper stockPriceWeekMapper;
-
-    @Autowired
     protected StockDealMonthMapper stockDealMonthMapper;
-
-    @Autowired
-    protected StockPriceMonthMapper stockPriceMonthMapper;
 
     @Autowired
     protected StockDealMinuteMapper stockDealMinuteMapper;

@@ -1,59 +1,92 @@
 package com.fox.api.schedule.stock;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockInfoEntity;
-import com.fox.api.dao.stock.entity.StockPriceDayEntity;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
-import com.fox.api.dao.stock.mapper.StockPriceDayMapper;
-import com.fox.api.entity.po.third.stock.StockDayLinePo;
-import com.fox.api.entity.po.third.stock.StockDealDayPo;
-import com.fox.api.entity.po.third.stock.StockDealPo;
-import com.fox.api.service.third.stock.nets.api.NetsDayCsv;
-import com.fox.api.service.third.stock.nets.api.NetsDayLine;
-import com.fox.api.service.third.stock.nets.api.NetsStockBaseApi;
 import com.fox.api.util.DateUtil;
-import com.fox.api.util.StockUtil;
+import com.fox.api.util.FileUtil;
+import com.fox.spider.stock.api.nets.NetsDayDealInfoApi;
+import com.fox.spider.stock.api.nets.NetsFQKLineDataApi;
 import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.po.nets.NetsDayDealInfoPo;
+import com.fox.spider.stock.entity.po.nets.NetsFQKLineDataPo;
+import com.fox.spider.stock.entity.po.nets.NetsFQKLineNodeDataPo;
+import com.fox.spider.stock.entity.vo.StockVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 
 /**
- * 股票按天交易
+ * 股票按天交易数据
+ *
  * @author lusongsong
  * @date 2020/4/7 14:22
  */
 @Component
 public class StockDealDaySchedule extends StockBaseSchedule implements StockScheduleHandler {
+    /**
+     * 日志
+     */
     private Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * 按天交易数据库操作类
+     */
     @Autowired
-    private StockDealDayMapper stockDealDayMapper;
+    StockDealDayMapper stockDealDayMapper;
+    /**
+     * 网易股票按天交易日数据接口
+     */
     @Autowired
-    private StockPriceDayMapper stockPriceDayMapper;
-    private static int defaultStartYear = 1990;
-    private int startYear = 1990;
-    private int endYear = Integer.valueOf(DateUtil.getCurrentYear());
-    private String currentDate = DateUtil.getCurrentDate();
-    private String preDealDate;
-    private NetsDayLine netsDayLine = new NetsDayLine();
-    private NetsDayCsv netsDayCsv = new NetsDayCsv();
+    NetsDayDealInfoApi netsDayDealInfoApi;
+    /**
+     * 网易股票按天交易价格数据接口
+     */
+    @Autowired
+    NetsFQKLineDataApi netsFQKLineDataApi;
+    /**
+     * 默认股票数据接口结果保存路径
+     */
+    private static final String DEFAULT_STOCK_API_DATA_PATH = "/export/data/api/stock";
+    /**
+     * 稳定数据日期
+     */
+    String stableDate = DateUtil.getRelateDate(0, 0, -60, DateUtil.DATE_FORMAT_1);
+    /**
+     * 默认数据同步开始年份
+     */
+    String defaultStartYear;
+    /**
+     * 数据同步开始年份
+     */
+    String startYear;
+    /**
+     * 数据同步结束年份
+     */
+    String endYear;
+    /**
+     * 数据同步开始日期
+     */
+    private String startDate;
+    /**
+     * 数据同步结束日期
+     */
+    private String endDate = DateUtil.getCurrentDate();
     /**
      * 复权类型
      */
-    Map<String, Integer> fqTypeMap = new LinkedHashMap<String, Integer>(){{
-        put("kline", 0);
-        put("klinederc", 1);
-    }};
+    List<Integer> fqTypeList = Arrays.asList(
+//            StockConst.SFQ_BEFORE,
+            StockConst.SFQ_AFTER
+    );
     /**
      * 是否全量同步
      */
@@ -63,16 +96,22 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
      * 创建影子表
      */
     private void createShadow() {
-        stockPriceDayMapper.createShadow();
-        stockDealDayMapper.createShadow();
+        try {
+            stockDealDayMapper.createShadow();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
     }
 
     /**
      * 数据表重命名
      */
     private void shadowConvert() {
-        stockPriceDayMapper.shadowConvert();
-        stockDealDayMapper.shadowConvert();
+        try {
+            stockDealDayMapper.shadowConvert();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
     }
 
     /**
@@ -80,14 +119,9 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
      */
     private void dropShadow() {
         try {
-            stockPriceDayMapper.dropShadow();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
             stockDealDayMapper.dropShadow();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 
@@ -95,167 +129,234 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
      * 数据表重命名
      */
     private void optimizeTable() {
-        stockPriceDayMapper.optimize();
-        stockDealDayMapper.optimize();
-    }
-
-    /**
-     * 同步价格信息
-     * @param stockEntity
-     */
-    private void syncPriceDay(StockEntity stockEntity) {
-        BigDecimal preClosePrice = new BigDecimal(0);
-        int scanStartYear = syncTotal ? startYear : endYear;
-        for (String fqType : fqTypeMap.keySet()) {
-            for (int year = scanStartYear; year <= endYear; year++) {
-                String startDate = "";
-                String endDate = "";
-                try {
-                    startDate = syncTotal ? year + "-01-01" : preDealDate;
-                    endDate = syncTotal ? year + "-12-31" : currentDate;
-                    Map<String, String> netsParams = NetsStockBaseApi.getNetsStockInfoMap(stockEntity);
-                    netsParams.put("rehabilitationType", fqType);
-                    StockDayLinePo stockDayLinePo = netsDayLine.getDayLine(netsParams, startDate, endDate);
-                    if (null == stockDayLinePo.getLineNode() || stockDayLinePo.getLineNode().isEmpty()) {
-                        break;
-                    }
-                    List<StockPriceDayEntity> list = new LinkedList<>();
-                    for (StockDealPo stockDealPo : stockDayLinePo.getLineNode()) {
-                        StockPriceDayEntity stockPriceDayEntity = new StockPriceDayEntity();
-                        stockPriceDayEntity.setStockId(stockEntity.getId());
-                        stockPriceDayEntity.setDt(stockDealPo.getDateTime());
-                        stockPriceDayEntity.setFqType(fqTypeMap.get(fqType));
-                        stockPriceDayEntity.setOpenPrice(stockDealPo.getOpenPrice());
-                        stockPriceDayEntity.setClosePrice(stockDealPo.getClosePrice());
-                        stockPriceDayEntity.setHighestPrice(stockDealPo.getHighestPrice());
-                        stockPriceDayEntity.setLowestPrice(stockDealPo.getLowestPrice());
-                        if (BigDecimal.ZERO.equals(preClosePrice)) {
-                            preClosePrice = stockDealPo.getOpenPrice();
-                        }
-                        stockPriceDayEntity.setPreClosePrice(preClosePrice);
-                        if (BigDecimal.ZERO.equals(stockDealPo.getClosePrice())) {
-                            continue;
-                        }
-                        preClosePrice = stockDealPo.getClosePrice();
-                        if (syncTotal) {
-                            list.add(stockPriceDayEntity);
-                        } else {
-                            if (currentDate.equals(stockDealPo.getDateTime())) {
-                                StockPriceDayEntity dbStockPriceDayEntity = stockPriceDayMapper.getBySignalDate(stockPriceDayEntity);
-                                if (null == dbStockPriceDayEntity) {
-                                    stockPriceDayMapper.insert(stockPriceDayEntity);
-                                } else {
-                                    stockPriceDayEntity.setId(dbStockPriceDayEntity.getId());
-                                    stockPriceDayMapper.update(stockPriceDayEntity);
-                                }
-                            }
-                        }
-                    }
-                    if (list.size() > 0) {
-                        stockPriceDayMapper.batchInsert(list);
-                    }
-                } catch (Exception e) {
-                    logger.error(startDate);
-                    logger.error(stockEntity.toString());
-                    logger.error(e.getMessage());
-                }
-            }
+        try {
+            stockDealDayMapper.optimize();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
     }
 
     /**
-     * 同步交易信息
+     * 获取股票数据保存目录
+     *
+     * @param stockVo
+     * @return
+     */
+    private String getStockDataPath(StockVo stockVo) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("/");
+        stringBuffer.append(stockVo.getStockMarket());
+        String stockCode = stockVo.getStockCode();
+        for (int i = 0; i < stockCode.length(); i++) {
+            if (0 == i % 2) {
+                stringBuffer.append("/");
+            }
+            stringBuffer.append(stockCode.charAt(i));
+        }
+        stringBuffer.append("/");
+        return stringBuffer.toString();
+    }
+
+    /**
+     * 获取股票数据日期保存目录
+     *
+     * @param stockVo
+     * @param date
+     * @return
+     */
+    private String getStockDataPath(StockVo stockVo, String date) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(getStockDataPath(stockVo));
+        stringBuffer.append(DateUtil.dateStrFormatChange(date, DateUtil.DATE_FORMAT_1, DateUtil.YEAR_FORMAT_1));
+        stringBuffer.append(".txt");
+        return stringBuffer.toString();
+    }
+
+    /**
+     * 股票按天交易数据接口结果保存路径
+     *
+     * @param className
+     * @param stockVo
+     * @param startDate
+     * @return
+     */
+    private String getDealInfoDataPath(String className, StockVo stockVo, String startDate) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(DEFAULT_STOCK_API_DATA_PATH);
+        stringBuffer.append("/");
+        stringBuffer.append(className);
+        stringBuffer.append(getStockDataPath(stockVo, startDate));
+        return stringBuffer.toString();
+    }
+
+    /**
+     * 获取交易数据
+     *
+     * @param stockVo
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    private List<NetsDayDealInfoPo> getDayDealInfoList(StockVo stockVo, String startDate, String endDate) {
+        List<NetsDayDealInfoPo> netsDayDealInfoPoList = null;
+        try {
+            String filePath = null;
+            if (syncTotal && (DateUtil.compare(endDate, stableDate, DateUtil.DATE_FORMAT_1) <= 0)) {
+                filePath = getDealInfoDataPath(netsDayDealInfoApi.getClass().getSimpleName(), stockVo, startDate);
+                String dealString = FileUtil.read(filePath);
+                if (null != dealString && !dealString.isEmpty()) {
+                    netsDayDealInfoPoList = JSONObject.parseArray(dealString, NetsDayDealInfoPo.class);
+                }
+            }
+            if (null == netsDayDealInfoPoList || netsDayDealInfoPoList.isEmpty()) {
+                netsDayDealInfoPoList = netsDayDealInfoApi.dayDealInfo(
+                        stockVo, startDate, endDate
+                );
+                if (null != filePath && !filePath.isEmpty() && null != netsDayDealInfoPoList
+                        && !netsDayDealInfoPoList.isEmpty()) {
+                    FileUtil.coverWrite(filePath, JSONObject.toJSONString(netsDayDealInfoPoList));
+                }
+            }
+        } catch (ParseException e) {
+            logger.error(e.getMessage());
+        }
+        return netsDayDealInfoPoList;
+    }
+
+    private String getPriceInfoDataPath(String className, StockVo stockVo, String startDate, Integer fqType) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(DEFAULT_STOCK_API_DATA_PATH);
+        stringBuffer.append("/");
+        stringBuffer.append(className);
+        stringBuffer.append("/");
+        stringBuffer.append(fqType);
+        stringBuffer.append("/");
+        stringBuffer.append(getStockDataPath(stockVo, startDate));
+        return stringBuffer.toString();
+    }
+
+    /**
+     * 获取价格数据
+     *
+     * @param stockVo
+     * @param startDate
+     * @param endDate
+     * @param fqType
+     * @return
+     */
+    private NetsFQKLineDataPo getDayPriceInfoList(
+            StockVo stockVo, String startDate, String endDate, Integer fqType
+    ) {
+        NetsFQKLineDataPo netsFQKLineDataPo = null;
+        try {
+            String filePath = null;
+            if (syncTotal && (DateUtil.compare(endDate, stableDate, DateUtil.DATE_FORMAT_1) <= 0)) {
+                filePath = getPriceInfoDataPath(netsFQKLineDataApi.getClass().getSimpleName(), stockVo, startDate, fqType);
+                String priceString = FileUtil.read(filePath);
+                if (null != priceString && !priceString.isEmpty()) {
+                    netsFQKLineDataPo = JSONObject.parseObject(priceString, NetsFQKLineDataPo.class);
+                }
+            }
+            if (null == netsFQKLineDataPo) {
+                netsFQKLineDataPo = netsFQKLineDataApi.fqKLineData(stockVo, startDate, endDate, fqType);
+                if (null != filePath && !filePath.isEmpty() && null != netsFQKLineDataPo) {
+                    FileUtil.coverWrite(filePath, JSONObject.toJSONString(netsFQKLineDataPo));
+                }
+            }
+        } catch (ParseException e) {
+            logger.error(e.getMessage());
+        }
+        return netsFQKLineDataPo;
+    }
+
+    /**
+     * 同步按天交易数据
+     *
      * @param stockEntity
      */
     private void syncDealDay(StockEntity stockEntity) {
-        BigDecimal preClosePrice = new BigDecimal(0);
-        int scanStartYear = syncTotal ? startYear : endYear;
-        for (int year = scanStartYear; year <= endYear; year++) {
-            String startDate = "";
-            String endDate = "";
-            try {
-                startDate = syncTotal ? year + "-01-01" : preDealDate;
-                endDate = syncTotal ? year + "-12-31" : currentDate;
-                Map<String, String> netsParams = NetsStockBaseApi.getNetsStockInfoMap(stockEntity);
-                netsParams.put("startDate", startDate);
-                netsParams.put("endDate", endDate);
-                List<StockDealDayPo> stockDealDayPoList = netsDayCsv.getDealDayInfo(netsParams);
-                if (null == stockDealDayPoList || stockDealDayPoList.size() == 0) {
-                    break;
+        if (null == stockEntity || null == stockEntity.getId() || null == stockEntity.getStockMarket()
+                || null == stockEntity.getStockCode()) {
+            return;
+        }
+        StockVo stockVo = new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket());
+        List<NetsDayDealInfoPo> netsDayDealInfoPoList = getDayDealInfoList(
+                stockVo, startDate, endDate
+        );
+        Map<String, NetsDayDealInfoPo> dateDealInfoMap = new HashMap<>(netsDayDealInfoPoList.size());
+        for (NetsDayDealInfoPo netsDayDealInfoPo : netsDayDealInfoPoList) {
+            if (null != netsDayDealInfoPo && null != netsDayDealInfoPo.getDt()) {
+                dateDealInfoMap.put(netsDayDealInfoPo.getDt(), netsDayDealInfoPo);
+            }
+        }
+        for (Integer fqType : fqTypeList) {
+            NetsFQKLineDataPo netsFQKLineDataPo = getDayPriceInfoList(stockVo, startDate, endDate, fqType);
+            if (null == netsFQKLineDataPo || null == netsFQKLineDataPo.getKlineData()) {
+                continue;
+            }
+            List<NetsFQKLineNodeDataPo> netsFQKLineNodeDataPoList = netsFQKLineDataPo.getKlineData();
+            List<StockDealDayEntity> stockDealDayEntityList = new ArrayList<>(netsFQKLineNodeDataPoList.size());
+            for (NetsFQKLineNodeDataPo netsFQKLineNodeDataPo : netsFQKLineNodeDataPoList) {
+                if (null == netsFQKLineNodeDataPo) {
+                    continue;
                 }
-//                List<StockPriceDayEntity> stockPriceDayEntityList = new LinkedList<>();
-                List<StockDealDayEntity> stockDealDayEntityList = new LinkedList<>();
-                for (StockDealDayPo stockDealDayPo : stockDealDayPoList) {
-//                    StockPriceDayEntity stockPriceDayEntity = new StockPriceDayEntity();
-//                    stockPriceDayEntity.setStockId(stockEntity.getId());
-//                    stockPriceDayEntity.setDt(stockDealDayPo.getDt());
-//                    stockPriceDayEntity.setFqType(0);
-//                    stockPriceDayEntity.setOpenPrice(stockDealDayPo.getOpenPrice());
-//                    stockPriceDayEntity.setClosePrice(stockDealDayPo.getClosePrice());
-//                    stockPriceDayEntity.setHighestPrice(stockDealDayPo.getHighestPrice());
-//                    stockPriceDayEntity.setLowestPrice(stockDealDayPo.getLowestPrice());
-//                    if (BigDecimal.ZERO.equals(preClosePrice)) {
-//                        preClosePrice = stockDealDayPo.getOpenPrice();
-//                    }
-//                    stockPriceDayEntity.setPreClosePrice(preClosePrice);
-//                    if (BigDecimal.ZERO.equals(stockDealDayPo.getClosePrice())) {
-//                        continue;
-//                    }
-//                    preClosePrice = stockDealDayPo.getClosePrice();
-//                    if (syncTotal) {
-//                        stockPriceDayEntityList.add(stockPriceDayEntity);
-//                    } else {
-//                        if (currentDate.equals(stockDealDayPo.getDt())) {
-//                            StockPriceDayEntity dbStockPriceDayEntity = stockPriceDayMapper.getBySignalDate(stockPriceDayEntity);
-//                            if (null == dbStockPriceDayEntity) {
-//                                stockPriceDayMapper.insert(stockPriceDayEntity);
-//                            } else {
-//                                stockPriceDayEntity.setId(dbStockPriceDayEntity.getId());
-//                                stockPriceDayMapper.update(stockPriceDayEntity);
-//                            }
-//                        }
-//                    }
-
+                NetsDayDealInfoPo netsDayDealInfoPo = dateDealInfoMap.containsKey(netsFQKLineNodeDataPo.getDt()) ?
+                        dateDealInfoMap.get(netsFQKLineNodeDataPo.getDt()) : null;
+                if (null != netsDayDealInfoPo) {
                     StockDealDayEntity stockDealDayEntity = new StockDealDayEntity();
                     stockDealDayEntity.setStockId(stockEntity.getId());
-                    stockDealDayEntity.setDt(stockDealDayPo.getDt());
-                    stockDealDayEntity.setClosePrice(stockDealDayPo.getClosePrice());
-                    stockDealDayEntity.setDealNum(stockDealDayPo.getDealNum());
-                    stockDealDayEntity.setDealMoney(stockDealDayPo.getDealMoney());
-                    stockDealDayEntity.setTotalEquity(
-                            null == stockDealDayPo.getTotalValue() || 0 == stockDealDayPo.getClosePrice().compareTo(BigDecimal.ZERO)
-                                    ? 0 : stockDealDayPo.getTotalValue().divide(stockDealDayPo.getClosePrice(), 2, RoundingMode.HALF_UP).longValue()
-                    );
+                    stockDealDayEntity.setDt(netsFQKLineNodeDataPo.getDt());
+                    stockDealDayEntity.setFqType(fqType);
+                    stockDealDayEntity.setOpenPrice(netsFQKLineNodeDataPo.getOpenPrice());
+                    stockDealDayEntity.setClosePrice(netsFQKLineNodeDataPo.getClosePrice());
+                    stockDealDayEntity.setHighestPrice(netsFQKLineNodeDataPo.getHighestPrice());
+                    stockDealDayEntity.setLowestPrice(netsFQKLineNodeDataPo.getLowestPrice());
+                    stockDealDayEntity.setDealNum(netsFQKLineNodeDataPo.getDealNum());
+                    stockDealDayEntity.setPreClosePrice(netsDayDealInfoPo.getPreClosePrice());
+                    stockDealDayEntity.setDealMoney(netsDayDealInfoPo.getDealMoney());
                     stockDealDayEntity.setCircEquity(
-                            null == stockDealDayPo.getCircValue() || 0 == stockDealDayPo.getClosePrice().compareTo(BigDecimal.ZERO)
-                                    ? 0 : stockDealDayPo.getCircValue().divide(stockDealDayPo.getClosePrice(), 2, RoundingMode.HALF_UP).longValue()
+                            netsDayDealInfoPo.getCircValue().divide(netsDayDealInfoPo.getClosePrice()).longValue()
                     );
-                    if (syncTotal) {
-                        stockDealDayEntityList.add(stockDealDayEntity);
-                    } else {
-                        if (currentDate.equals(stockDealDayPo.getDt())) {
-                            StockDealDayEntity dbStockDealDayEntity = stockDealDayMapper.getBySignalDate(stockDealDayEntity);
-                            if (null == dbStockDealDayEntity) {
-                                stockDealDayMapper.insert(stockDealDayEntity);
-                            } else {
-                                stockDealDayEntity.setId(dbStockDealDayEntity.getId());
-                                stockDealDayMapper.update(stockDealDayEntity);
-                            }
+                    stockDealDayEntity.setTotalEquity(
+                            netsDayDealInfoPo.getTotalValue().divide(netsDayDealInfoPo.getClosePrice()).longValue()
+                    );
+                    stockDealDayEntityList.add(stockDealDayEntity);
+                }
+            }
+            if (!stockDealDayEntityList.isEmpty()) {
+                if (syncTotal) {
+                    try {
+                        stockDealDayMapper.batchInsert(stockDealDayEntityList);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                        logger.error(stockDealDayEntityList.toString());
+                    }
+                } else {
+                    for (StockDealDayEntity stockDealDayEntity : stockDealDayEntityList) {
+                        StockDealDayEntity dbStockDealDayEntity = stockDealDayMapper.getBySignalDate(stockDealDayEntity);
+                        if (null != dbStockDealDayEntity) {
+                            stockDealDayEntity.setId(dbStockDealDayEntity.getId());
+                            stockDealDayMapper.update(stockDealDayEntity);
+                        } else {
+                            stockDealDayMapper.insert(stockDealDayEntity);
                         }
                     }
                 }
-
-//                if (stockPriceDayEntityList.size() > 0 && stockDealDayEntityList.size() > 0){
-                if (stockDealDayEntityList.size() > 0){
-//                    stockPriceDayMapper.batchInsert(stockPriceDayEntityList);
-                    stockDealDayMapper.batchInsert(stockDealDayEntityList);
-                }
-            } catch (Exception e) {
-                logger.error(startDate);
-                logger.error(stockEntity.toString());
-                logger.error(e.getMessage());
             }
         }
+    }
+
+    /**
+     * 同步数据
+     *
+     * @param stockMarket
+     */
+    private void syncStockMarketData(Integer stockMarket) {
+        if (null == stockMarket || !StockConst.SM_ALL.contains(stockMarket)) {
+            return;
+        }
+        //同步股票
+        stockMarketScan(stockMarket, this);
     }
 
     /**
@@ -265,15 +366,23 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
     public void syncTotalDealDayInfo() {
         syncTotal = true;
         try {
-            this.dropShadow();
-            this.createShadow();
-            //交易开始年份
-            startYear = defaultStartYear;
-            aStockMarketTopIndexScan(this);
-            aStockMarketScan(this);
-            this.shadowConvert();
-            this.dropShadow();
-            this.optimizeTable();
+            dropShadow();
+            createShadow();
+            endYear = DateUtil.getCurrentYear();
+            if (null == endYear) {
+                return;
+            }
+            for (Integer sm : StockConst.SM_A_LIST) {
+                //交易开始日期
+                defaultStartYear = StockConst.stockMarketStartYear(sm);
+                if (null == defaultStartYear) {
+                    continue;
+                }
+                syncStockMarketData(sm);
+            }
+            shadowConvert();
+            dropShadow();
+            optimizeTable();
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
@@ -286,14 +395,11 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
     public void syncCurrentDealDayInfo() {
         syncTotal = false;
         try {
-            //设置上个交易日
-            preDealDate = StockUtil.preDealDate(StockConst.SM_A);
-            preDealDate = null == preDealDate || preDealDate.isEmpty() ?
-                    DateUtil.getRelateDate(0, -1, 0, DateUtil.DATE_FORMAT_1) : preDealDate;
             //交易开始年份
-            startYear = defaultStartYear;
-            aStockMarketTopIndexScan(this);
-            aStockMarketScan(this);
+            startDate = DateUtil.getRelateDate(0, 0, -60, DateUtil.DATE_FORMAT_1);
+            for (Integer sm : StockConst.SM_A_LIST) {
+                syncStockMarketData(sm);
+            }
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
@@ -315,16 +421,24 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
             startYear = defaultStartYear;
             StockInfoEntity stockInfoEntity = stockInfoMapper.getByStockId(stockEntity.getId());
             if (null != stockInfoEntity && null != stockInfoEntity.getStockOnDate()) {
-                startYear = Integer.parseInt(
-                        DateUtil.dateStrFormatChange(
-                                stockInfoEntity.getStockOnDate(),
-                                DateUtil.DATE_FORMAT_1,
-                                DateUtil.YEAR_FORMAT_1
-                        )
+                startYear = DateUtil.dateStrFormatChange(
+                        stockInfoEntity.getStockOnDate(), DateUtil.DATE_FORMAT_1, DateUtil.YEAR_FORMAT_1
                 );
             }
+            Integer startYearNum = Integer.valueOf(startYear);
+            Integer endYearNum = Integer.valueOf(endYear);
+            for (Integer year = startYearNum; year <= endYearNum; year++) {
+                startDate = year + "-01-01";
+                endDate = year + "-12-31";
+                try {
+                    syncDealDay(stockEntity);
+                } catch (Exception e) {
+                    logger.error(e.getMessage());
+                }
+
+            }
+        } else {
+            syncDealDay(stockEntity);
         }
-        this.syncPriceDay(stockEntity);
-        this.syncDealDay(stockEntity);
     }
 }

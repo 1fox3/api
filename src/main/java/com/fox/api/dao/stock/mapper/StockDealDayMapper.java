@@ -2,7 +2,6 @@ package com.fox.api.dao.stock.mapper;
 
 import com.fox.api.annotation.mapper.StockMapperConfig;
 import com.fox.api.dao.stock.entity.StockDealDayEntity;
-import com.fox.api.dao.stock.entity.StockPriceDayEntity;
 
 import java.util.List;
 
@@ -69,11 +68,12 @@ public interface StockDealDayMapper {
     /**
      * 获根据起止日期取按天交易数据
      * @param stockId
+     * @param fqType
      * @param startDate
      * @param endDate
      * @return
      */
-    List<StockDealDayEntity> getByDate(Integer stockId, String startDate, String endDate);
+    List<StockDealDayEntity> getByDate(Integer stockId, Integer fqType, String startDate, String endDate);
 
     /**
      * 优化表

@@ -15,7 +15,12 @@
         INSERT INTO t_stock_deal_day (
             stock_id,
             dt,
+            fq_type,
+            open_price,
             close_price,
+            highest_price,
+            lowest_price,
+            pre_close_price,
             deal_num,
             deal_money,
             circ_equity,
@@ -23,7 +28,12 @@
         ) VALUES (
             #{stockId},
             #{dt},
+            #{fqType},
+            #{openPrice},
             #{closePrice},
+            #{highestPrice},
+            #{lowestPrice},
+            #{preClosePrice},
             #{dealNum},
             #{dealMoney},
             #{circEquity},
@@ -35,7 +45,12 @@
         SET
             stock_id = #{stockId},
             dt = #{dt},
+            fq_type = #{fqType},
+            open_price = #{openPrice},
             close_price = #{closePrice},
+            highest_price = #{highestPrice},
+            lowest_price = #{lowestPrice},
+            pre_close_price = #{preClosePrice},
             deal_num = #{dealNum},
             deal_money = #{dealMoney},
             circ_equity = #{circEquity},
@@ -48,7 +63,12 @@
         INSERT INTO t_stock_deal_day_shadow (
             stock_id,
             dt,
+            fq_type,
+            open_price,
             close_price,
+            highest_price,
+            lowest_price,
+            pre_close_price,
             deal_num,
             deal_money,
             circ_equity,
@@ -59,7 +79,12 @@
             (
                 #{stockDealDayEntity.stockId},
                 #{stockDealDayEntity.dt},
+                #{stockDealDayEntity.fqType},
+                #{stockDealDayEntity.openPrice},
                 #{stockDealDayEntity.closePrice},
+                #{stockDealDayEntity.highestPrice},
+                #{stockDealDayEntity.lowestPrice},
+                #{stockDealDayEntity.preClosePrice},
                 #{stockDealDayEntity.dealNum},
                 #{stockDealDayEntity.dealMoney},
                 #{stockDealDayEntity.circEquity},
@@ -91,17 +116,10 @@
         WHERE
             stock_id = #{stockId}
             AND
+            fq_type = #{fqType}
+            AND
             dt = #{dt}
         LIMIT 1;
-    </select>
-
-    <select id="getTotalByStock" resultMap="BasicResultMap">
-        SELECT
-            *
-        FROM
-            t_stock_deal_day
-        WHERE
-            stock_id = #{stockId};
     </select>
 
     <select id="getByDate" resultMap="BasicResultMap">
@@ -111,6 +129,8 @@
             t_stock_deal_day
         WHERE
             stock_id = #{stockId}
+            AND
+            fq_type = #{fqType}
             AND
             dt >= #{startDate}
             AND

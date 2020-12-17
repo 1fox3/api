@@ -18,7 +18,7 @@ class ApiApplicationTests {
     /**
      * 港股测试股票（腾讯控股）
      */
-    public static final StockVo TEST_HK_STOCK =  new StockVo("00700", StockConst.SM_HK);
+    public static final StockVo TEST_HK_STOCK = new StockVo("00700", StockConst.SM_HK);
 
     @Test
     void contextLoads() {

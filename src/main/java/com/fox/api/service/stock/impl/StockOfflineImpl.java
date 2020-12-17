@@ -35,58 +35,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
 
     @Override
     public StockDealDayLineDto line(Integer stockId, String startDate, String endDate) {
-        StockDealDayLineDto stockDealDayLineDto = new StockDealDayLineDto();
-        StockEntity stockEntity = this.stockMapper.getById(stockId);
-        if (null == stockEntity) {
-            return stockDealDayLineDto;
-        }
-        stockDealDayLineDto.setStockName(stockEntity.getStockName());
-        stockDealDayLineDto.setStockCode(stockEntity.getStockCode());
-
-        List<StockPriceDayEntity> priceDayList = this.stockPriceDayMapper.getByDate(
-                0, stockId, startDate, endDate
-        );
-        List<StockDealDayDto> stockDealDayList = new LinkedList<>();
-        if (null != priceDayList && 0 < priceDayList.size()) {
-            List<StockDealDayEntity> dealDayList = this.stockDealDayMapper.getByDate(
-                    stockId, startDate, endDate
-            );
-            Map<String, StockDealDayEntity> stockDealDayMap = new HashMap<>(priceDayList.size());
-            if (null != dealDayList && 0 < dealDayList.size()) {
-                for (StockDealDayEntity stockDealDayEntity : dealDayList) {
-                    stockDealDayMap.put(stockDealDayEntity.getDt(), stockDealDayEntity);
-                }
-            }
-
-            for (StockPriceDayEntity stockPriceDayEntity : priceDayList) {
-                StockDealDayDto stockDealDayDto = new StockDealDayDto();
-                BeanUtils.copyProperties(stockPriceDayEntity, stockDealDayDto);
-                if (stockDealDayMap.containsKey(stockPriceDayEntity.getDt())) {
-                    StockDealDayEntity stockDealDayEntity = stockDealDayMap.get(stockPriceDayEntity.getDt());
-                    if (null != stockDealDayEntity) {
-                        BeanUtils.copyProperties(stockDealDayEntity, stockDealDayDto);
-                    }
-                }
-                stockDealDayList.add(stockDealDayDto);
-            }
-            stockDealDayLineDto.setLineNode(stockDealDayList);
-            return stockDealDayLineDto;
-        } else {
-            NetsDayLine netsDayLine = new NetsDayLine();
-            StockDayLinePo stockDayLinePo = netsDayLine.getDayLine(this.getNetsStockInfoMap(stockId), startDate, endDate);
-            List<StockDealPo> stockDealPos = stockDayLinePo.getLineNode();
-            if (null != stockDealPos && 0 < stockDealPos.size()) {
-                for (StockDealPo stockDealPo : stockDealPos) {
-                    StockDealDayDto stockDealDayDto = new StockDealDayDto();
-                    BeanUtils.copyProperties(stockDealPo, stockDealDayDto);
-                    stockDealDayDto.setDt(stockDealPo.getDateTime());
-                    stockDealDayList.add(stockDealDayDto);
-                }
-            }
-            stockDealDayLineDto.setLineNode(stockDealDayList);
-        }
-
-        return stockDealDayLineDto;
+        return null;
     }
 
     /**
@@ -120,33 +69,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
      */
     @Override
     public List<List<Object>> day(Integer stockId, Integer fqType) {
-        List<List<Object>> dayList = new LinkedList<>();
-        List<StockPriceDayEntity> priceDayList = this.stockPriceDayMapper.getTotalByStock(fqType, stockId);
-        List<StockDealDayEntity> dealDayList = this.stockDealDayMapper.getTotalByStock(stockId);
-        for (int i = 0; i < priceDayList.size(); i++) {
-            List<Object> dayInfoList = new LinkedList<>();
-            StockPriceDayEntity stockPriceDayEntity = priceDayList.get(i);
-            dayInfoList.add(stockPriceDayEntity.getDt());
-            dayInfoList.add(stockPriceDayEntity.getOpenPrice());
-            dayInfoList.add(stockPriceDayEntity.getClosePrice());
-            dayInfoList.add(stockPriceDayEntity.getHighestPrice());
-            dayInfoList.add(stockPriceDayEntity.getLowestPrice());
-            dayInfoList.add(stockPriceDayEntity.getPreClosePrice());
-            if (i < dealDayList.size() - 1) {
-                StockDealDayEntity stockDealDayEntity = dealDayList.get(i);
-                dayInfoList.add(stockDealDayEntity.getDealNum());
-                dayInfoList.add(stockDealDayEntity.getDealMoney());
-                dayInfoList.add(stockDealDayEntity.getCircEquity());
-                dayInfoList.add(stockDealDayEntity.getTotalEquity());
-            } else {
-                dayInfoList.add(BigDecimal.ZERO);
-                dayInfoList.add(BigDecimal.ZERO);
-                dayInfoList.add(BigDecimal.ZERO);
-                dayInfoList.add(BigDecimal.ZERO);
-            }
-            dayList.add(dayInfoList);
-        }
-        return dayList;
+        return null;
     }
 
     /**
@@ -158,33 +81,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
      */
     @Override
     public List<List<Object>> week(Integer stockId, Integer fqType) {
-        List<List<Object>> weekList = new LinkedList<>();
-        List<StockPriceWeekEntity> priceWeekList = this.stockPriceWeekMapper.getTotalByStock(fqType, stockId);
-        List<StockDealWeekEntity> dealWeekList = this.stockDealWeekMapper.getTotalByStock(stockId);
-        for (int i = 0; i < priceWeekList.size(); i++) {
-            List<Object> weekInfoList = new LinkedList<>();
-            StockPriceWeekEntity stockPriceWeekEntity = priceWeekList.get(i);
-            weekInfoList.add(stockPriceWeekEntity.getDt());
-            weekInfoList.add(stockPriceWeekEntity.getOpenPrice());
-            weekInfoList.add(stockPriceWeekEntity.getClosePrice());
-            weekInfoList.add(stockPriceWeekEntity.getHighestPrice());
-            weekInfoList.add(stockPriceWeekEntity.getLowestPrice());
-            weekInfoList.add(stockPriceWeekEntity.getPreClosePrice());
-            if (i < dealWeekList.size() - 1) {
-                StockDealWeekEntity stockDealWeekEntity = dealWeekList.get(i);
-                weekInfoList.add(stockDealWeekEntity.getDealNum());
-                weekInfoList.add(stockDealWeekEntity.getDealMoney());
-                weekInfoList.add(stockDealWeekEntity.getCircEquity());
-                weekInfoList.add(stockDealWeekEntity.getTotalEquity());
-            } else {
-                weekInfoList.add(BigDecimal.ZERO);
-                weekInfoList.add(BigDecimal.ZERO);
-                weekInfoList.add(BigDecimal.ZERO);
-                weekInfoList.add(BigDecimal.ZERO);
-            }
-            weekList.add(weekInfoList);
-        }
-        return weekList;
+        return null;
     }
 
     /**
@@ -196,33 +93,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
      */
     @Override
     public List<List<Object>> month(Integer stockId, Integer fqType) {
-        List<List<Object>> monthList = new LinkedList<>();
-        List<StockPriceMonthEntity> priceMonthList = this.stockPriceMonthMapper.getTotalByStock(fqType, stockId);
-        List<StockDealMonthEntity> dealMonthList = this.stockDealMonthMapper.getTotalByStock(stockId);
-        for (int i = 0; i < priceMonthList.size(); i++) {
-            List<Object> monthInfoList = new LinkedList<>();
-            StockPriceMonthEntity stockPriceMonthEntity = priceMonthList.get(i);
-            monthInfoList.add(stockPriceMonthEntity.getDt());
-            monthInfoList.add(stockPriceMonthEntity.getOpenPrice());
-            monthInfoList.add(stockPriceMonthEntity.getClosePrice());
-            monthInfoList.add(stockPriceMonthEntity.getHighestPrice());
-            monthInfoList.add(stockPriceMonthEntity.getLowestPrice());
-            monthInfoList.add(stockPriceMonthEntity.getPreClosePrice());
-            if (i < dealMonthList.size() - 1) {
-                StockDealMonthEntity stockDealMonthEntity = dealMonthList.get(i);
-                monthInfoList.add(stockDealMonthEntity.getDealNum());
-                monthInfoList.add(stockDealMonthEntity.getDealMoney());
-                monthInfoList.add(stockDealMonthEntity.getCircEquity());
-                monthInfoList.add(stockDealMonthEntity.getTotalEquity());
-            } else {
-                monthInfoList.add(BigDecimal.ZERO);
-                monthInfoList.add(BigDecimal.ZERO);
-                monthInfoList.add(BigDecimal.ZERO);
-                monthInfoList.add(BigDecimal.ZERO);
-            }
-            monthList.add(monthInfoList);
-        }
-        return monthList;
+        return null;
     }
 
     /**
