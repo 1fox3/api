@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * 股票按天交易数据
+ *
  * @author lusongsong
  * @date 2020/09/24 20:15
  */
@@ -14,20 +15,23 @@ import java.util.List;
 public interface StockDealDayMapper {
     /**
      * 插入
+     *
      * @param stockDealDayEntity
      * @return
-    */
+     */
     Integer insert(StockDealDayEntity stockDealDayEntity);
 
     /**
      * 更新
+     *
      * @param stockDealDayEntity
      * @return
-    */
+     */
     Boolean update(StockDealDayEntity stockDealDayEntity);
 
     /**
      * 批量插入数据
+     *
      * @param list
      * @return
      */
@@ -35,24 +39,28 @@ public interface StockDealDayMapper {
 
     /**
      * 创建影子表
+     *
      * @return
      */
     Boolean createShadow();
 
     /**
      * 影子表转换
+     *
      * @return
      */
     Boolean shadowConvert();
 
     /**
      * 删除影子表
+     *
      * @return
      */
     Boolean dropShadow();
 
     /**
      * 获取单天记录
+     *
      * @param stockDealDayEntity
      * @return
      */
@@ -60,13 +68,16 @@ public interface StockDealDayMapper {
 
     /**
      * 获取股票全部数据
+     *
      * @param stockId
+     * @param fqType
      * @return
      */
-    List<StockDealDayEntity> getTotalByStock(Integer stockId);
+    List<StockDealDayEntity> getTotalByStock(Integer stockId, Integer fqType);
 
     /**
      * 获根据起止日期取按天交易数据
+     *
      * @param stockId
      * @param fqType
      * @param startDate
@@ -77,6 +88,7 @@ public interface StockDealDayMapper {
 
     /**
      * 优化表
+     *
      * @return
      */
     Boolean optimize();

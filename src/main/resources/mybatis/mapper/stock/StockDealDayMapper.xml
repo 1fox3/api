@@ -5,7 +5,12 @@
         <id column="id" property="id" jdbcType="BIGINT" />
         <result column="stock_id" property="stockId" jdbcType="INTEGER" />
         <result column="dt" property="dt" jdbcType="DATE" />
+        <result column="fq_type" property="fqType" jdbcType="INTEGER" />
+        <result column="open_price" property="openPrice" jdbcType="DECIMAL" />
         <result column="close_price" property="closePrice" jdbcType="DECIMAL" />
+        <result column="highest_price" property="highestPrice" jdbcType="DECIMAL" />
+        <result column="lowest_price" property="lowestPrice" jdbcType="DECIMAL" />
+        <result column="pre_close_price" property="preClosePrice" jdbcType="DECIMAL" />
         <result column="deal_num" property="dealNum" jdbcType="BIGINT" />
         <result column="deal_money" property="dealMoney" jdbcType="DECIMAL" />
         <result column="circ_equity" property="circEquity" jdbcType="BIGINT" />
@@ -120,6 +125,19 @@
             AND
             dt = #{dt}
         LIMIT 1;
+    </select>
+
+    <select id="getTotalByStock" resultMap="BasicResultMap">
+        SELECT
+            *
+        FROM
+            t_stock_deal_day
+        WHERE
+            stock_id = #{stockId}
+            AND
+            fq_type = #{fqType}
+        ORDER BY
+            dt ASC;
     </select>
 
     <select id="getByDate" resultMap="BasicResultMap">

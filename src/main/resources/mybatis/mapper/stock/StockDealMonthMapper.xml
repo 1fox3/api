@@ -5,18 +5,27 @@
         <id column="id" property="id" jdbcType="BIGINT" />
         <result column="stock_id" property="stockId" jdbcType="INTEGER" />
         <result column="dt" property="dt" jdbcType="DATE" />
+        <result column="fq_type" property="fqType" jdbcType="INTEGER" />
+        <result column="open_price" property="openPrice" jdbcType="DECIMAL" />
         <result column="close_price" property="closePrice" jdbcType="DECIMAL" />
+        <result column="highest_price" property="highestPrice" jdbcType="DECIMAL" />
+        <result column="lowest_price" property="lowestPrice" jdbcType="DECIMAL" />
+        <result column="pre_close_price" property="preClosePrice" jdbcType="DECIMAL" />
         <result column="deal_num" property="dealNum" jdbcType="BIGINT" />
         <result column="deal_money" property="dealMoney" jdbcType="DECIMAL" />
         <result column="circ_equity" property="circEquity" jdbcType="BIGINT" />
         <result column="total_equity" property="totalEquity" jdbcType="BIGINT" />
     </resultMap>
-
     <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockDealMonthEntity" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_stock_deal_month (
             stock_id,
             dt,
+            fq_type,
+            open_price,
             close_price,
+            highest_price,
+            lowest_price,
+            pre_close_price,
             deal_num,
             deal_money,
             circ_equity,
@@ -24,20 +33,29 @@
         ) VALUES (
             #{stockId},
             #{dt},
+            #{fqType},
+            #{openPrice},
             #{closePrice},
+            #{highestPrice},
+            #{lowestPrice},
+            #{preClosePrice},
             #{dealNum},
             #{dealMoney},
             #{circEquity},
             #{totalEquity}
         );
     </insert>
-
     <update id="update" parameterType="com.fox.api.dao.stock.entity.StockDealMonthEntity">
         UPDATE t_stock_deal_month
         SET
             stock_id = #{stockId},
             dt = #{dt},
+            fq_type = #{fqType},
+            open_price = #{openPrice},
             close_price = #{closePrice},
+            highest_price = #{highestPrice},
+            lowest_price = #{lowestPrice},
+            pre_close_price = #{preClosePrice},
             deal_num = #{dealNum},
             deal_money = #{dealMoney},
             circ_equity = #{circEquity},
@@ -48,20 +66,30 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO t_stock_deal_month_shadow (
-            stock_id,
-            dt,
-            close_price,
-            deal_num,
-            deal_money,
-            circ_equity,
-            total_equity
+        stock_id,
+        dt,
+        fq_type,
+        open_price,
+        close_price,
+        highest_price,
+        lowest_price,
+        pre_close_price,
+        deal_num,
+        deal_money,
+        circ_equity,
+        total_equity
         )
         VALUES
         <foreach collection ="list" item="stockDealMonthEntity" index= "index" separator =",">
             (
             #{stockDealMonthEntity.stockId},
             #{stockDealMonthEntity.dt},
+            #{stockDealMonthEntity.fqType},
+            #{stockDealMonthEntity.openPrice},
             #{stockDealMonthEntity.closePrice},
+            #{stockDealMonthEntity.highestPrice},
+            #{stockDealMonthEntity.lowestPrice},
+            #{stockDealMonthEntity.preClosePrice},
             #{stockDealMonthEntity.dealNum},
             #{stockDealMonthEntity.dealMoney},
             #{stockDealMonthEntity.circEquity},
@@ -71,7 +99,7 @@
     </insert>
 
     <update id="createShadow">
-        CREATE TABLE IF NOT EXISTS t_stock_deal_month_shadow LIKE t_stock_deal_month;
+        CREATE TABLE IF NOT EXISTS t_stock_deal_month_shadow LIKE t_stock_deal_day;
     </update>
 
     <update id="shadowConvert">
@@ -93,6 +121,8 @@
         WHERE
             stock_id = #{stockId}
             AND
+            fq_type = #{fqType}
+            AND
             dt = #{dt}
         LIMIT 1;
     </select>
@@ -103,7 +133,11 @@
         FROM
             t_stock_deal_month
         WHERE
-            stock_id = #{stockId};
+            stock_id = #{stockId}
+            AND
+            fq_type = #{fqType}
+        ORDER BY
+            dt ASC;
     </select>
 
     <select id="getByDate" resultMap="BasicResultMap">
@@ -113,6 +147,8 @@
             t_stock_deal_month
         WHERE
             stock_id = #{stockId}
+            AND
+            fq_type = #{fqType}
             AND
             dt >= #{startDate}
             AND

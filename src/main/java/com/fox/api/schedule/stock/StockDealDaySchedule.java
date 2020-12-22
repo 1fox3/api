@@ -54,7 +54,7 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
     /**
      * 默认股票数据接口结果保存路径
      */
-    private static final String DEFAULT_STOCK_API_DATA_PATH = "/export/data/api/stock";
+    private static final String DEFAULT_STOCK_API_DATA_PATH = "/api";
     /**
      * 稳定数据日期
      */
@@ -398,19 +398,6 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
     }
 
     /**
-     * 同步数据
-     *
-     * @param stockMarket
-     */
-    private void syncStockMarketData(Integer stockMarket) {
-        if (null == stockMarket || !StockConst.SM_ALL.contains(stockMarket)) {
-            return;
-        }
-        //同步股票
-        stockMarketScan(stockMarket, this);
-    }
-
-    /**
      * 同步所有的按天交易信息数据
      */
     @LogShowTimeAnt
@@ -429,7 +416,8 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
                 if (null == defaultStartYear) {
                     continue;
                 }
-                syncStockMarketData(sm);
+                //同步股票
+                stockMarketScan(sm, this);
             }
             shadowConvert();
             dropShadow();
@@ -449,7 +437,8 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
             //交易开始年份
             startDate = DateUtil.getRelateDate(0, 0, -60, DateUtil.DATE_FORMAT_1);
             for (Integer sm : StockConst.SM_A_LIST) {
-                syncStockMarketData(sm);
+                //同步股票
+                stockMarketScan(sm, this);
             }
         } catch (Exception e) {
             logger.error("syncCurrentDealDayInfo", e);
