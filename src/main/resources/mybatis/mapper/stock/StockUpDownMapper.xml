@@ -4,54 +4,44 @@
     <resultMap id="BasicResultMap" type="com.fox.api.dao.stock.entity.StockUpDownEntity">
         <id column="id" property="id" jdbcType="INTEGER" />
         <result column="stock_id" property="stockId" jdbcType="INTEGER" />
-        <result column="d10_up" property="d10Up" jdbcType="DECIMAL" />
-        <result column="d10_down" property="d10Down" jdbcType="DECIMAL" />
-        <result column="d30_up" property="d30Up" jdbcType="DECIMAL" />
-        <result column="d30_down" property="d30Down" jdbcType="DECIMAL" />
-        <result column="d50_up" property="d50Up" jdbcType="DECIMAL" />
-        <result column="d50_down" property="d50Down" jdbcType="DECIMAL" />
-        <result column="d100_up" property="d100Up" jdbcType="DECIMAL" />
-        <result column="d100_down" property="d100Down" jdbcType="DECIMAL" />
-        <result column="d200_up" property="d200Up" jdbcType="DECIMAL" />
-        <result column="d200_down" property="d200Down" jdbcType="DECIMAL" />
-        <result column="d300_up" property="d300Up" jdbcType="DECIMAL" />
-        <result column="d300_down" property="d300Down" jdbcType="DECIMAL" />
-        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="day_num" property="dayNum" jdbcType="INTEGER" />
+        <result column="up_rate" property="upRate" jdbcType="DECIMAL" />
+        <result column="down_rate" property="downRate" jdbcType="DECIMAL" />
     </resultMap>
 
     <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockUpDownEntity" keyColumn="id"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_stock_up_down_shadow (
             stock_id,
-            d10_up,
-            d10_down,
-            d30_up,
-            d30_down,
-            d50_up,
-            d50_down,
-            d100_up,
-            d100_down,
-            d200_up,
-            d200_down,
-            d300_up,
-            d300_down
+            day_num,
+            up_rate,
+            down_rate
         )
         VALUES
             (
                 #{stockId},
-                #{d10Up},
-                #{d10Down},
-                #{d30Up},
-                #{d30Down},
-                #{d50Up},
-                #{d50Down},
-                #{d100Up},
-                #{d100Down},
-                #{d200Up},
-                #{d200Down},
-                #{d300Up},
-                #{d300Down}
+                #{dayNum},
+                #{upRate},
+                #{downRate}
             );
+    </insert>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO t_stock_up_down_shadow (
+            stock_id,
+            day_num,
+            up_rate,
+            down_rate
+        )
+        VALUES
+        <foreach collection ="list" item="stockUpDownEntity" index= "index" separator =",">
+            (
+                #{stockUpDownEntity.stockId},
+                #{stockUpDownEntity.dayNum},
+                #{stockUpDownEntity.upRate},
+                #{stockUpDownEntity.downRate}
+            )
+        </foreach >
     </insert>
 
     <select id="getList" resultMap="BasicResultMap">

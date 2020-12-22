@@ -46,9 +46,4 @@ public class StockLimitUpDownEntity {
      */
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     String currentDate;
-    /**
-     * 创建时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    String createTime;
 }

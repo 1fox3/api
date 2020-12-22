@@ -1,17 +1,17 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
+import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockLimitUpDownEntity;
 import com.fox.api.dao.stock.entity.StockUpDownEntity;
+import com.fox.api.dao.stock.mapper.StockDealDayMapper;
 import com.fox.api.dao.stock.mapper.StockLimitUpDownMapper;
 import com.fox.api.dao.stock.mapper.StockUpDownMapper;
-import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
-import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
-import com.fox.api.service.stock.StockOfflineService;
 import com.fox.api.util.DateUtil;
-import com.fox.api.util.StockUtil;
 import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.vo.StockVo;
+import com.fox.spider.stock.service.StockToolService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,187 +19,217 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 股票增幅统计
+ *
  * @author lusongsong
+ * @date 2020/12/22 17:55
  */
 @Component
 public class StockUpDownSchedule extends StockBaseSchedule implements StockScheduleHandler {
+    /**
+     * 日志
+     */
     private Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * 股票涨跌幅统计数据库操作类
+     */
     @Autowired
     private StockUpDownMapper stockUpDownMapper;
-
+    /**
+     * 股票涨跌停统计数据库操作类
+     */
     @Autowired
     private StockLimitUpDownMapper stockLimitUpDownMapper;
-
+    /**
+     * 按天交易数据库操作类
+     */
     @Autowired
-    private StockOfflineService stockOfflineService;
-
+    private StockDealDayMapper stockDealDayMapper;
+    /**
+     * 股票工具服务
+     */
+    @Autowired
+    StockToolService stockToolService;
     /**
      * 涨跌统计时间粒度
      */
     List<Integer> scopeList = Arrays.asList(10, 30, 50, 100, 200, 300);
     /**
-     * 需要的数据起始日期
+     * 获取数据起始日期
      */
-    String startDate;
+    private String startDate;
     /**
-     * 最新交易日
+     * 获取数据截止日期
      */
-    String lastDealDate;
+    private String endDate;
 
     /**
      * 删除影子表
      */
     private void dropShadowTable() {
-        stockUpDownMapper.dropShadow();
-        stockLimitUpDownMapper.dropShadow();
+        try {
+            stockUpDownMapper.dropShadow();
+        } catch (Exception e) {
+            logger.error("dropStockUpDownShadowTable", e);
+        }
+        try {
+            stockLimitUpDownMapper.dropShadow();
+        } catch (Exception e) {
+            logger.error("dropStockLimitUpDownShadowTable", e);
+        }
     }
 
     /**
      * 创建影子表
      */
     private void createShadowTable() {
-        stockUpDownMapper.createShadow();
-        stockLimitUpDownMapper.createShadow();
+        try {
+            stockUpDownMapper.createShadow();
+        } catch (Exception e) {
+            logger.error("createStockUpDownShadowTable", e);
+        }
+        try {
+            stockLimitUpDownMapper.createShadow();
+        } catch (Exception e) {
+            logger.error("createStockLimitUpDownShadowTable", e);
+        }
     }
 
     /**
      * 名称转换
      */
     private void shadowTableConvert() {
-        stockUpDownMapper.shadowConvert();
-        stockLimitUpDownMapper.shadowConvert();
+        try {
+            stockUpDownMapper.shadowConvert();
+        } catch (Exception e) {
+            logger.error("convertStockUpDownShadowTable", e);
+        }
+        try {
+            stockLimitUpDownMapper.shadowConvert();
+        } catch (Exception e) {
+            logger.error("convertStockLimitUpDownShadowTable", e);
+        }
     }
 
     /**
      * 优化表
      */
     private void optimizeTable() {
-        stockUpDownMapper.optimize();
-        stockLimitUpDownMapper.optimize();
+        try {
+            stockUpDownMapper.optimize();
+        } catch (Exception e) {
+            logger.error("optimizeStockUpDownShadowTable", e);
+        }
+        try {
+            stockLimitUpDownMapper.optimize();
+        } catch (Exception e) {
+            logger.error("optimizeStockLimitUpDownShadowTable", e);
+        }
     }
 
     /**
      * 股票增幅统计
+     *
      * @param stockEntity
-     * @param stockDealDayDtoList
+     * @param stockDealDayEntityList
      */
-    private void upDown(StockEntity stockEntity, List<StockDealDayDto> stockDealDayDtoList) {
-        if (null == stockEntity || null == stockDealDayDtoList || 0 >= stockDealDayDtoList.size()) {
+    private void upDown(StockEntity stockEntity, List<StockDealDayEntity> stockDealDayEntityList) {
+        if (null == stockEntity || null == stockDealDayEntityList || stockDealDayEntityList.isEmpty()) {
             return;
         }
 
-        int len = stockDealDayDtoList.size();
-        //需要的最大天数
-        Integer limitLen = scopeList.get(scopeList.size() - 1);
-        StockUpDownEntity stockUpDownEntity = new StockUpDownEntity();
-        stockUpDownEntity.setStockId(stockEntity.getId());
-
-        BigDecimal currentPrice , highestPrice, lowestPrice;
+        BigDecimal currentPrice, highestPrice, lowestPrice;
         currentPrice = highestPrice = lowestPrice = BigDecimal.ZERO;
 
-        Integer pos = len;
-        StockDealDayDto stockDealDayDto = new StockDealDayDto();
-        for (int j = 0; j <= limitLen; j++) {
-            while (pos > 0) {
-                pos--;
-                stockDealDayDto = stockDealDayDtoList.get(pos);
-                if (null == stockDealDayDto || null == stockDealDayDto.getClosePrice()
-                        || 0 <= BigDecimal.ZERO.compareTo(stockDealDayDto.getClosePrice())) {
-                    continue;
-                }
-                break;
+        StockDealDayEntity stockDealDayEntity = null;
+        List<StockUpDownEntity> stockUpDownEntityList = new ArrayList<>();
+        for (int i = 0; i < stockDealDayEntityList.size(); i++) {
+            stockDealDayEntity = stockDealDayEntityList.get(i);
+            if (null == stockDealDayEntity || null == stockDealDayEntity.getClosePrice()
+                    || 0 <= BigDecimal.ZERO.compareTo(stockDealDayEntity.getClosePrice())) {
+                continue;
             }
-            currentPrice = 0 == currentPrice.compareTo(BigDecimal.ZERO) ? stockDealDayDto.getClosePrice() : currentPrice;
-            highestPrice = 0 > highestPrice.compareTo(stockDealDayDto.getHighestPrice())
-                    ? stockDealDayDto.getHighestPrice() : highestPrice;
+
+            currentPrice = 0 == currentPrice.compareTo(BigDecimal.ZERO) ?
+                    stockDealDayEntity.getClosePrice() : currentPrice;
+            highestPrice = 0 > highestPrice.compareTo(stockDealDayEntity.getHighestPrice())
+                    ? stockDealDayEntity.getHighestPrice() : highestPrice;
             lowestPrice = 0 == lowestPrice.compareTo(BigDecimal.ZERO)
-                    || (0 < lowestPrice.compareTo(stockDealDayDto.getLowestPrice())
-                    && 0 > BigDecimal.ZERO.compareTo(stockDealDayDto.getLowestPrice()))
-                    ? stockDealDayDto.getLowestPrice() : lowestPrice;
-            if (scopeList.contains(j) && 0 < currentPrice.compareTo(BigDecimal.ZERO)
+                    || (0 < lowestPrice.compareTo(stockDealDayEntity.getLowestPrice())
+                    && 0 > BigDecimal.ZERO.compareTo(stockDealDayEntity.getLowestPrice()))
+                    ? stockDealDayEntity.getLowestPrice() : lowestPrice;
+            if (scopeList.contains(i) && 0 < currentPrice.compareTo(BigDecimal.ZERO)
                     && 0 < highestPrice.compareTo(BigDecimal.ZERO)
                     && 0 < lowestPrice.compareTo(BigDecimal.ZERO)
             ) {
                 BigDecimal up = currentPrice.subtract(lowestPrice).divide(lowestPrice, 4, RoundingMode.HALF_UP);
                 BigDecimal down = highestPrice.subtract(currentPrice).divide(highestPrice, 4, RoundingMode.HALF_UP);
-                if (10 == j) {
-                    stockUpDownEntity.setD10Up(up);
-                    stockUpDownEntity.setD10Down(down);
-                }
-                if (30 == j) {
-                    stockUpDownEntity.setD30Up(up);
-                    stockUpDownEntity.setD30Down(down);
-                }
-                if (50 == j) {
-                    stockUpDownEntity.setD50Up(up);
-                    stockUpDownEntity.setD50Down(down);
-                }
-                if (100 == j) {
-                    stockUpDownEntity.setD100Up(up);
-                    stockUpDownEntity.setD100Down(down);
-                }
-                if (200 == j) {
-                    stockUpDownEntity.setD200Up(up);
-                    stockUpDownEntity.setD200Down(down);
-                }
-                if (300 == j) {
-                    stockUpDownEntity.setD300Up(up);
-                    stockUpDownEntity.setD300Down(down);
-                }
+
+                StockUpDownEntity stockUpDownEntity = new StockUpDownEntity();
+                stockUpDownEntity.setStockId(stockEntity.getId());
+                stockUpDownEntity.setDayNum(i);
+                stockUpDownEntity.setUpRate(up);
+                stockUpDownEntity.setDownRate(down);
+                stockUpDownEntityList.add(stockUpDownEntity);
             }
         }
-        stockUpDownMapper.insert(stockUpDownEntity);
+        if (null != stockDealDayEntityList && !stockUpDownEntityList.isEmpty()) {
+            try {
+                stockUpDownMapper.batchInsert(stockUpDownEntityList);
+            } catch (Exception e) {
+                logger.error("upDown", e);
+            }
+        }
     }
 
     /**
      * 股票连续涨跌停统计
+     *
      * @param stockEntity
-     * @param stockDealDayDtoList
+     * @param stockDealDayEntityList
      */
-    private void limitUpDown(StockEntity stockEntity, List<StockDealDayDto> stockDealDayDtoList) {
-        if (null == stockEntity || null == stockDealDayDtoList || 0 >= stockDealDayDtoList.size()) {
+    private void limitUpDown(StockEntity stockEntity, List<StockDealDayEntity> stockDealDayEntityList) {
+        if (null == stockEntity || null == stockDealDayEntityList || stockDealDayEntityList.isEmpty()) {
             return;
         }
-        BigDecimal limitRate = StockUtil.limitRate(stockEntity);
+        BigDecimal limitRate = stockToolService.limitRate(
+                new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket()), stockEntity.getStockName()
+        );
         //未设增幅限制的忽略
         if (null == limitRate || 0 <= BigDecimal.ZERO.compareTo(limitRate)) {
             return;
         }
-        int len = stockDealDayDtoList.size();
-        StockDealDayDto todayDealDto = null;
-        StockDealDayDto yesterdayDealDto = null;
         BigDecimal todayPrice = null;
         BigDecimal yesterdayPrice = null;
         StockLimitUpDownEntity stockLimitUpDownEntity = new StockLimitUpDownEntity();
         stockLimitUpDownEntity.setStockId(stockEntity.getId());
-        for (int i = len - 1; i >= 0; i--) {
-            StockDealDayDto currentDealDto = stockDealDayDtoList.get(i);
-            if (null == currentDealDto || 0 <= BigDecimal.ZERO.compareTo(currentDealDto.getClosePrice())) {
+        StockDealDayEntity stockDealDayEntity = null;
+        for (int i = 0; i < stockDealDayEntityList.size(); i++) {
+            stockDealDayEntity = stockDealDayEntityList.get(i);
+            if (null == stockDealDayEntity || null == stockDealDayEntity.getClosePrice()
+                    || 0 <= BigDecimal.ZERO.compareTo(stockDealDayEntity.getClosePrice())) {
                 continue;
             }
-            todayDealDto = yesterdayDealDto;
-            yesterdayDealDto = currentDealDto;
-            if (null == yesterdayDealDto || null == todayDealDto) {
-                continue;
-            }
-            todayPrice = todayDealDto.getClosePrice().setScale(2, RoundingMode.HALF_UP);
-            yesterdayPrice = yesterdayDealDto.getClosePrice().setScale(2, RoundingMode.HALF_UP);
+            todayPrice = stockDealDayEntity.getClosePrice();
+            yesterdayPrice = stockDealDayEntity.getPreClosePrice();
 
             BigDecimal uptickPrice = todayPrice.subtract(yesterdayPrice).abs();
             BigDecimal limitRatePrice = yesterdayPrice.multiply(limitRate).abs().setScale(2, RoundingMode.HALF_UP);
 
             //type值说明 0-正常，1-涨停，2-跌停
-            Integer type = 0;
+            Integer type = StockConst.UPTICK_TYPE_FLAT;
             if (uptickPrice.equals(limitRatePrice)) {
-                type = 0 < todayPrice.compareTo(yesterdayPrice) ? 1 : 2;
+                type = 0 < todayPrice.compareTo(yesterdayPrice) ?
+                        StockConst.UPTICK_TYPE_TOP_UP : StockConst.UPTICK_TYPE_TOP_DOWN;
             }
             //不涨，涨跌发生转变则停止
-            if (type.equals(0)
+            if (type.equals(StockConst.UPTICK_TYPE_FLAT)
                     || (null != stockLimitUpDownEntity.getType() && !type.equals(stockLimitUpDownEntity.getType()))
             ) {
                 break;
@@ -214,14 +244,18 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
 
             if (null == stockLimitUpDownEntity.getCurrentPrice()) {
                 stockLimitUpDownEntity.setCurrentPrice(todayPrice);
-                stockLimitUpDownEntity.setCurrentDate(todayDealDto.getDt());
+                stockLimitUpDownEntity.setCurrentDate(stockDealDayEntity.getDt());
             }
 
             stockLimitUpDownEntity.setStartPrice(yesterdayPrice);
-            stockLimitUpDownEntity.setStartDate(yesterdayDealDto.getDt());
+            stockLimitUpDownEntity.setStartDate(stockDealDayEntity.getDt());
         }
         if (null != stockLimitUpDownEntity.getType()) {
-            stockLimitUpDownMapper.insert(stockLimitUpDownEntity);
+            try {
+                stockLimitUpDownMapper.insert(stockLimitUpDownEntity);
+            } catch (Exception e) {
+                logger.error("limitUpDown", e);
+            }
         }
     }
 
@@ -230,29 +264,22 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
      */
     @LogShowTimeAnt
     public void stockUpDown() {
-        if (!StockUtil.todayIsDealDate(StockConst.SM_A)) {
-            return;
-        }
-
-        //获取近2年的交易记录
         startDate = DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1);
-        //最新交易日
-        lastDealDate = StockUtil.lastDealDate(StockConst.SM_A);
+        endDate = DateUtil.getCurrentDate();
 
         //将涨幅统计的影子表删除
-        this.dropShadowTable();
+        dropShadowTable();
         //创建涨幅统计的影子表
-        this.createShadowTable();
-
-        //遍历A股
-        aStockMarketScan(this);
-
+        createShadowTable();
+        for (Integer sm : StockConst.SM_A_LIST) {
+            stockMarketScan(sm, this);
+        }
         //涨幅统计的影子表与正式表进行名称互换
-        this.shadowTableConvert();
+        shadowTableConvert();
         //将涨幅统计的影子表删除(前正式表)
-        this.dropShadowTable();
+        dropShadowTable();
         //优化正式表空间
-        this.optimizeTable();
+        optimizeTable();
     }
 
     /**
@@ -262,27 +289,22 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
      */
     @Override
     public void handle(StockEntity stockEntity) {
-        try{
-            if (null != stockEntity && null != stockEntity.getId()) {
-                startDate = null == startDate ?
-                        DateUtil.getRelateDate(-2, 0, 0, DateUtil.DATE_FORMAT_1) : startDate;
-                StockDealDayLineDto stockDealDayLineDto = stockOfflineService.line(stockEntity.getId(), startDate);
-                List<StockDealDayDto> stockDealDayDtoList = stockDealDayLineDto.getLineNode();
-                if (null == stockDealDayDtoList || stockDealDayDtoList.isEmpty()) {
+        try {
+            if (null != stockEntity && null != stockEntity.getId() && 1 != stockEntity.getStockStatus()) {
+                List<StockDealDayEntity> stockDealDayEntityList = stockDealDayMapper.getByDate(
+                        stockEntity.getId(), StockConst.SFQ_AFTER, startDate, endDate
+                );
+                if (null == stockDealDayEntityList || stockDealDayEntityList.isEmpty()) {
                     return;
                 }
-                //有最新交易数据才统计
-                StockDealDayDto lastStockDealDayDto = stockDealDayDtoList.get(stockDealDayDtoList.size() - 1);
-                if (null == lastStockDealDayDto || null == lastStockDealDayDto.getDt()
-                        || !lastStockDealDayDto.getDt().equals(lastDealDate)) {
-                    return;
-                }
-                upDown(stockEntity, stockDealDayDtoList);
-                limitUpDown(stockEntity, stockDealDayDtoList);
+                //按日期降序排列
+                Collections.reverse(stockDealDayEntityList);
+                upDown(stockEntity, stockDealDayEntityList);
+                limitUpDown(stockEntity, stockDealDayEntityList);
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(stockEntity.toString());
-            logger.error(e.getMessage());
+            logger.error("handle", e);
         }
     }
 }

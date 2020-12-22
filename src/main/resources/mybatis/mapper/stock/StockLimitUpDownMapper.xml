@@ -10,7 +10,6 @@
         <result column="current_price" property="currentPrice" jdbcType="DECIMAL" />
         <result column="start_date" property="startDate" jdbcType="DATE" />
         <result column="current_date" property="currentDate" jdbcType="DATE" />
-        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     </resultMap>
 
     <insert id="insert" parameterType="com.fox.api.dao.stock.entity.StockLimitUpDownEntity" keyColumn="id"
