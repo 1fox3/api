@@ -9,6 +9,7 @@ import com.fox.api.service.stock.StockRealtimeRankService;
 import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
+import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,16 +31,12 @@ public class RealtimeController {
 
     @RequestMapping("/stock/realtime/info")
     public ResultDto realtime(Integer stockId) {
-        StockRealtimePo stockRealtimeEntity = stockRealtimeService.info(stockId);
-        if (null == stockRealtimeEntity) {
-            return ResultDto.fail(ReturnCode.FAIL);
-        }
-        return ResultDto.success(stockRealtimeEntity);
+        return ResultDto.success(stockRealtimeService.info(stockId));
     }
 
     @RequestMapping("/stock/realtime/priceList")
     public ResultDto priceList(Integer stockId) {
-        StockRealtimePo stockRealtimeEntity = stockRealtimeService.info(stockId);
+        SinaRealtimeDealInfoPo stockRealtimeEntity = stockRealtimeService.info(stockId);
         if (null == stockRealtimeEntity) {
             return ResultDto.fail(ReturnCode.FAIL);
         }
@@ -50,12 +47,8 @@ public class RealtimeController {
     }
 
     @RequestMapping("/stock/realtime/line")
-    public ResultDto lint(Integer stockId) {
-        StockRealtimeLinePo stockRealtimeLineEntity = stockRealtimeService.line(stockId);
-        if (null == stockRealtimeLineEntity) {
-            return ResultDto.fail(ReturnCode.FAIL);
-        }
-        return ResultDto.success(stockRealtimeLineEntity);
+    public ResultDto line(Integer stockId) {
+        return ResultDto.success(stockRealtimeService.line(stockId));
     }
 
     @RequestMapping("/stock/realtime/rank")

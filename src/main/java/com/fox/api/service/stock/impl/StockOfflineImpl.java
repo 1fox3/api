@@ -1,25 +1,31 @@
 package com.fox.api.service.stock.impl;
 
-import com.fox.api.dao.stock.entity.*;
-import com.fox.api.entity.dto.stock.offline.StockDealDayDto;
+import com.fox.api.dao.stock.entity.StockDealMinuteEntity;
+import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
-import com.fox.api.entity.po.third.stock.*;
+import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
+import com.fox.api.entity.po.third.stock.StockRealtimeNodePo;
 import com.fox.api.service.stock.StockOfflineService;
 import com.fox.api.service.stock.StockRealtimeService;
-import com.fox.api.service.third.stock.nets.api.NetsDayLine;
-import com.fox.api.service.third.stock.sina.api.SinaDealRatio;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
+import com.fox.spider.stock.api.sina.SinaPriceDealNumRatioApi;
 import com.fox.spider.stock.constant.StockConst;
-import org.springframework.beans.BeanUtils;
+import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteDealInfoPo;
+import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteNodeDataPo;
+import com.fox.spider.stock.entity.po.sina.SinaPriceDealNumRatioPo;
+import com.fox.spider.stock.entity.vo.StockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 股票历史交易信息
+ *
  * @author lusongsong
  * @date 2020/3/5 18:13
  */
@@ -27,6 +33,11 @@ import java.util.*;
 public class StockOfflineImpl extends StockBaseImpl implements StockOfflineService {
     @Autowired
     StockRealtimeService stockRealtimeService;
+    /**
+     * 新浪股票价格成交占比接口
+     */
+    @Autowired
+    SinaPriceDealNumRatioApi sinaPriceDealNumRatioApi;
 
     @Override
     public StockDealDayLineDto line(Integer stockId, String startDate) {
@@ -40,19 +51,21 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
 
     /**
      * 获取价格成交比例
+     *
      * @param stockId
      * @param startDate
      * @param endDate
      * @return
      */
     @Override
-    public List<StockDealNumPo> dealRatio(Integer stockId, String startDate, String endDate) {
-        SinaDealRatio sinaDealRatio = new SinaDealRatio();
-        return sinaDealRatio.getDealRatio(this.getStockEntity(stockId), startDate, endDate);
+    public List<SinaPriceDealNumRatioPo> dealRatio(Integer stockId, String startDate, String endDate) {
+        StockEntity stockEntity = this.getStockEntity(stockId);
+        return sinaPriceDealNumRatioApi.priceDealNumRatio(new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket()), startDate, endDate);
     }
 
     /**
      * 股票单天交易数据
+     *
      * @param stockId
      * @return
      */
@@ -63,6 +76,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
 
     /**
      * 股票单天交易数据
+     *
      * @param stockId
      * @param fqType
      * @return
@@ -123,16 +137,16 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
         }
 
         if (getRealtime) {
-            StockRealtimeLinePo stockRealtimeLinePo = stockRealtimeService.line(stockId);
-            if (null != stockRealtimeLinePo && null != stockRealtimeLinePo.getLineNode()) {
-                List<StockRealtimeNodePo> lineNodeList = stockRealtimeLinePo.getLineNode();
-                for (StockRealtimeNodePo stockRealtimeNodePo : lineNodeList) {
+            NetsRealtimeMinuteDealInfoPo netsRealtimeMinuteDealInfoPo = stockRealtimeService.line(stockId);
+            if (null != netsRealtimeMinuteDealInfoPo && null != netsRealtimeMinuteDealInfoPo.getKlineData()) {
+                List<NetsRealtimeMinuteNodeDataPo> netsRealtimeMinuteNodeDataPoList = netsRealtimeMinuteDealInfoPo.getKlineData();
+                for (NetsRealtimeMinuteNodeDataPo netsRealtimeMinuteNodeDataPo : netsRealtimeMinuteNodeDataPoList) {
                     StockDealMinuteEntity stockDealMinuteEntity = new StockDealMinuteEntity();
                     stockDealMinuteEntity.setDt(lastDealDate);
-                    stockDealMinuteEntity.setTime(stockRealtimeNodePo.getTime());
-                    stockDealMinuteEntity.setPrice(stockRealtimeNodePo.getPrice());
-                    stockDealMinuteEntity.setAvgPrice(stockRealtimeNodePo.getAvgPrice());
-                    stockDealMinuteEntity.setDealNum(stockRealtimeNodePo.getDealNum());
+                    stockDealMinuteEntity.setTime(netsRealtimeMinuteNodeDataPo.getTime());
+                    stockDealMinuteEntity.setPrice(netsRealtimeMinuteNodeDataPo.getPrice());
+                    stockDealMinuteEntity.setAvgPrice(netsRealtimeMinuteNodeDataPo.getAvgPrice());
+                    stockDealMinuteEntity.setDealNum(netsRealtimeMinuteNodeDataPo.getDealNum());
                 }
             }
         }

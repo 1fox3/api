@@ -1,8 +1,9 @@
 package com.fox.api.service.stock;
 
 import com.fox.api.entity.dto.stock.realtime.StockRealtimeInfoDto;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
+import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteDealInfoPo;
+import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 
 import java.util.List;
 import java.util.Map;
@@ -15,9 +16,21 @@ import java.util.Map;
  */
 public interface StockRealtimeService {
 
-    StockRealtimePo info(Integer stockId);
+    /**
+     * 获取股票实时交易信息
+     *
+     * @param stockId
+     * @return
+     */
+    SinaRealtimeDealInfoPo info(Integer stockId);
 
-    StockRealtimeLinePo line(Integer stockId);
+    /**
+     * 分钟线图
+     *
+     * @param stockId
+     * @return
+     */
+    NetsRealtimeMinuteDealInfoPo line(Integer stockId);
 
     List<StockRealtimeInfoDto> topIndex();
 

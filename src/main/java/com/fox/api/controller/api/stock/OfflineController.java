@@ -39,15 +39,11 @@ public class OfflineController {
 
     @RequestMapping("/stock/offline/dealRatio")
     public ResultDto dealRatio(@Valid StockOfflineLineVo stockOfflineLineVo) {
-        List<StockDealNumPo> list = stockOfflineService.dealRatio(
+        return ResultDto.success(stockOfflineService.dealRatio(
                 stockOfflineLineVo.getStockId(),
                 stockOfflineLineVo.getStartDate(),
                 stockOfflineLineVo.getEndDate()
-        );
-        if (null == list) {
-            return ResultDto.fail(ReturnCode.FAIL);
-        }
-        return ResultDto.success(list);
+        ));
     }
 
     @RequestMapping("/stock/offline/day")

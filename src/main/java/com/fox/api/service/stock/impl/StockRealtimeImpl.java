@@ -2,15 +2,17 @@ package com.fox.api.service.stock.impl;
 
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.realtime.StockRealtimeInfoDto;
-import com.fox.api.entity.property.stock.StockCodeProperty;
-import com.fox.api.service.stock.StockRealtimeService;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
-import com.fox.api.service.third.stock.nets.api.NetsMinuteRealtime;
-import com.fox.api.service.third.stock.sina.api.SinaRealtime;
+import com.fox.api.entity.po.third.stock.StockRealtimePo;
+import com.fox.api.service.stock.StockRealtimeService;
+import com.fox.spider.stock.api.nets.NetsRealtimeMinuteDealInfoApi;
+import com.fox.spider.stock.api.sina.SinaRealtimeDealInfoApi;
 import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteDealInfoPo;
+import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import com.fox.spider.stock.entity.vo.StockVo;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -20,6 +22,16 @@ import java.util.Map;
 
 @Service
 public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeService {
+    /**
+     * 新浪实时交易数据接口
+     */
+    @Autowired
+    SinaRealtimeDealInfoApi sinaRealtimeDealInfoApi;
+    /**
+     * 网易分钟线图
+     */
+    @Autowired
+    NetsRealtimeMinuteDealInfoApi netsRealtimeMinuteDealInfoApi;
 
     /**
      * 获取实时信息
@@ -28,13 +40,23 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
      * @return
      */
     @Override
-    public StockRealtimePo info(Integer stockId) {
-        if (stockRedisUtil.hHasKey(redisRealtimeStockInfoHash, stockId.toString())) {
-            return (StockRealtimePo) stockRedisUtil.hGet(redisRealtimeStockInfoHash, stockId.toString());
+    public SinaRealtimeDealInfoPo info(Integer stockId) {
+        if (null == stockId) {
+            return null;
         }
-        SinaRealtime sinaRealtime = new SinaRealtime();
-        StockRealtimePo stockRealtimePo = sinaRealtime.getRealtimeData(stockMapper.getById(stockId));
-        return stockRealtimePo;
+        StockEntity stockEntity = getStockEntity(stockId);
+        if (null == stockEntity) {
+            return null;
+        }
+
+        String hashKey = redisRealtimeStockInfoHash + ":" + stockEntity.getStockMarket();
+        if (stockRedisUtil.hHasKey(hashKey, stockEntity.getStockCode())) {
+            return (SinaRealtimeDealInfoPo) stockRedisUtil.hGet(hashKey, stockEntity.getStockCode());
+        }
+
+        return sinaRealtimeDealInfoApi.realtimeDealInfo(
+                new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket())
+        );
     }
 
     /**
@@ -44,18 +66,23 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
      * @return
      */
     @Override
-    public StockRealtimeLinePo line(Integer stockId) {
+    public NetsRealtimeMinuteDealInfoPo line(Integer stockId) {
         String redisKey = redisRealtimeStockLineSingle + stockId;
-        StockRealtimeLinePo stockRealtimeLinePo = (StockRealtimeLinePo) stockRedisUtil.get(redisKey);
-        if (null != stockRealtimeLinePo) {
-            return stockRealtimeLinePo;
+        NetsRealtimeMinuteDealInfoPo netsRealtimeMinuteDealInfoPo = (NetsRealtimeMinuteDealInfoPo) stockRedisUtil.get(redisKey);
+        if (null != netsRealtimeMinuteDealInfoPo) {
+            return netsRealtimeMinuteDealInfoPo;
         }
-        NetsMinuteRealtime netsMinuteRealtime = new NetsMinuteRealtime();
-        stockRealtimeLinePo = netsMinuteRealtime.getRealtimeData(getNetsStockInfoMap(stockId));
-        if (null != stockRealtimeLinePo) {
-            stockRedisUtil.set(redisKey, stockId, Long.valueOf(5));
+        StockEntity stockEntity = getStockEntity(stockId);
+        if (null == stockEntity) {
+            return null;
         }
-        return stockRealtimeLinePo;
+        netsRealtimeMinuteDealInfoPo = netsRealtimeMinuteDealInfoApi.realtimeMinuteKLine(
+                new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket())
+        );
+        if (null != netsRealtimeMinuteDealInfoPo) {
+            stockRedisUtil.set(redisKey, netsRealtimeMinuteDealInfoPo, Long.valueOf(5));
+        }
+        return netsRealtimeMinuteDealInfoPo;
     }
 
     /**
@@ -74,13 +101,12 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
             );
             if (null != stockEntity && null != stockEntity.getId()) {
                 Integer stockId = stockEntity.getId();
-                StockRealtimePo stockRealtimePo = info(stockId);
+                SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = info(stockId);
                 StockRealtimeInfoDto stockRealtimeInfoDto = new StockRealtimeInfoDto();
-                BeanUtils.copyProperties(stockRealtimePo, stockRealtimeInfoDto);
+                BeanUtils.copyProperties(sinaRealtimeDealInfoPo, stockRealtimeInfoDto);
                 stockRealtimeInfoDto.setStockId(stockId);
                 list.add(stockRealtimeInfoDto);
             }
-
         }
         return list;
     }
