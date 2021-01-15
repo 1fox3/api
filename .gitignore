@@ -1,4 +1,6 @@
 target/
+### jar ###
+lib/spiderStock.jar
 
 ### IntelliJ IDEA ###
 .idea
