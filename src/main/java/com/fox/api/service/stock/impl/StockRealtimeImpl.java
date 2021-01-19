@@ -2,13 +2,11 @@ package com.fox.api.service.stock.impl;
 
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.realtime.StockRealtimeInfoDto;
-import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
-import com.fox.api.entity.po.third.stock.StockRealtimePo;
 import com.fox.api.service.stock.StockRealtimeService;
-import com.fox.spider.stock.api.nets.NetsRealtimeMinuteDealInfoApi;
+import com.fox.spider.stock.api.nets.NetsRealtimeMinuteKLineApi;
 import com.fox.spider.stock.api.sina.SinaRealtimeDealInfoApi;
 import com.fox.spider.stock.constant.StockConst;
-import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteDealInfoPo;
+import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteKLinePo;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import com.fox.spider.stock.entity.vo.StockVo;
 import org.springframework.beans.BeanUtils;
@@ -31,7 +29,7 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
      * 网易分钟线图
      */
     @Autowired
-    NetsRealtimeMinuteDealInfoApi netsRealtimeMinuteDealInfoApi;
+    NetsRealtimeMinuteKLineApi netsRealtimeMinuteKLineApi;
 
     /**
      * 获取实时信息
@@ -66,9 +64,9 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
      * @return
      */
     @Override
-    public NetsRealtimeMinuteDealInfoPo line(Integer stockId) {
+    public NetsRealtimeMinuteKLinePo line(Integer stockId) {
         String redisKey = redisRealtimeStockLineSingle + stockId;
-        NetsRealtimeMinuteDealInfoPo netsRealtimeMinuteDealInfoPo = (NetsRealtimeMinuteDealInfoPo) stockRedisUtil.get(redisKey);
+        NetsRealtimeMinuteKLinePo netsRealtimeMinuteDealInfoPo = (NetsRealtimeMinuteKLinePo) stockRedisUtil.get(redisKey);
         if (null != netsRealtimeMinuteDealInfoPo) {
             return netsRealtimeMinuteDealInfoPo;
         }
@@ -76,7 +74,7 @@ public class StockRealtimeImpl extends StockBaseImpl implements StockRealtimeSer
         if (null == stockEntity) {
             return null;
         }
-        netsRealtimeMinuteDealInfoPo = netsRealtimeMinuteDealInfoApi.realtimeMinuteKLine(
+        netsRealtimeMinuteDealInfoPo = netsRealtimeMinuteKLineApi.realtimeMinuteKLine(
                 new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket())
         );
         if (null != netsRealtimeMinuteDealInfoPo) {

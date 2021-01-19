@@ -41,8 +41,8 @@ public class RealtimeController {
             return ResultDto.fail(ReturnCode.FAIL);
         }
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("sell", stockRealtimeEntity.getSellPriceList());
-        map.put("buy", stockRealtimeEntity.getBuyPriceList());
+        map.put("sell", stockRealtimeEntity.getSellPriceMap());
+        map.put("buy", stockRealtimeEntity.getBuyPriceMap());
         return ResultDto.success(map);
     }
 

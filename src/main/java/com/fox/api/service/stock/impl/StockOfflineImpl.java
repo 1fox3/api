@@ -3,15 +3,13 @@ package com.fox.api.service.stock.impl;
 import com.fox.api.dao.stock.entity.StockDealMinuteEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.entity.dto.stock.offline.StockDealDayLineDto;
-import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
-import com.fox.api.entity.po.third.stock.StockRealtimeNodePo;
 import com.fox.api.service.stock.StockOfflineService;
 import com.fox.api.service.stock.StockRealtimeService;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
 import com.fox.spider.stock.api.sina.SinaPriceDealNumRatioApi;
 import com.fox.spider.stock.constant.StockConst;
-import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteDealInfoPo;
+import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteKLinePo;
 import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteNodeDataPo;
 import com.fox.spider.stock.entity.po.sina.SinaPriceDealNumRatioPo;
 import com.fox.spider.stock.entity.vo.StockVo;
@@ -137,7 +135,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
         }
 
         if (getRealtime) {
-            NetsRealtimeMinuteDealInfoPo netsRealtimeMinuteDealInfoPo = stockRealtimeService.line(stockId);
+            NetsRealtimeMinuteKLinePo netsRealtimeMinuteDealInfoPo = stockRealtimeService.line(stockId);
             if (null != netsRealtimeMinuteDealInfoPo && null != netsRealtimeMinuteDealInfoPo.getKlineData()) {
                 List<NetsRealtimeMinuteNodeDataPo> netsRealtimeMinuteNodeDataPoList = netsRealtimeMinuteDealInfoPo.getKlineData();
                 for (NetsRealtimeMinuteNodeDataPo netsRealtimeMinuteNodeDataPo : netsRealtimeMinuteNodeDataPoList) {

@@ -226,7 +226,7 @@ public class StockUpDownSchedule extends StockBaseSchedule implements StockSched
             Integer type = StockConst.UPTICK_TYPE_FLAT;
             if (uptickPrice.equals(limitRatePrice)) {
                 type = 0 < todayPrice.compareTo(yesterdayPrice) ?
-                        StockConst.UPTICK_TYPE_TOP_UP : StockConst.UPTICK_TYPE_TOP_DOWN;
+                        StockConst.UPTICK_TYPE_LIMIT_UP : StockConst.UPTICK_TYPE_LIMIT_DOWN;
             }
             //不涨，涨跌发生转变则停止
             if (type.equals(StockConst.UPTICK_TYPE_FLAT)

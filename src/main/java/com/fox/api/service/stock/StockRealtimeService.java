@@ -1,8 +1,7 @@
 package com.fox.api.service.stock;
 
 import com.fox.api.entity.dto.stock.realtime.StockRealtimeInfoDto;
-import com.fox.api.entity.po.third.stock.StockRealtimeLinePo;
-import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteDealInfoPo;
+import com.fox.spider.stock.entity.po.nets.NetsRealtimeMinuteKLinePo;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public interface StockRealtimeService {
      * @param stockId
      * @return
      */
-    NetsRealtimeMinuteDealInfoPo line(Integer stockId);
+    NetsRealtimeMinuteKLinePo line(Integer stockId);
 
     List<StockRealtimeInfoDto> topIndex();
 
