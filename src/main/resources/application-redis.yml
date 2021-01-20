@@ -5,7 +5,6 @@ redis:
 
   stock:
     stock:
-      hash: stockRedisHash #股票在缓存中使用的队列
       list: stockRedisList #股票在缓存中使用的队列
       code-list: stockRedisCodeList #股票编码在缓存中使用的队列
     realtime:

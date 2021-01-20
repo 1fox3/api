@@ -83,6 +83,9 @@ public class StockApiServiceBaseImpl {
      * @return
      */
     public <T extends StockSpiderApiBaseInterface> T getBean(Class<T> clazz) {
+        if (chooseMethod == CHOOSE_METHOD_PRIMARY) {
+            return ApplicationContextUtil.getBean(clazz);
+        }
         if (null == beanMap) {
             getSpiderBean(clazz);
         }
@@ -96,14 +99,11 @@ public class StockApiServiceBaseImpl {
             case CHOOSE_METHOD_RANDOM:
                 getPosByRandom();
                 break;
-            case CHOOSE_METHOD_POLL:
-                getPosByPool();
-                break;
             case CHOOSE_METHOD_WEIGHT:
                 getPosByWeight();
                 break;
             default:
-                getPosByPrimary();
+                getPosByPool();
         }
         currentPos %= beanMap.values().size();
         searchVerifyBean();

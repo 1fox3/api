@@ -6,6 +6,7 @@ import com.fox.api.dao.stock.entity.StockDealDayEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockInfoEntity;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
+import com.fox.api.schedule.stock.handler.StockScheduleHandler;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.FileUtil;
 import com.fox.spider.stock.api.nets.NetsDayDealInfoApi;

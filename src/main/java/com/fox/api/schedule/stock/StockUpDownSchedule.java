@@ -8,6 +8,7 @@ import com.fox.api.dao.stock.entity.StockUpDownEntity;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
 import com.fox.api.dao.stock.mapper.StockLimitUpDownMapper;
 import com.fox.api.dao.stock.mapper.StockUpDownMapper;
+import com.fox.api.schedule.stock.handler.StockScheduleHandler;
 import com.fox.api.util.DateUtil;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.entity.vo.StockVo;

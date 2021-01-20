@@ -192,10 +192,11 @@ public class StockScanSchedule extends StockBaseSchedule {
         try {
             while (true) {
                 stockVoList.clear();
-                List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
+                List<StockEntity> stockEntityList = this.stockMapper.getListByType(
                         StockConst.ST_STOCK,
                         stockId,
                         stockMarket,
+                        null,
                         SCAN_ONCE_LIMIT.toString()
                 );
                 if (null == stockEntityList || stockEntityList.isEmpty()) {

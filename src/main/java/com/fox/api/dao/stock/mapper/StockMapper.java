@@ -50,20 +50,11 @@ public interface StockMapper {
      * @param stockType
      * @param id
      * @param stockMarket
+     * @param stockStatus
      * @param limit
      * @return
      */
-    List<StockEntity> getListByType(Integer stockType, Integer id, Integer stockMarket, String limit);
-
-    /**
-     * 获取全部列表
-     * @param stockType
-     * @param id
-     * @param stockMarket
-     * @param limit
-     * @return
-     */
-    List<StockEntity> getTotalByType(Integer stockType, Integer id, Integer stockMarket, String limit);
+    List<StockEntity> getListByType(Integer stockType, Integer id, Integer stockMarket, Integer stockStatus, String limit);
 
     /**
      * 优化表

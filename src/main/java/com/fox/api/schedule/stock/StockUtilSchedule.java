@@ -1,14 +1,10 @@
 package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
-import com.fox.api.dao.stock.entity.StockDealDateEntity;
-import com.fox.api.dao.stock.mapper.StockDealDateMapper;
-import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
 import com.fox.spider.stock.api.hk.HKStockInfoApi;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.constant.StockMarketStatusConst;
-import com.fox.spider.stock.service.StockToolService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

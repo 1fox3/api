@@ -6,6 +6,7 @@ import com.fox.api.dao.stock.entity.StockDealWeekEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockDealDayMapper;
 import com.fox.api.dao.stock.mapper.StockDealWeekMapper;
+import com.fox.api.schedule.stock.handler.StockScheduleHandler;
 import com.fox.api.util.DateUtil;
 import com.fox.spider.stock.constant.StockConst;
 import org.slf4j.Logger;

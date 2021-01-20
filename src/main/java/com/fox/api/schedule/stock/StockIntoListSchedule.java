@@ -2,13 +2,17 @@ package com.fox.api.schedule.stock;
 
 import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
+import com.fox.api.schedule.stock.handler.StockScheduleBatchHandler;
 import com.fox.api.util.DateUtil;
 import com.fox.spider.stock.constant.StockConst;
+import com.fox.spider.stock.entity.vo.StockVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 将需要频繁处理的股票信息放入缓存列表中，方便以后使用，不用在查询数据库
@@ -17,15 +21,19 @@ import java.util.*;
  * @date 2020/3/27 13:57
  */
 @Component
-public class StockIntoListSchedule extends StockBaseSchedule {
+public class StockIntoListSchedule extends StockBaseSchedule implements StockScheduleBatchHandler {
     /**
      * 日志
      */
     private Logger logger = LoggerFactory.getLogger(getClass());
     /**
-     * 缓存key修改前缀
+     * 股票代码缓存key
      */
-    private String cacheNamePre = "pre";
+    private String stockCodeListCacheKey = "";
+    /**
+     * 股票对象缓存key
+     */
+    private String stockVoListCacheKey = "";
 
     /**
      * A股缓存数据刷新
@@ -46,7 +54,7 @@ public class StockIntoListSchedule extends StockBaseSchedule {
     @LogShowTimeAnt
     private void clearStockCacheData(Integer stockMarket) {
         try {
-            if (isDealDate(StockConst.SM_A, DateUtil.getCurrentDate())) {
+            if (isDealDate(stockMarket, DateUtil.getCurrentDate())) {
                 this.stockRedisUtil.delete(this.redisRealtimeStockInfoHash + ":" + stockMarket);
                 this.stockRedisUtil.delete(this.redisRealtimeRankPriceZSet + ":" + stockMarket);
                 this.stockRedisUtil.delete(this.redisRealtimeRankUptickRateZSet + ":" + stockMarket);
@@ -73,34 +81,30 @@ public class StockIntoListSchedule extends StockBaseSchedule {
         if (StockConst.SM_A == stockMarket) {
             stockMarketList = StockConst.SM_A_LIST;
         }
-        List<StockEntity> stockEntityList;
-        Integer startId = 0;
-        Integer limit = 300;
-        Map<String, StockEntity> stockEntityMap = new LinkedHashMap<>();
-        List<String> codeList = new ArrayList<>(limit);
-        String idCacheKey = cacheNamePre + redisStockCodeList + ":" + stockMarket;
-        String listCacheKey = cacheNamePre + redisStockList + ":" + stockMarket;
-        String hashCacheKey = cacheNamePre + redisStockHash + ":" + stockMarket;
+        stockCodeListCacheKey = cacheNamePre + redisStockCodeList + ":" + stockMarket;
+        stockVoListCacheKey = cacheNamePre + redisStockList + ":" + stockMarket;
         for (Integer sm : stockMarketList) {
-            while (true) {
-                stockEntityList = stockMapper.getListByType(this.stockType, startId, sm, limit.toString());
-                if (null == stockEntityList || stockEntityList.isEmpty()) {
-                    break;
-                }
-                startId = stockEntityList.get(stockEntityList.size() - 1).getId();
-                this.stockRedisUtil.lPushAll(listCacheKey, stockEntityList);
-                stockEntityMap.clear();
-                codeList.clear();
-                for (StockEntity stockEntity : stockEntityList) {
-                    stockEntityMap.put(String.valueOf(stockEntity.getId()), stockEntity);
-                    codeList.add(stockEntity.getStockCode());
-                }
-                this.stockRedisUtil.lPushAll(idCacheKey, codeList);
-                this.stockRedisUtil.hPutAll(hashCacheKey, stockEntityMap);
-            }
+            stockMarketBatchScan(sm, this);
         }
-        this.stockRedisUtil.rename(idCacheKey, idCacheKey.replace(cacheNamePre, ""));
-        this.stockRedisUtil.rename(listCacheKey, listCacheKey.replace(cacheNamePre, ""));
-        this.stockRedisUtil.rename(hashCacheKey, hashCacheKey.replace(cacheNamePre, ""));
+        this.stockRedisUtil.rename(stockCodeListCacheKey, stockCodeListCacheKey.replace(cacheNamePre, ""));
+        this.stockRedisUtil.rename(stockVoListCacheKey, stockVoListCacheKey.replace(cacheNamePre, ""));
+    }
+
+    /**
+     * 计划任务批量处理股票
+     *
+     * @param stockEntityList
+     */
+    @Override
+    public void batchHandle(List<StockEntity> stockEntityList) {
+        List<StockVo> stockVoList = StockBaseSchedule.stockListConvert(stockEntityList);
+        if (null != stockVoList && !stockVoList.isEmpty()) {
+            this.stockRedisUtil.lPushAll(stockVoListCacheKey, stockVoList);
+            List<String> stockCodeList = new ArrayList<>(stockVoList.size());
+            for (StockVo stockVo : stockVoList) {
+                stockCodeList.add(stockVo.getStockCode());
+            }
+            this.stockRedisUtil.lPushAll(stockCodeListCacheKey, stockCodeList);
+        }
     }
 }

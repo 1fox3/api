@@ -3,6 +3,10 @@ package com.fox.api.schedule.stock;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
 import com.fox.api.dao.stock.mapper.StockMapper;
+import com.fox.api.schedule.stock.handler.StockScheduleBatchHandler;
+import com.fox.api.schedule.stock.handler.StockScheduleCacheBatchCodeHandler;
+import com.fox.api.schedule.stock.handler.StockScheduleCacheBatchHandler;
+import com.fox.api.schedule.stock.handler.StockScheduleHandler;
 import com.fox.api.service.admin.DateTypeService;
 import com.fox.api.util.DateUtil;
 import com.fox.api.util.StockUtil;
@@ -31,19 +35,18 @@ public class StockBaseSchedule {
      * 日志
      */
     private Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * 缓存key修改前缀
+     */
+    protected String cacheNamePre = "pre";
     @Autowired
     protected StockMapper stockMapper;
 
     @Autowired
     protected StockInfoMapper stockInfoMapper;
 
-    protected int stockType = 2;
-
     @Value("${redis.stock.stock.list}")
     protected String redisStockList;
-
-    @Value("${redis.stock.stock.hash}")
-    protected String redisStockHash;
 
     @Value("${redis.stock.stock.code-list}")
     protected String redisStockCodeList;
@@ -135,15 +138,6 @@ public class StockBaseSchedule {
     }
 
     /**
-     * 遍历A股
-     *
-     * @param stockScheduleHandler
-     */
-    public void aStockMarketScan(StockScheduleHandler stockScheduleHandler) {
-        stockMarketListScan(StockConst.SM_A_LIST, stockScheduleHandler);
-    }
-
-    /**
      * 遍历集市列表处理
      *
      * @param stockMarketList
@@ -166,10 +160,11 @@ public class StockBaseSchedule {
         Integer onceLimit = 300;
         try {
             while (true) {
-                List<StockEntity> stockEntityList = this.stockMapper.getTotalByType(
-                        2,
+                List<StockEntity> stockEntityList = this.stockMapper.getListByType(
+                        StockConst.ST_STOCK,
                         stockId,
                         stockMarket,
+                        null,
                         onceLimit.toString()
                 );
                 if (null == stockEntityList || stockEntityList.isEmpty()) {
@@ -200,23 +195,88 @@ public class StockBaseSchedule {
     }
 
     /**
-     * 遍历A股TOP指数
+     * 批量处理股票
      *
-     * @param stockScheduleHandler
+     * @param stockMarket
+     * @param stockScheduleBatchHandler
      */
-    public void aStockMarketTopIndexScan(StockScheduleHandler stockScheduleHandler) {
-        stockMarketListTopIndexScan(StockConst.SM_A_LIST, stockScheduleHandler);
+    public void stockMarketBatchScan(Integer stockMarket, StockScheduleBatchHandler stockScheduleBatchHandler) {
+        Integer startId = 0;
+        Integer onceLimit = 300;
+        Integer stockStatus = 0;
+        try {
+            while (true) {
+                List<StockEntity> stockEntityList = this.stockMapper.getListByType(
+                        StockConst.ST_STOCK,
+                        startId,
+                        stockMarket,
+                        stockStatus,
+                        onceLimit.toString()
+                );
+                if (null == stockEntityList || stockEntityList.isEmpty()) {
+                    break;
+                }
+                startId = stockEntityList.get(stockEntityList.size() - 1).getId();
+                stockScheduleBatchHandler.batchHandle(stockEntityList);
+                if (stockEntityList.size() < onceLimit) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            logger.error(String.valueOf(stockMarket), e);
+        }
     }
 
     /**
-     * 遍历集市TOP指数处理
+     * 缓存中的信息批量过滤
      *
-     * @param stockMarketList
-     * @param stockScheduleHandler
+     * @param stockMarket
+     * @param stockScheduleCacheBatchHandler
      */
-    public void stockMarketListTopIndexScan(List<Integer> stockMarketList, StockScheduleHandler stockScheduleHandler) {
-        for (Integer stockMarket : stockMarketList) {
-            stockMarketTopIndexScan(stockMarket, stockScheduleHandler);
+    public void stockMarketCacheBatchScan(Integer stockMarket, StockScheduleCacheBatchHandler stockScheduleCacheBatchHandler) {
+        try {
+            String listCacheKey = redisStockList + ":" + stockMarket;
+            Long stockListSize = stockRedisUtil.lSize(listCacheKey);
+            Integer onceLimit = 200;
+            if (stockListSize > 0) {
+                for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit) {
+                    List<StockVo> stockVoList = (List<StockVo>) (List) stockRedisUtil.lRange(listCacheKey, i, i + onceLimit - 1);
+                    if (null == stockVoList || stockVoList.isEmpty()) {
+                        break;
+                    }
+                    stockScheduleCacheBatchHandler.cacheBatchHandle(stockVoList);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(String.valueOf(stockMarket), e);
+        }
+    }
+
+    /**
+     * 缓存中的信息批量过滤
+     *
+     * @param stockMarket
+     * @param stockScheduleCacheBatchCodeHandler
+     */
+    public void stockMarketCacheBatchCodeScan(Integer stockMarket,
+                                              StockScheduleCacheBatchCodeHandler stockScheduleCacheBatchCodeHandler) {
+        try {
+            String stockCodeListCacheKey = redisStockCodeList + ":" + stockMarket;
+            Long stockListSize = stockRedisUtil.lSize(stockCodeListCacheKey);
+            Integer onceLimit = 200;
+            if (stockListSize > 0) {
+                for (Long i = Long.valueOf(0); i < stockListSize; i += onceLimit) {
+                    List<String> stockCodeList = (List<String>) (List) stockRedisUtil.lRange(
+                            stockCodeListCacheKey, i, i + onceLimit - 1
+                    );
+                    if (null == stockCodeList || stockCodeList.isEmpty()) {
+                        break;
+                    }
+                    stockScheduleCacheBatchCodeHandler.cacheBatchCodeHandle(stockCodeList);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(String.valueOf(stockMarket), e);
         }
     }
 
@@ -253,7 +313,7 @@ public class StockBaseSchedule {
      */
     public List<String> doDateByStatisticsType(String statisticsType, Map<String, String> map) throws ParseException {
         List<String> listWeekOrMonth = new ArrayList<String>();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat dateFormat = new SimpleDateFormat(DateUtil.DATE_FORMAT_1);
         String startDate = map.get("startDate");
         String endDate = map.get("endDate");
         Date sDate = dateFormat.parse(startDate);
@@ -330,5 +390,24 @@ public class StockBaseSchedule {
         }
 
         return false;
+    }
+
+    /**
+     * 列表转换
+     *
+     * @param stockEntityList
+     * @return
+     */
+    public static List<StockVo> stockListConvert(List<StockEntity> stockEntityList) {
+        if (null != stockEntityList) {
+            List<StockVo> stockVoList = new ArrayList<>(stockEntityList.size());
+            for (StockEntity stockEntity : stockEntityList) {
+                if (null != stockEntity && stockEntity instanceof StockEntity) {
+                    stockVoList.add(new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket()));
+                }
+            }
+            return stockVoList;
+        }
+        return null;
     }
 }

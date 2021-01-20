@@ -1,7 +1,8 @@
 package com.fox.api.schedule.stock;
 
+import com.fox.api.entity.po.stock.api.StockRealtimeDealInfoPo;
+import com.fox.api.schedule.stock.handler.StockScheduleCacheBatchCodeHandler;
 import com.fox.spider.stock.constant.StockConst;
-import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import com.fox.spider.stock.entity.vo.StockVo;
 import com.fox.spider.stock.service.StockToolService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,149 +20,91 @@ import java.util.*;
  * @date 2020/3/30 18:01
  */
 @Component
-public class StockRealtimeRankSchedule extends StockBaseSchedule {
+public class StockRealtimeRankSchedule extends StockBaseSchedule implements StockScheduleCacheBatchCodeHandler {
+    /**
+     * 股票最新交易日交易信息缓存key
+     */
+    private String stockRealtimeDealInfoCacheHashKey = "";
+    /**
+     * 股票最新交易日价格缓存key
+     */
+    private String stockRealtimeRankPriceCacheZSetKey = "";
+    /**
+     * 股票最新交易日增幅缓存key
+     */
+    private String stockRealtimeRankUptickRateCacheZSetKey = "";
+    /**
+     * 股票最新交易日波动缓存key
+     */
+    private String stockRealtimeRankSurgeRateCacheZSetKey = "";
+    /**
+     * 股票最新交易日成交量缓存key
+     */
+    private String stockRealtimeRankDealNumCacheZSetKey = "";
+    /**
+     * 股票最新交易日成交额缓存key
+     */
+    private String stockRealtimeRankDealMoneyCacheZSetKey = "";
+    /**
+     * 股票最新交易日涨停缓存key
+     */
+    private String stockRealtimeUpLimitCacheListKey = "";
+    /**
+     * 股票最新交易日跌停缓存key
+     */
+    private String stockRealtimeDownLimitCacheListKey = "";
+    /**
+     * 股票最新交易日涨停股票代码列表
+     */
+    private List<String> upLimitStockCodeList = new ArrayList<>();
+    /**
+     * 股票最新交易日跌停股票代码列表
+     */
+    private List<String> downLimitStockCodeList = new ArrayList<>();
     /**
      * 股票工具类
      */
     @Autowired
     StockToolService stockToolService;
+
     /**
      * 排行统计
      */
     public void syncStockRealtimeRank() {
-        Long onceLimit = (long) 200;
-        List hashKeyList = new ArrayList();
         String schedule = "StockRealtimeRankSchedule:syncStockRealtimeRank";
-        String cacheNamePre = "pre";
         for (Integer stockMarket : StockConst.SM_CODE_ALL) {
             if (!realtimeDealScheduleCanRun(stockMarket, schedule)) {
                 continue;
             }
-            String codeListCacheKey = redisStockCodeList + ":" + stockMarket;
-            String infoHashCacheKey = redisRealtimeStockInfoHash + ":" + stockMarket;
-            String priceZSetKey = redisRealtimeRankPriceZSet + ":" + stockMarket;
-            String uptickRateZSetKey = redisRealtimeRankUptickRateZSet + ":" + stockMarket;
-            String surgeRateZSetKey = redisRealtimeRankSurgeRateZSet + ":" + stockMarket;
-            String dealNumZSetKey = redisRealtimeRankDealNumZSet + ":" + stockMarket;
-            String dealMoneyZSetKey = redisRealtimeRankDealMoneyZSet + ":" + stockMarket;
-            String upLimitListKey = stockRealtimeStockRankUpLimitList + ":" + stockMarket;
-            String downLimitListKey = stockRealtimeStockRankDownLimitList + ":" + stockMarket;
-            Long codeListSize = stockRedisUtil.lSize(codeListCacheKey);
-            List<String> upLimitStockCodeList = new ArrayList<>();
-            List<String> downLimitStockCodeList = new ArrayList<>();
-            BigDecimal upRateLimit = null;
-            for (Long i = Long.valueOf(0); i < codeListSize; i += onceLimit) {
-                List<Object> stockCodeList = stockRedisUtil.lRange(codeListCacheKey, i, i + onceLimit - (long) 1);
-                if (null == stockCodeList || 0 >= stockCodeList.size()) {
-                    continue;
-                }
-                hashKeyList.clear();
-                for (Object stockCode : stockCodeList) {
-                    hashKeyList.add(stockCode.toString());
-                }
-                List<Object> stockInfoList = stockRedisUtil.hMultiGet(
-                        infoHashCacheKey,
-                        hashKeyList
-                );
-                Set<DefaultTypedTuple> priceSet = new HashSet<>();
-                Set<DefaultTypedTuple> uptickRateSet = new HashSet<>();
-                Set<DefaultTypedTuple> surgeRateSet = new HashSet<>();
-                Set<DefaultTypedTuple> dealNumSet = new HashSet<>();
-                Set<DefaultTypedTuple> dealMoneySet = new HashSet<>();
-                for (int j = 0; j < stockCodeList.size(); j++) {
-                    String stockCode = (String) stockCodeList.get(j);
-                    SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = (SinaRealtimeDealInfoPo) stockInfoList.get(j);
-                    if (null == stockCode || null == sinaRealtimeDealInfoPo) {
-                        continue;
-                    }
+            stockRealtimeDealInfoCacheHashKey = redisRealtimeStockInfoHash + ":" + stockMarket;
+            stockRealtimeRankPriceCacheZSetKey = redisRealtimeRankPriceZSet + ":" + stockMarket;
+            stockRealtimeRankUptickRateCacheZSetKey = redisRealtimeRankUptickRateZSet + ":" + stockMarket;
+            stockRealtimeRankSurgeRateCacheZSetKey = redisRealtimeRankSurgeRateZSet + ":" + stockMarket;
+            stockRealtimeRankDealNumCacheZSetKey = redisRealtimeRankDealNumZSet + ":" + stockMarket;
+            stockRealtimeRankDealMoneyCacheZSetKey = redisRealtimeRankDealMoneyZSet + ":" + stockMarket;
+            stockRealtimeUpLimitCacheListKey = stockRealtimeStockRankUpLimitList + ":" + stockMarket;
+            stockRealtimeDownLimitCacheListKey = stockRealtimeStockRankDownLimitList + ":" + stockMarket;
 
-                    //今日开盘价
-                    BigDecimal openPrice = sinaRealtimeDealInfoPo.getOpenPrice();
-                    //上个交易日收盘价
-                    BigDecimal preClosePrice = sinaRealtimeDealInfoPo.getPreClosePrice();
-                    if (0 == openPrice.compareTo(BigDecimal.ZERO)
-                            || 0 == preClosePrice.compareTo(BigDecimal.ZERO)) {
-                        continue;
-                    }
-                    //当前价
-                    BigDecimal currentPrice = sinaRealtimeDealInfoPo.getCurrentPrice();
-                    //增幅
-                    BigDecimal uptickRate = sinaRealtimeDealInfoPo.getUptickRate();
-                    //波动
-                    BigDecimal surgeRate = sinaRealtimeDealInfoPo.getSurgeRate();
-                    //成交量
-                    Long dealNum = sinaRealtimeDealInfoPo.getDealNum();
-                    //成交金额
-                    BigDecimal dealMoney = sinaRealtimeDealInfoPo.getDealMoney();
+            stockMarketCacheBatchCodeScan(stockMarket, this);
 
-                    upRateLimit = stockToolService.limitRate(
-                            new StockVo(sinaRealtimeDealInfoPo.getStockCode(), stockMarket),
-                            sinaRealtimeDealInfoPo.getStockName()
-                    );
-
-                    //判断是否涨跌停
-                    if (null != upRateLimit
-                            && 0 >= preClosePrice.multiply(upRateLimit)
-                            .setScale(2, RoundingMode.HALF_UP)
-                            .compareTo(preClosePrice.subtract(currentPrice).abs())
-                    ) {
-                        if (0 < preClosePrice.compareTo(currentPrice)) {
-                            downLimitStockCodeList.add(sinaRealtimeDealInfoPo.getStockCode());
-                        } else {
-                            upLimitStockCodeList.add(sinaRealtimeDealInfoPo.getStockCode());
-                        }
-                    }
-
-                    if (null != currentPrice) {
-                        priceSet.add(new DefaultTypedTuple(stockCode, currentPrice.doubleValue()));
-                    }
-                    if (null != uptickRate) {
-                        uptickRateSet.add(new DefaultTypedTuple(stockCode, uptickRate.doubleValue()));
-                    }
-                    if (null != surgeRate) {
-                        surgeRateSet.add(new DefaultTypedTuple(stockCode, surgeRate.doubleValue()));
-                    }
-                    if (null != dealNum) {
-                        dealNumSet.add(new DefaultTypedTuple(stockCode, dealNum.doubleValue()));
-                    }
-                    if (null != dealMoney) {
-                        dealMoneySet.add(new DefaultTypedTuple(stockCode, dealMoney.doubleValue()));
-                    }
-                }
-                if (0 < priceSet.size()) {
-                    stockRedisUtil.zAdd(priceZSetKey, priceSet);
-                }
-                if (0 < uptickRateSet.size()) {
-                    stockRedisUtil.zAdd(uptickRateZSetKey, uptickRateSet);
-                }
-                if (0 < surgeRateSet.size()) {
-                    stockRedisUtil.zAdd(surgeRateZSetKey, surgeRateSet);
-                }
-                if (0 < dealNumSet.size()) {
-                    stockRedisUtil.zAdd(dealNumZSetKey, dealNumSet);
-                }
-                if (0 < dealMoneySet.size()) {
-                    stockRedisUtil.zAdd(dealMoneyZSetKey, dealMoneySet);
-                }
-            }
             if (null != upLimitStockCodeList && !upLimitStockCodeList.isEmpty()) {
                 stockRedisUtil.lPushAll(
-                        cacheNamePre + upLimitListKey,
+                        cacheNamePre + stockRealtimeUpLimitCacheListKey,
                         upLimitStockCodeList
                 );
                 stockRedisUtil.rename(
-                        cacheNamePre + upLimitListKey,
-                        upLimitListKey
+                        cacheNamePre + stockRealtimeUpLimitCacheListKey,
+                        stockRealtimeUpLimitCacheListKey
                 );
             }
             if (null != downLimitStockCodeList && !downLimitStockCodeList.isEmpty()) {
                 stockRedisUtil.lPushAll(
-                        cacheNamePre + downLimitListKey,
+                        cacheNamePre + stockRealtimeDownLimitCacheListKey,
                         downLimitStockCodeList
                 );
                 stockRedisUtil.rename(
-                        cacheNamePre + downLimitListKey,
-                        downLimitListKey
+                        cacheNamePre + stockRealtimeDownLimitCacheListKey,
+                        stockRealtimeDownLimitCacheListKey
                 );
             }
         }
@@ -201,6 +144,109 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule {
             Long downLimit = stockRedisUtil.lSize(stockRealtimeStockRankDownLimitList + ":" + stockMarket);
             uptickRateStatisticsMap.put("downLimit", null == downLimit ? 0 : downLimit.intValue());
             stockRedisUtil.set(stockRealtimeStockUptickRateStatistics + ":" + stockMarket, uptickRateStatisticsMap);
+        }
+    }
+
+    /**
+     * 计划任务批量处理股票
+     *
+     * @param stockCodeList
+     */
+    @Override
+    public void cacheBatchCodeHandle(List<String> stockCodeList) {
+        if (null == stockCodeList || stockCodeList.isEmpty()) {
+            return;
+        }
+
+        List<StockRealtimeDealInfoPo> stockRealtimeDealInfoPoList = (List<StockRealtimeDealInfoPo>) (List) stockRedisUtil.hMultiGet(
+                stockRealtimeDealInfoCacheHashKey,
+                stockCodeList
+        );
+        Set<DefaultTypedTuple> priceSet = new HashSet<>();
+        Set<DefaultTypedTuple> uptickRateSet = new HashSet<>();
+        Set<DefaultTypedTuple> surgeRateSet = new HashSet<>();
+        Set<DefaultTypedTuple> dealNumSet = new HashSet<>();
+        Set<DefaultTypedTuple> dealMoneySet = new HashSet<>();
+        BigDecimal upRateLimit = null;
+        for (StockRealtimeDealInfoPo stockRealtimeDealInfoPo : stockRealtimeDealInfoPoList) {
+            if (null == stockRealtimeDealInfoPo) {
+                continue;
+            }
+            String stockCode = stockRealtimeDealInfoPo.getStockCode();
+
+            //今日开盘价
+            BigDecimal openPrice = stockRealtimeDealInfoPo.getOpenPrice();
+            //上个交易日收盘价
+            BigDecimal preClosePrice = stockRealtimeDealInfoPo.getPreClosePrice();
+            if (null == openPrice || 0 == openPrice.compareTo(BigDecimal.ZERO)
+                    || null == preClosePrice || 0 == preClosePrice.compareTo(BigDecimal.ZERO)) {
+                continue;
+            }
+            //当前价
+            BigDecimal currentPrice = stockRealtimeDealInfoPo.getCurrentPrice();
+            if (null != currentPrice) {
+                priceSet.add(new DefaultTypedTuple(stockCode, currentPrice.doubleValue()));
+                //增幅
+                BigDecimal uptickRate = currentPrice.subtract(preClosePrice).multiply(new BigDecimal(100)).divide(preClosePrice, 2, RoundingMode.HALF_UP);
+                if (null != uptickRate) {
+                    uptickRateSet.add(new DefaultTypedTuple(stockCode, uptickRate.doubleValue()));
+                }
+            }
+            //波动
+            if (null != stockRealtimeDealInfoPo.getHighestPrice()
+                    && 0 != stockRealtimeDealInfoPo.getHighestPrice().compareTo(BigDecimal.ZERO)
+                    && null != stockRealtimeDealInfoPo.getLowestPrice()
+                    && 0 != stockRealtimeDealInfoPo.getLowestPrice().compareTo(BigDecimal.ZERO)) {
+                BigDecimal surgeRate = stockRealtimeDealInfoPo.getHighestPrice()
+                        .subtract(stockRealtimeDealInfoPo.getLowestPrice())
+                        .multiply(new BigDecimal(100))
+                        .divide(preClosePrice, 2, RoundingMode.HALF_UP);
+                if (null != surgeRate) {
+                    surgeRateSet.add(new DefaultTypedTuple(stockCode, surgeRate.doubleValue()));
+                }
+            }
+            //成交量
+            Long dealNum = stockRealtimeDealInfoPo.getDealNum();
+            if (null != dealNum) {
+                dealNumSet.add(new DefaultTypedTuple(stockCode, dealNum.doubleValue()));
+            }
+            //成交金额
+            BigDecimal dealMoney = stockRealtimeDealInfoPo.getDealMoney();
+            if (null != dealMoney) {
+                dealMoneySet.add(new DefaultTypedTuple(stockCode, dealMoney.doubleValue()));
+            }
+            //涨跌停
+            upRateLimit = stockToolService.limitRate(
+                    new StockVo(stockRealtimeDealInfoPo.getStockCode(), stockRealtimeDealInfoPo.getStockMarket()),
+                    stockRealtimeDealInfoPo.getStockName()
+            );
+            //判断是否涨跌停
+            if (null != upRateLimit
+                    && 0 >= preClosePrice.multiply(upRateLimit)
+                    .setScale(2, RoundingMode.HALF_UP)
+                    .compareTo(preClosePrice.subtract(currentPrice).abs())
+            ) {
+                if (0 < preClosePrice.compareTo(currentPrice)) {
+                    downLimitStockCodeList.add(stockCode);
+                } else {
+                    upLimitStockCodeList.add(stockCode);
+                }
+            }
+        }
+        if (!priceSet.isEmpty()) {
+            stockRedisUtil.zAdd(stockRealtimeRankPriceCacheZSetKey, priceSet);
+        }
+        if (!uptickRateSet.isEmpty()) {
+            stockRedisUtil.zAdd(stockRealtimeRankUptickRateCacheZSetKey, uptickRateSet);
+        }
+        if (!surgeRateSet.isEmpty()) {
+            stockRedisUtil.zAdd(stockRealtimeRankSurgeRateCacheZSetKey, surgeRateSet);
+        }
+        if (!dealNumSet.isEmpty()) {
+            stockRedisUtil.zAdd(stockRealtimeRankDealNumCacheZSetKey, dealNumSet);
+        }
+        if (!dealMoneySet.isEmpty()) {
+            stockRedisUtil.zAdd(stockRealtimeRankDealMoneyCacheZSetKey, dealMoneySet);
         }
     }
 }

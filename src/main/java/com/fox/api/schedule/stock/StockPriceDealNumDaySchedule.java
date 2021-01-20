@@ -6,6 +6,7 @@ import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockPriceDealNumDayEntity;
 import com.fox.api.dao.stock.entity.StockTableDtEntity;
 import com.fox.api.dao.stock.mapper.StockPriceDealNumDayMapper;
+import com.fox.api.schedule.stock.handler.StockScheduleHandler;
 import com.fox.api.service.stock.StockTableDtService;
 import com.fox.api.util.StockUtil;
 import com.fox.spider.stock.api.sina.SinaRealtimePriceDealNumRatioApi;

@@ -93,25 +93,11 @@
             AND
             stock_type = #{stockType}
             AND
-            stock_status = 0
-            AND
             stock_market = #{stockMarket}
-        ORDER BY
-            id ASC
-        LIMIT ${limit}
-    </select>
-
-    <select id="getTotalByType" resultMap="BasicResultMap">
-        SELECT
-            *
-        FROM
-            t_stock
-        WHERE
-            id > #{id}
-            AND
-            stock_type = #{stockType}
-            AND
-            stock_market = #{stockMarket}
+            <if test='stockStatus ==0 || stockStatus ==1'>
+                AND
+                stock_status = #{stockStatus}
+            </if>
         ORDER BY
             id ASC
         LIMIT ${limit}

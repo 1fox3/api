@@ -10,9 +10,6 @@ public class StockBaseImpl {
     @Autowired
     protected StockRedisUtil stockRedisUtil;
 
-    @Value("${redis.stock.stock.hash}")
-    protected String redisStockHash;
-
     @Value("${redis.stock.realtime.stock.info.hash}")
     protected String redisRealtimeStockInfoHash;
 

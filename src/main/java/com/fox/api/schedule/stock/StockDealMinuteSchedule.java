@@ -8,6 +8,7 @@ import com.fox.api.dao.stock.entity.StockTableDtEntity;
 import com.fox.api.dao.stock.mapper.StockDealMinuteMapper;
 import com.fox.api.entity.po.stock.dealinfo.StockRealtimeMinuteDealInfoPo;
 import com.fox.api.entity.po.stock.dealinfo.StockRealtimeMinuteNodeDealInfoPo;
+import com.fox.api.schedule.stock.handler.StockScheduleHandler;
 import com.fox.api.service.stock.StockTableDtService;
 import com.fox.api.service.stock.dealinfo.StockMinuteDealInfoService;
 import com.fox.api.util.StockUtil;

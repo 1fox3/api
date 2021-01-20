@@ -4,6 +4,7 @@ import com.fox.api.annotation.aspect.log.LogShowTimeAnt;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockInfoEntity;
 import com.fox.api.dao.stock.mapper.StockInfoMapper;
+import com.fox.api.schedule.stock.handler.StockScheduleHandler;
 import com.fox.api.service.stock.StockInfoService;
 import com.fox.spider.stock.entity.vo.StockVo;
 import org.slf4j.Logger;
