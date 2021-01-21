@@ -2,6 +2,7 @@ package com.fox.api.schedule.stock;
 
 import com.fox.api.entity.po.stock.api.StockRealtimeDealInfoPo;
 import com.fox.api.schedule.stock.handler.StockScheduleCacheBatchCodeHandler;
+import com.fox.api.util.BigDecimalUtil;
 import com.fox.spider.stock.constant.StockConst;
 import com.fox.spider.stock.entity.vo.StockVo;
 import com.fox.spider.stock.service.StockToolService;
@@ -187,7 +188,10 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule implements Stoc
             if (null != currentPrice) {
                 priceSet.add(new DefaultTypedTuple(stockCode, currentPrice.doubleValue()));
                 //增幅
-                BigDecimal uptickRate = currentPrice.subtract(preClosePrice).multiply(new BigDecimal(100)).divide(preClosePrice, 2, RoundingMode.HALF_UP);
+                BigDecimal uptickRate = BigDecimalUtil.rate(
+                        currentPrice.subtract(preClosePrice),
+                        preClosePrice
+                );
                 if (null != uptickRate) {
                     uptickRateSet.add(new DefaultTypedTuple(stockCode, uptickRate.doubleValue()));
                 }
@@ -197,10 +201,11 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule implements Stoc
                     && 0 != stockRealtimeDealInfoPo.getHighestPrice().compareTo(BigDecimal.ZERO)
                     && null != stockRealtimeDealInfoPo.getLowestPrice()
                     && 0 != stockRealtimeDealInfoPo.getLowestPrice().compareTo(BigDecimal.ZERO)) {
-                BigDecimal surgeRate = stockRealtimeDealInfoPo.getHighestPrice()
-                        .subtract(stockRealtimeDealInfoPo.getLowestPrice())
-                        .multiply(new BigDecimal(100))
-                        .divide(preClosePrice, 2, RoundingMode.HALF_UP);
+                BigDecimal surgeRate = BigDecimalUtil.rate(
+                        stockRealtimeDealInfoPo.getHighestPrice()
+                                .subtract(stockRealtimeDealInfoPo.getLowestPrice()),
+                        preClosePrice
+                );
                 if (null != surgeRate) {
                     surgeRateSet.add(new DefaultTypedTuple(stockCode, surgeRate.doubleValue()));
                 }

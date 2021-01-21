@@ -114,15 +114,6 @@ public class StockApiServiceBaseImpl {
     }
 
     /**
-     * 获取主实例
-     *
-     * @return
-     */
-    private void getPosByPrimary() {
-        currentPos = 0;
-    }
-
-    /**
      * 随机获取实例位置
      *
      * @return

@@ -2,7 +2,9 @@ package com.fox.api.service.stock.impl;
 
 import com.fox.api.entity.dto.stock.realtime.rank.StockRealtimeRankInfoDto;
 import com.fox.api.entity.po.PageInfoPo;
+import com.fox.api.entity.po.stock.api.StockRealtimeDealInfoPo;
 import com.fox.api.service.stock.StockRealtimeRankService;
+import com.fox.api.util.BigDecimalUtil;
 import com.fox.spider.stock.entity.po.sina.SinaRealtimeDealInfoPo;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.stereotype.Service;
@@ -86,31 +88,43 @@ public class StockRealtimeRankImpl extends StockBaseImpl implements StockRealtim
         }
 
         //获取股票实时信息
-        List<Object> inaRealtimeDealInfoPoList = stockRedisUtil.hMultiGet(
+        List<Object> stockRealtimeDealInfoPoList = stockRedisUtil.hMultiGet(
                 redisRealtimeStockInfoHash + ":" + stockMarket,
                 stockCodeList
         );
-        Map<String, SinaRealtimeDealInfoPo> sinaRealtimeDealInfoPoMap = new HashMap<>(inaRealtimeDealInfoPoList.size());
-        for (Object sinaRealtimeDealInfoPo : inaRealtimeDealInfoPoList) {
-            sinaRealtimeDealInfoPoMap.put(
-                    ((SinaRealtimeDealInfoPo) sinaRealtimeDealInfoPo).getStockCode(),
-                    (SinaRealtimeDealInfoPo) sinaRealtimeDealInfoPo
+        Map<String, StockRealtimeDealInfoPo> stockRealtimeDealInfoPoMap = new HashMap<>(stockRealtimeDealInfoPoList.size());
+        for (Object stockRealtimeDealInfoPo : stockRealtimeDealInfoPoList) {
+            stockRealtimeDealInfoPoMap.put(
+                    ((StockRealtimeDealInfoPo) stockRealtimeDealInfoPo).getStockCode(),
+                    (StockRealtimeDealInfoPo) stockRealtimeDealInfoPo
             );
         }
 
         //根据排序结果遍历补充数据
         for (Object object : set) {
             String stockCode = (String) ((DefaultTypedTuple) object).getValue();
-            SinaRealtimeDealInfoPo sinaRealtimeDealInfoPo = sinaRealtimeDealInfoPoMap.get(stockCode);
+            StockRealtimeDealInfoPo stockRealtimeDealInfoPo = stockRealtimeDealInfoPoMap.get(stockCode);
             StockRealtimeRankInfoDto stockRealtimeRankInfoDto = new StockRealtimeRankInfoDto();
-            stockRealtimeRankInfoDto.setStockMarket(sinaRealtimeDealInfoPo.getStockMarket());
-            stockRealtimeRankInfoDto.setStockCode(sinaRealtimeDealInfoPo.getStockCode());
-            stockRealtimeRankInfoDto.setStockName(sinaRealtimeDealInfoPo.getStockName());
-            stockRealtimeRankInfoDto.setCurrentPrice(sinaRealtimeDealInfoPo.getCurrentPrice());
-            stockRealtimeRankInfoDto.setUptickRate(sinaRealtimeDealInfoPo.getUptickRate());
-            stockRealtimeRankInfoDto.setSurgeRate(sinaRealtimeDealInfoPo.getSurgeRate());
-            stockRealtimeRankInfoDto.setDealNum(sinaRealtimeDealInfoPo.getDealNum());
-            stockRealtimeRankInfoDto.setDealMoney(sinaRealtimeDealInfoPo.getDealMoney());
+            stockRealtimeRankInfoDto.setStockMarket(stockRealtimeDealInfoPo.getStockMarket());
+            stockRealtimeRankInfoDto.setStockCode(stockRealtimeDealInfoPo.getStockCode());
+            stockRealtimeRankInfoDto.setStockName(stockRealtimeDealInfoPo.getStockName());
+            stockRealtimeRankInfoDto.setCurrentPrice(stockRealtimeDealInfoPo.getCurrentPrice());
+            stockRealtimeRankInfoDto.setUptickRate(
+                    BigDecimalUtil.rate(
+                            stockRealtimeDealInfoPo.getCurrentPrice()
+                                    .subtract(stockRealtimeDealInfoPo.getPreClosePrice()),
+                            stockRealtimeDealInfoPo.getPreClosePrice()
+                    )
+            );
+            stockRealtimeRankInfoDto.setSurgeRate(
+                    BigDecimalUtil.rate(
+                            stockRealtimeDealInfoPo.getHighestPrice()
+                                    .subtract(stockRealtimeDealInfoPo.getLowestPrice()),
+                            stockRealtimeDealInfoPo.getPreClosePrice()
+                    )
+            );
+            stockRealtimeRankInfoDto.setDealNum(stockRealtimeDealInfoPo.getDealNum());
+            stockRealtimeRankInfoDto.setDealMoney(stockRealtimeDealInfoPo.getDealMoney());
             list.add(stockRealtimeRankInfoDto);
         }
 
