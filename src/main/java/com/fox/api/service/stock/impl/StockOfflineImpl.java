@@ -143,7 +143,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
                     stockDealMinuteEntity.setDt(lastDealDate);
                     stockDealMinuteEntity.setTime(netsRealtimeMinuteNodeDataPo.getTime());
                     stockDealMinuteEntity.setPrice(netsRealtimeMinuteNodeDataPo.getPrice());
-                    stockDealMinuteEntity.setAvgPrice(netsRealtimeMinuteNodeDataPo.getAvgPrice());
+//                    stockDealMinuteEntity.setAvgPrice(netsRealtimeMinuteNodeDataPo.getAvgPrice());
                     stockDealMinuteEntity.setDealNum(netsRealtimeMinuteNodeDataPo.getDealNum());
                 }
             }
@@ -167,7 +167,7 @@ public class StockOfflineImpl extends StockBaseImpl implements StockOfflineServi
             oneMinList.add(stockDealMinuteEntity.getDt());
             oneMinList.add(stockDealMinuteEntity.getTime());
             oneMinList.add(stockDealMinuteEntity.getPrice());
-            oneMinList.add(stockDealMinuteEntity.getAvgPrice());
+//            oneMinList.add(stockDealMinuteEntity.getAvgPrice());
             oneMinList.add(stockDealMinuteEntity.getDealNum());
             fiveDayList.add(oneMinList);
         }

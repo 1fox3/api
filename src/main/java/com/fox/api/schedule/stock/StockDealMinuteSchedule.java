@@ -6,10 +6,13 @@ import com.fox.api.dao.stock.entity.StockDealMinuteEntity;
 import com.fox.api.dao.stock.entity.StockEntity;
 import com.fox.api.dao.stock.entity.StockTableDtEntity;
 import com.fox.api.dao.stock.mapper.StockDealMinuteMapper;
+import com.fox.api.entity.po.stock.api.StockRealtimeMinuteKLinePo;
+import com.fox.api.entity.po.stock.api.StockRealtimeMinuteNodeDataPo;
 import com.fox.api.entity.po.stock.dealinfo.StockRealtimeMinuteDealInfoPo;
 import com.fox.api.entity.po.stock.dealinfo.StockRealtimeMinuteNodeDealInfoPo;
 import com.fox.api.schedule.stock.handler.StockScheduleHandler;
 import com.fox.api.service.stock.StockTableDtService;
+import com.fox.api.service.stock.api.request.StockRealtimeMinuteKLineApiService;
 import com.fox.api.service.stock.dealinfo.StockMinuteDealInfoService;
 import com.fox.api.util.StockUtil;
 import com.fox.spider.stock.constant.StockConst;
@@ -38,7 +41,7 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
      * 股票分钟交易数据服务
      */
     @Autowired
-    StockMinuteDealInfoService stockMinuteDealInfoService;
+    StockRealtimeMinuteKLineApiService stockRealtimeMinuteKLineApiService;
     /**
      * 分钟交易数据表
      */
@@ -66,30 +69,31 @@ public class StockDealMinuteSchedule extends StockBaseSchedule implements StockS
             return;
         }
         try {
-            StockRealtimeMinuteDealInfoPo stockRealtimeMinuteDealInfoPo = stockMinuteDealInfoService
-                    .realtimeFromSpiderApi(new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket()));
-            if (null == stockRealtimeMinuteDealInfoPo || !lastDealDate.equals(stockRealtimeMinuteDealInfoPo.getDt())) {
+            StockRealtimeMinuteKLinePo stockRealtimeMinuteKLinePo =
+                    stockRealtimeMinuteKLineApiService.realtimeMinuteKLine(
+                            new StockVo(stockEntity.getStockCode(), stockEntity.getStockMarket())
+                    );
+            if (null == stockRealtimeMinuteKLinePo || !lastDealDate.equals(stockRealtimeMinuteKLinePo.getDt())) {
                 return;
             }
-            List<StockRealtimeMinuteNodeDealInfoPo> stockRealtimeMinuteNodeDealInfoPoList =
-                    stockRealtimeMinuteDealInfoPo.getKlineData();
-            if (null == stockRealtimeMinuteNodeDealInfoPoList || stockRealtimeMinuteNodeDealInfoPoList.isEmpty()) {
+            List<StockRealtimeMinuteNodeDataPo> stockRealtimeMinuteNodeDataPoList =
+                    stockRealtimeMinuteKLinePo.getKlineData();
+            if (null == stockRealtimeMinuteNodeDataPoList || stockRealtimeMinuteNodeDataPoList.isEmpty()) {
                 return;
             }
             List<StockDealMinuteEntity> stockDealMinuteEntityList =
-                    new ArrayList<>(stockRealtimeMinuteNodeDealInfoPoList.size());
-            for (StockRealtimeMinuteNodeDealInfoPo stockRealtimeMinuteNodeDealInfoPo
-                    : stockRealtimeMinuteNodeDealInfoPoList) {
-                if (null == stockRealtimeMinuteNodeDealInfoPo || null == stockRealtimeMinuteNodeDealInfoPo.getPrice()) {
+                    new ArrayList<>(stockRealtimeMinuteNodeDataPoList.size());
+            for (StockRealtimeMinuteNodeDataPo stockRealtimeMinuteNodeDataPo
+                    : stockRealtimeMinuteNodeDataPoList) {
+                if (null == stockRealtimeMinuteNodeDataPo || null == stockRealtimeMinuteNodeDataPo.getPrice()) {
                     continue;
                 }
                 StockDealMinuteEntity stockDealMinuteEntity = new StockDealMinuteEntity();
                 stockDealMinuteEntity.setStockId(stockEntity.getId());
-                stockDealMinuteEntity.setDt(stockRealtimeMinuteDealInfoPo.getDt());
-                stockDealMinuteEntity.setTime(stockRealtimeMinuteNodeDealInfoPo.getTime());
-                stockDealMinuteEntity.setPrice(stockRealtimeMinuteNodeDealInfoPo.getPrice());
-                stockDealMinuteEntity.setAvgPrice(stockRealtimeMinuteNodeDealInfoPo.getAvgPrice());
-                stockDealMinuteEntity.setDealNum(stockRealtimeMinuteNodeDealInfoPo.getDealNum());
+                stockDealMinuteEntity.setDt(stockRealtimeMinuteKLinePo.getDt());
+                stockDealMinuteEntity.setTime(stockRealtimeMinuteNodeDataPo.getTime());
+                stockDealMinuteEntity.setPrice(stockRealtimeMinuteNodeDataPo.getPrice());
+                stockDealMinuteEntity.setDealNum(stockRealtimeMinuteNodeDataPo.getDealNum());
                 stockDealMinuteEntityList.add(stockDealMinuteEntity);
             }
             if (!stockDealMinuteEntityList.isEmpty()) {

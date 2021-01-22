@@ -12,7 +12,7 @@ import java.util.Map;
  * @author lusongsong
  * @date 2021/1/15 17:36
  */
-public interface StockRealtimeDealInfoApiService {
+public interface StockRealtimeDealInfoApiService extends StockBaseApiService {
     /**
      * 获取单只股票的实时交易信息
      *
@@ -28,11 +28,4 @@ public interface StockRealtimeDealInfoApiService {
      * @return
      */
     Map<String, StockRealtimeDealInfoPo> batchRealtimeDealInfo(List<StockVo> stockVoList);
-
-    /**
-     * 设置选取策略
-     *
-     * @param method
-     */
-    void setChooseMethod(int method);
 }

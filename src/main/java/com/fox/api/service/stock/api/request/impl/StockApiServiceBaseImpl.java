@@ -3,6 +3,7 @@ package com.fox.api.service.stock.api.request.impl;
 import com.fox.api.service.stock.api.spider.StockSpiderApiBaseInterface;
 import com.fox.api.util.ApplicationContextUtil;
 import com.fox.api.util.IntUtil;
+import com.fox.spider.stock.entity.vo.StockVo;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,7 +35,7 @@ public class StockApiServiceBaseImpl {
     /**
      * bean选择方案
      */
-    private int chooseMethod = CHOOSE_METHOD_PRIMARY;
+    protected int chooseMethod = CHOOSE_METHOD_PRIMARY;
     /**
      * 当前位置
      */
@@ -55,6 +56,10 @@ public class StockApiServiceBaseImpl {
      * 无用的实现类的失效时间
      */
     private Map<String, Long> uselessTimeMap = null;
+    /**
+     * 样例股票
+     */
+    protected StockVo demoStockVo;
 
     /**
      * 根据全限定类名去寻找一个spring管理的bean实例
@@ -181,15 +186,6 @@ public class StockApiServiceBaseImpl {
 
     /**
      * 判断bean是否适合
-     *
-     * @return
-     */
-    public boolean verifyBean(Object bean) {
-        return true;
-    }
-
-    /**
-     * 判断bean是否适合
      */
     public void searchVerifyBean() {
         int currPos = currentPos;
@@ -205,5 +201,14 @@ public class StockApiServiceBaseImpl {
                 break;
             }
         }
+    }
+
+    /**
+     * 判断bean是否适合
+     *
+     * @return
+     */
+    public boolean verifyBean(Object object) {
+        return ((StockSpiderApiBaseInterface) object).isSupport(demoStockVo.getStockMarket());
     }
 }

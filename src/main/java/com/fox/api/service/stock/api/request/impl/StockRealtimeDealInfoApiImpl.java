@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 股票最新交易日交易数据
+ *
  * @author lusongsong
  * @date 2021/1/15 17:39
  */
@@ -17,8 +19,10 @@ import java.util.Map;
 public class StockRealtimeDealInfoApiImpl
         extends StockApiServiceBaseImpl
         implements StockRealtimeDealInfoApiService {
+    /**
+     * 股票最新交易日交易数据
+     */
     private Class spiderBeanClass = StockRealtimeDealInfoSpiderApiService.class;
-    private StockVo demoStockVo;
 
     /**
      * 获取单只股票的实时交易信息
@@ -53,15 +57,5 @@ public class StockRealtimeDealInfoApiImpl
             return ((StockRealtimeDealInfoSpiderApiService) object).batchRealtimeDealInfo(stockVoList);
         }
         return null;
-    }
-
-    /**
-     * 判断bean是否适合
-     *
-     * @return
-     */
-    @Override
-    public boolean verifyBean(Object object) {
-        return ((StockRealtimeDealInfoSpiderApiService) object).isSupport(demoStockVo.getStockMarket());
     }
 }

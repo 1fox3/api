@@ -61,7 +61,8 @@ public class StockTableBackSchedule {
             return;
         }
 
-        String dt = DateUtil.getRelateDate(0, 0, diffDay, DateUtil.DATE_FORMAT_1);
+        String dt = DateUtil.getRelateDate(0, 0, -diffDay, DateUtil.DATE_FORMAT_1);
+        System.out.println(dt);
         if (null == dt || dt.isEmpty()) {
             return;
         }

@@ -36,10 +36,6 @@ public class StockDealMinuteEntity {
      */
     BigDecimal price;
     /**
-     * 均价
-     */
-    BigDecimal avgPrice;
-    /**
      * 成交量
      */
     Long dealNum;

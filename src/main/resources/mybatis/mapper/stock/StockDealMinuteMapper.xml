@@ -7,7 +7,6 @@
         <result column="dt" property="dt" jdbcType="DATE" />
         <result column="time" property="time" jdbcType="TIME" />
         <result column="price" property="price" jdbcType="DECIMAL" />
-        <result column="avg_price" property="avgPrice" jdbcType="DECIMAL" />
         <result column="deal_num" property="dealNum" jdbcType="BIGINT" />
     </resultMap>
 
@@ -17,14 +16,12 @@
             dt,
             `time`,
             price,
-            avg_price,
             deal_num
         ) VALUES (
             #{stockId},
             #{dt},
             #{time},
             #{price},
-            #{avgPrice},
             #{dealNum}
         );
     </insert>
@@ -35,7 +32,6 @@
             dt,
             `time`,
             price,
-            avg_price,
             deal_num
         )
         VALUES
@@ -45,7 +41,6 @@
                 #{stockDealMinuteEntity.dt},
                 #{stockDealMinuteEntity.time},
                 #{stockDealMinuteEntity.price},
-                #{stockDealMinuteEntity.avgPrice},
                 #{stockDealMinuteEntity.dealNum}
             )
         </foreach >
