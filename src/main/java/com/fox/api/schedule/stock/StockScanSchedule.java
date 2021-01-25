@@ -287,6 +287,17 @@ public class StockScanSchedule extends StockBaseSchedule {
         StockCategoryVo stockCategoryVo = StockConst.stockCategory(
                 stockEntity.getStockCode(), stockEntity.getStockMarket()
         );
+        //处理港股中的基金分类异常
+        if (StockConst.SM_HK == stockEntity.getStockMarket()
+                && stockCategoryVo.getStockType() == StockConst.ST_STOCK
+                && (
+                        sinaRealtimeDealInfoPo.getStockName().endsWith("基金")
+                                || sinaRealtimeDealInfoPo.getStockName().endsWith("信托"))) {
+            stockCategoryVo = new StockCategoryVo(
+                    StockConst.SM_HK,
+                    StockConst.ST_FUND,
+                    StockConst.SK_HK_FUND);
+        }
         stockEntity.setStockType(null == stockCategoryVo.getStockType() ?
                 StockConst.ST_UNKNOWN : stockCategoryVo.getStockType());
         stockEntity.setStockKind(null == stockCategoryVo.getStockKind() ?

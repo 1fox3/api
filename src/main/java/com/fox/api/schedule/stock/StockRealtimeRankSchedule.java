@@ -86,6 +86,8 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule implements Stoc
             stockRealtimeUpLimitCacheListKey = stockRealtimeStockRankUpLimitList + ":" + stockMarket;
             stockRealtimeDownLimitCacheListKey = stockRealtimeStockRankDownLimitList + ":" + stockMarket;
 
+            upLimitStockCodeList = new ArrayList<>();
+            downLimitStockCodeList = new ArrayList<>();
             stockMarketCacheBatchCodeScan(stockMarket, this);
 
             if (null != upLimitStockCodeList && !upLimitStockCodeList.isEmpty()) {
@@ -227,7 +229,7 @@ public class StockRealtimeRankSchedule extends StockBaseSchedule implements Stoc
             );
             //判断是否涨跌停
             if (null != upRateLimit
-                    && 0 >= preClosePrice.multiply(upRateLimit)
+                    && 0 == preClosePrice.multiply(upRateLimit)
                     .setScale(2, RoundingMode.HALF_UP)
                     .compareTo(preClosePrice.subtract(currentPrice).abs())
             ) {
