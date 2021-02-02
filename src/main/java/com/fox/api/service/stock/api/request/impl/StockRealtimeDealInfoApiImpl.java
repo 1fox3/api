@@ -22,7 +22,7 @@ public class StockRealtimeDealInfoApiImpl
     /**
      * 股票最新交易日交易数据
      */
-    private Class spiderBeanClass = StockRealtimeDealInfoSpiderApiService.class;
+    private Class<StockRealtimeDealInfoSpiderApiService> spiderBeanClass = StockRealtimeDealInfoSpiderApiService.class;
 
     /**
      * 获取单只股票的实时交易信息
@@ -33,9 +33,9 @@ public class StockRealtimeDealInfoApiImpl
     @Override
     public StockRealtimeDealInfoPo realtimeDealInfo(StockVo stockVo) {
         demoStockVo = stockVo;
-        Object object = getBean(spiderBeanClass);
+        StockRealtimeDealInfoSpiderApiService object = getBean(spiderBeanClass);
         if (null != object) {
-            return ((StockRealtimeDealInfoSpiderApiService) object).realtimeDealInfo(stockVo);
+            return object.realtimeDealInfo(stockVo);
         }
         return null;
     }
@@ -52,9 +52,9 @@ public class StockRealtimeDealInfoApiImpl
             return null;
         }
         demoStockVo = stockVoList.get(0);
-        Object object = getBean(spiderBeanClass);
+        StockRealtimeDealInfoSpiderApiService object = getBean(spiderBeanClass);
         if (null != object) {
-            return ((StockRealtimeDealInfoSpiderApiService) object).batchRealtimeDealInfo(stockVoList);
+            return object.batchRealtimeDealInfo(stockVoList);
         }
         return null;
     }

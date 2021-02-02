@@ -19,7 +19,7 @@ public class StockRealtimeMinuteKLineApiImpl
     /**
      * 股票最新交易日分钟线图数据
      */
-    private Class spiderBeanClass = StockRealtimeMinuteKLineSpiderApiService.class;
+    private Class<StockRealtimeMinuteKLineSpiderApiService> spiderBeanClass = StockRealtimeMinuteKLineSpiderApiService.class;
 
     /**
      * 无参构造函数
@@ -38,9 +38,9 @@ public class StockRealtimeMinuteKLineApiImpl
     @Override
     public StockRealtimeMinuteKLinePo realtimeMinuteKLine(StockVo stockVo) {
         demoStockVo = stockVo;
-        Object object = getBean(spiderBeanClass);
+        StockRealtimeMinuteKLineSpiderApiService object = getBean(spiderBeanClass);
         if (null != object) {
-            return ((StockRealtimeMinuteKLineSpiderApiService) object).realtimeMinuteKLine(stockVo);
+            return object.realtimeMinuteKLine(stockVo);
         }
         return null;
     }

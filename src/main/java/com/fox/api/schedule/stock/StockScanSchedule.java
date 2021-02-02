@@ -292,7 +292,9 @@ public class StockScanSchedule extends StockBaseSchedule {
                 && stockCategoryVo.getStockType() == StockConst.ST_STOCK
                 && (
                         sinaRealtimeDealInfoPo.getStockName().endsWith("基金")
-                                || sinaRealtimeDealInfoPo.getStockName().endsWith("信托"))) {
+                                || sinaRealtimeDealInfoPo.getStockName().endsWith("信托")
+                                || sinaRealtimeDealInfoPo.getStockName().equals("招商局商业房托"))
+        ) {
             stockCategoryVo = new StockCategoryVo(
                     StockConst.SM_HK,
                     StockConst.ST_FUND,
