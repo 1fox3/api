@@ -438,6 +438,17 @@ public class StockDealDaySchedule extends StockBaseSchedule implements StockSche
             //交易开始年份
             startDate = DateUtil.getRelateDate(0, 0, -60, DateUtil.DATE_FORMAT_1);
             for (Integer sm : StockConst.SM_A_LIST) {
+                // 检查今年的数据是否具备
+                String curYear = DateUtil.getCurrentYear();
+                List<NetsDayDealInfoPo> netsDayDealInfoPoList = getDayDealInfoList(
+                        demoStock.get(sm), curYear + "-01-01", curYear + "-12-31"
+                );
+                if (null == netsDayDealInfoPoList || netsDayDealInfoPoList.isEmpty()) {
+                    endDate = (Integer.valueOf(curYear) - 1) + "-12-31";
+                    if (DateUtil.compare(startDate, endDate, DateUtil.DATE_FORMAT_1) >= 0) {
+                        continue;
+                    }
+                }
                 //同步股票
                 stockMarketScan(sm, this);
             }

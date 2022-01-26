@@ -41,7 +41,7 @@ public class StockScanSchedule extends StockBaseSchedule {
     /**
      * 单次扫描股票代码数
      */
-    private static Integer SCAN_ONCE_LIMIT = 300;
+    private static Integer SCAN_ONCE_LIMIT = 100;
     /**
      * 最新交易日
      */

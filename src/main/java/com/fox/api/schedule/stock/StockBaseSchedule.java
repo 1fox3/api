@@ -24,6 +24,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.fox.spider.stock.constant.StockConst.*;
+
 /**
  * 计划任务基类
  *
@@ -97,6 +99,15 @@ public class StockBaseSchedule {
      */
     protected static final String REALTIME_SCHEDULE_HAS_NEXT = "rtScheduleHasNext";
 
+    public final Map<Integer, StockVo> demoStock = new HashMap<Integer, StockVo>() {{
+        //贵州茅台
+        put(SM_SH, new StockVo("600519", SM_SH));
+        //同花顺
+        put(SM_SZ, new StockVo("300033", SM_SZ));
+        //腾讯控股
+        put(SM_HK, new StockVo("00700", SM_HK));
+    }};
+
     /**
      * 判断日期是否为一个交易日
      *
@@ -109,7 +120,7 @@ public class StockBaseSchedule {
             Integer dayInWeekNum = DateUtil.getDayInWeekNum(dealDate, DateUtil.DATE_FORMAT_1);
             if (1 <= dayInWeekNum && 5 >= dayInWeekNum) {
                 Integer dateType = dateTypeService.getByDate(dealDate);
-                if (stockMarket.equals(StockConst.SM_HK)) {
+                if (stockMarket.equals(SM_HK)) {
                     if (DateTypeService.DATE_TYPE_WORKDAY == dateType
                             || DateTypeService.DATE_TYPE_WEEKEND == dateType) {
                         return true;
